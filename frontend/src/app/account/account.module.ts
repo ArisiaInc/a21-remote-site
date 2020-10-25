@@ -4,13 +4,17 @@ import { LoginComponent } from './login/login.component';
 import { LayoutComponent } from './layout/layout.component';
 import { AccountRoutingModule } from './account-routing.module';
 
-
+import { SharedModule } from '@app/_components';
 
 @NgModule({
-  declarations: [LoginComponent, LayoutComponent],
+  declarations: [
+    LoginComponent, 
+    LayoutComponent
+  ],
   imports: [
     CommonModule,
-    AccountRoutingModule
+    AccountRoutingModule,
+    SharedModule
   ]
 })
 export class AccountModule { }
