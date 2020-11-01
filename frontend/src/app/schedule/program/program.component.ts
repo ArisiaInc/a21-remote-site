@@ -12,8 +12,18 @@ export class ProgramComponent implements OnInit {
 
   constructor(private scheduleService: ScheduleService) { }
 
+  // TODO allow filtering by url params
   ngOnInit(): void {
     this.scheduleService.get_schedule().subscribe(items => {
+      this.items[items[0]] = this.items[items[0]] || {}
+      this.items[items[0]][items[1]] = items[2]
+    });
+  }
+
+  updateItems(filters) {
+    console.log('updating')
+    this.items = {}
+    this.scheduleService.get_schedule(filters).subscribe(items => {
       this.items[items[0]] = this.items[items[0]] || {}
       this.items[items[0]][items[1]] = items[2]
     });

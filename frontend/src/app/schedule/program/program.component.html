@@ -1,4 +1,5 @@
 <div>
+    <app-filters (filtersChanged)="updateItems($event)"></app-filters>
     <div *ngFor="let date of items | keyvalue">
         <h4>{{date.key}}</h4>
         <div *ngFor="let time of date.value | keyvalue">

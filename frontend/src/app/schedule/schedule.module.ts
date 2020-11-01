@@ -8,10 +8,11 @@ import { ItemComponent } from './item/item.component';
 import { LayoutComponent } from './layout/layout.component';
 import { MenuComponent } from './menu/menu.component';
 import { PeopleComponent } from './people/people.component';
+import { FiltersComponent } from './filters/filters.component';
 
 
 @NgModule({
-  declarations: [ProgramComponent, PersonComponent, ItemComponent, LayoutComponent, MenuComponent, PeopleComponent],
+  declarations: [ProgramComponent, PersonComponent, ItemComponent, LayoutComponent, MenuComponent, PeopleComponent, FiltersComponent],
   imports: [
     CommonModule,
     ScheduleRoutingModule

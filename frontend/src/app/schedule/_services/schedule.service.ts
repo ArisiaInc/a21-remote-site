@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, GroupedObservable, zip } from 'rxjs';
-import { map, groupBy, mergeMap, toArray } from 'rxjs/operators';
-import { ProgramItem, ProgramPerson } from '@app/_models';
+import { Observable, of, zip } from 'rxjs';
+import { map, groupBy, mergeMap, toArray, filter, tap } from 'rxjs/operators';
+import { ProgramItem, ProgramPerson, ProgramFilter } from '@app/_models';
 
 import { program, people } from "test_data/konopas"
 
@@ -12,8 +12,13 @@ export class ScheduleService {
 
   constructor() { }
 
-  get_schedule(): Observable<[string, string, ProgramItem[]]> {
+  get_schedule(filters: ProgramFilter = {}): Observable<[string, string, ProgramItem[]]> {
+    const munged_filters: { tags?: (_:string[]) => boolean, loc?: (_:string[]) => boolean, date?: (_:string) => boolean } = {}
+    Object.keys(filters).forEach(f => {
+        munged_filters[f] = pf => filters[f].some(f => pf.includes(f) || pf === f)
+    });
     return of(...program).pipe(
+      filter(p => Object.keys(munged_filters).every(k => munged_filters[k](p[k]))),
       groupBy(p => `${p.date}~${p.time}`),
       mergeMap(group => zip(of(group.key.split('~')[0]), of(group.key.split('~')[1]), group.pipe(toArray())))
     );
@@ -24,6 +29,6 @@ export class ScheduleService {
   }
 
   get_person(id): Observable<ProgramPerson> {
-    return this.get_people().pipe(map(people => people.filter(p => p.id === id)[0]));
+    return this.get_people().pipe(map(people => people.find(p => p.id === id)));
   }
 }
