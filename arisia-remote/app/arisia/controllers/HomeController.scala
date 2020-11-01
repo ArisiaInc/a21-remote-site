@@ -1,6 +1,5 @@
 package controllers
 
-import play.api._
 import play.api.mvc._
 
 /**
@@ -17,6 +16,6 @@ class HomeController (val controllerComponents: ControllerComponents) extends Ba
    * a path of `/`.
    */
   def index() = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.index())
+    Ok(arisia.views.html.index())
   }
 }

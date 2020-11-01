@@ -1,7 +1,9 @@
+package arisia
+
 import play.api.ApplicationLoader.Context
 import play.api._
 import com.softwaremill.macwire._
-import _root_.controllers.{ControllerModule, AssetsComponents, AssetsConfiguration, AssetsMetadata, AssetsMetadataProvider}
+import _root_.controllers.{ControllerModule, AssetsComponents}
 import play.api.i18n.I18nComponents
 import play.api.mvc.EssentialFilter
 import router.Routes
