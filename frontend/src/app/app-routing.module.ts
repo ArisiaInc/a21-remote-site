@@ -5,10 +5,12 @@ import { LandingComponent } from './landing/landing.component';
 import { AuthGuard } from './_helpers';
 
 const accountModule = () => import('./account/account.module').then(x => x.AccountModule);
+const scheduleModule = () => import('./schedule/schedule.module').then(x => x.ScheduleModule);
 
 const routes: Routes = [
   {path: '', component: LandingComponent, canActivate: [AuthGuard]},
   {path: 'account', loadChildren: accountModule},
+  {path: 'schedule', loadChildren: scheduleModule},
 
   //redirect home
   {path: '**', redirectTo: ''}

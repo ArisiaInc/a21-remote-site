@@ -1,0 +1,16 @@
+<div class="item_frame" (click)="toggleExpand()">
+    <div class="item_star"></div>
+    <div class="item_base">
+        <div class="title">{{item.title}}</div>
+        <div class="loc">{{item.loc}}</div>
+    </div>
+    <div class="extra" *ngIf="expanded">
+        <ul class="tags">
+            <li *ngFor="let tag of item.tags">{{tag}}</li>
+        </ul>
+        <div class="item-people">
+            <a *ngFor="let person of item.people" href="/schedule/people/{{person.id}}">{{person.name}}</a>
+        </div>
+        <p>{{item.desc}}</p>
+    </div>
+</div>
