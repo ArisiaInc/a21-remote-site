@@ -4,6 +4,7 @@ import play.api.ApplicationLoader.Context
 import play.api._
 import com.softwaremill.macwire._
 import _root_.controllers.{ControllerModule, AssetsComponents}
+import arisia.auth.AuthModule
 import play.api.i18n.I18nComponents
 import play.api.mvc.EssentialFilter
 import router.Routes
@@ -23,6 +24,7 @@ class PlayComponents(context: Context)
   with I18nComponents
   with AssetsComponents
   with ControllerModule
+  with AuthModule
 {
   lazy val httpFilters: Seq[EssentialFilter] = Seq()
 
