@@ -15,11 +15,13 @@ class LoginController (
 )
   extends BaseController
 {
+  final val idKey = "id"
+
   def login(): EssentialAction = Action.async(controllerComponents.parsers.tolerantJson[LoginRequest]) { implicit request =>
     val req = request.body
     loginService.checkLogin(req.id, req.password).map { verified =>
       if (verified) {
-        Ok("Login accepted")
+        Ok("Login accepted").withSession(idKey -> req.id)
       } else {
         Unauthorized("Not a known login")
       }
