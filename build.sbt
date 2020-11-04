@@ -1,5 +1,6 @@
 import scala.sys.process._
 import java.io.File
+import Dependencies._
 
 name := """arisia2021"""
 organization := "org.arisia"
@@ -29,7 +30,11 @@ scalaVersion := "2.13.3"
 lazy val backend = (project in file("arisia-remote"))
   .settings(
     libraryDependencies += guice,
-    libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test
+    libraryDependencies ++= Seq(
+      macwireMacros,
+      macwireUtil,
+      scalatestPlusPlay
+    )
   )
   .enablePlugins(PlayScala)
 
