@@ -7,7 +7,23 @@
 # TODO: replace this with serving out the front end
 GET     /                           controllers.HomeController.index()
 
-POST    /login                      controllers.LoginController.login()
+##########
+#
+# API Entry Points
+#
+
+# Logs in with the given credentials
+# Takes JSON body:
+# { "id":"...", "password":"..." }
+# Returns OK (200) if the credentials match, or Unauthorized (401) if not
+# Sets the Play session cookie, which contains all of the live (non-DB) session information
+POST    /api/login                      controllers.LoginController.login()
+
+# Logs the current user out
+# No body is expected on this one
+# Always succeeds with OK (200), regardless of whether the user was logged in or not
+# Clears the Play session cookie
+POST    /api/logout                     controllers.LoginController.logout()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
