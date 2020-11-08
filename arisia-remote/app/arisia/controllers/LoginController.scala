@@ -27,4 +27,8 @@ class LoginController (
       }
     }
   }
+
+  def logout(): EssentialAction = Action { implicit request =>
+    Ok("Logged out").withNewSession
+  }
 }
