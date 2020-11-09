@@ -3,7 +3,9 @@ package arisia.models
 import java.util.Date
 
 import arisia.util._
-import play.api.libs.json.{Format, Json}
+
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
 case class ProgramItemId(v: String) extends StdString
 object ProgramItemId extends StdStringUtils(new ProgramItemId(_))
@@ -45,11 +47,21 @@ case class ProgramItem(
   tags: List[ProgramItemTag],
   date: Option[Date],
   // TODO: how do we represent "time" in the KonOpas sense?
-  mins: Option[Int],
+  // TODO: convert this String to Int on the way in and out:
+  mins: Option[String],
   loc: List[ProgramItemLoc],
   people: List[ProgramItemPerson],
   desc: Option[ProgramItemDesc]
 )
 object ProgramItem {
-  implicit val fmt: Format[ProgramItem] = Json.format
+  implicit val fmt: Format[ProgramItem] = (
+    (JsPath \ "id").format[ProgramItemId] and
+      (JsPath \ "title").formatNullable[ProgramItemTitle] and
+      (JsPath \ "tags").formatWithDefault[List[ProgramItemTag]](List.empty) and
+      (JsPath \ "date").formatNullable[Date] and
+      (JsPath \ "mins").formatNullable[String] and
+      (JsPath \ "loc").formatWithDefault[List[ProgramItemLoc]](List.empty) and
+      (JsPath \ "people").formatWithDefault[List[ProgramItemPerson]](List.empty) and
+      (JsPath \ "desc").formatNullable[ProgramItemDesc]
+    )(ProgramItem.apply, unlift(ProgramItem.unapply))
 }
