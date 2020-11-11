@@ -7,6 +7,7 @@ import _root_.controllers.{ControllerModule, AssetsComponents}
 import arisia.auth.AuthModule
 import play.api.i18n.I18nComponents
 import play.api.mvc.EssentialFilter
+import play.filters.cors.{CORSFilter, CORSConfig}
 import router.Routes
 
 /**
@@ -26,7 +27,11 @@ class PlayComponents(context: Context)
   with ControllerModule
   with AuthModule
 {
-  lazy val httpFilters: Seq[EssentialFilter] = Seq()
+  lazy val httpFilters: Seq[EssentialFilter] = Seq(
+    CORSFilter(
+      CORSConfig.fromConfiguration(context.initialConfiguration)
+    )
+  )
 
   lazy val router: Routes = {
     val prefix: String = "/"
