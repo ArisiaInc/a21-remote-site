@@ -31,10 +31,12 @@ lazy val backend = (project in file("arisia-remote"))
   .settings(
     libraryDependencies += guice,
     libraryDependencies ++= Seq(
+      betterFiles,
       macwireMacros,
       macwireUtil,
-      scalatestPlusPlay,
-      filters
+      scalactic,
+      scalaTest,
+      scalatestPlusPlay
     )
   )
   .enablePlugins(PlayScala)
