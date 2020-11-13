@@ -2,6 +2,17 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 10.2.0.
 
+## Getting Started
+
+If you don't have Angular set up yet:
+
+* Install npm. (On the Mac, this is `brew install npm`)
+* Install stuff *from* npm: `npm install`
+* Install Angular itself: `npm install --global @angular/cli`
+* Install the dev kit: `npm install --save-dev @angular-devkit/build-angular`
+
+That should make `ng` available, for use in the next sections.
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
