@@ -1,4 +1,4 @@
-package controllers
+package arisia.controllers
 
 import play.api.mvc._
 

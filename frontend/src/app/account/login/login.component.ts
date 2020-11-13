@@ -26,7 +26,7 @@ export class LoginComponent implements OnInit {
       this.accountService.userValue = true;
       console.log('logged in');
       this.router.navigate([this.returnUrl]);
-    })
+    });
   }
 
 }

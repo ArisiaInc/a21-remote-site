@@ -3,11 +3,13 @@ package arisia
 import play.api.ApplicationLoader.Context
 import play.api._
 import com.softwaremill.macwire._
-import _root_.controllers.{ControllerModule, AssetsComponents}
+import _root_.controllers.AssetsComponents
 import arisia.auth.AuthModule
+import arisia.controllers.ControllerModule
+import arisia.schedule.ScheduleModule
 import play.api.i18n.I18nComponents
 import play.api.mvc.EssentialFilter
-import play.filters.cors.{CORSFilter, CORSConfig}
+import play.filters.cors.{CORSConfig, CORSFilter}
 import router.Routes
 
 /**
@@ -26,6 +28,7 @@ class PlayComponents(context: Context)
   with AssetsComponents
   with ControllerModule
   with AuthModule
+  with ScheduleModule
 {
   lazy val httpFilters: Seq[EssentialFilter] = Seq(
     CORSFilter(
