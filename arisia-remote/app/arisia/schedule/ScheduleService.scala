@@ -1,20 +1,44 @@
 package arisia.schedule
 
 import arisia.models.{ProgramItem, Schedule, ProgramPerson}
-import play.api.libs.json.{Json, JsSuccess, JsError}
+import better.files.Resource
+import play.api.libs.json.{Json, JsError, JsSuccess}
+
+import scala.concurrent.Future
 
 trait ScheduleService {
   /**
+   * Returns the currently-cached Schedule.
+   */
+  def currentSchedule(): Future[Schedule]
+
+  /**
    * Given a dump from Zambia, parse that into our internal structure.
    */
-  def ParseKonOpas(konopasJsonp: String): Schedule
+  def parseKonOpas(konopasJsonp: String): Schedule
 }
 
 class ScheduleServiceImpl()
   extends ScheduleService
 {
+  var _theSchedule: Option[Schedule] = None
+
+  private def fetchSchedule(): Future[Schedule] = {
+    // TODO: replace this with something real, of course
+    val jsonp: String = Resource.getAsString("konopastest.jsonp")
+    _theSchedule = Some(parseKonOpas(jsonp))
+    Future.successful(_theSchedule.get)
+  }
+
+  def currentSchedule(): Future[Schedule] = {
+    _theSchedule match {
+      case Some(schedule) => Future.successful(schedule)
+      case None => fetchSchedule()
+    }
+  }
+
   // TODO: wrap this in some sort of validation type, so we can cope cleanly with errors:
-  def ParseKonOpas(konopasJsonp: String): Schedule = {
+  def parseKonOpas(konopasJsonp: String): Schedule = {
     // We are assuming the format of the JSONP pretty precisely -- it's generated, so we should be able to count
     // on it. This is a known fragility, but we aren't pretending that this is general-purpose at this stage of the
     // game.
@@ -47,6 +71,6 @@ class ScheduleServiceImpl()
         }
       }
 
-    Schedule(List.empty, List.empty)
+    Schedule(program, people)
   }
 }

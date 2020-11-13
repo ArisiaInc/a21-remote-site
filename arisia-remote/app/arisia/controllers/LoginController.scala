@@ -1,4 +1,4 @@
-package controllers
+package arisia.controllers
 
 import arisia.auth.LoginService
 import arisia.models.LoginRequest
@@ -24,7 +24,7 @@ class LoginController (
       _ match {
         case Some(user) => {
           val json = Json.toJson(user)
-          Ok(Json.stringify(json)).withSession(idKey -> user.id.v)
+          Ok(Json.stringify(json)).withSession(idKey -> user.id.v).as(JSON)
         }
         case None => {
           Unauthorized("""{"success":"false", "message":"Put a real error message here"}""")
