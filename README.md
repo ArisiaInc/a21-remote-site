@@ -69,7 +69,7 @@ At the moment, the backend and frontend are not connected to
 each other. (This will change soon.)
 
 To run the frontend, see [the frontend README](frontend/README.md).
-That will serve a basic page on localhost:80.
+That will serve a basic page on localhost:4200.
 
 To run the backend, in the sbt shell, say `backend/run`. This will boot
 the backend server, and provide a basic "hello world" page on
