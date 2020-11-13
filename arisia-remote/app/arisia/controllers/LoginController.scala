@@ -3,6 +3,7 @@ package controllers
 import arisia.auth.LoginService
 import arisia.models.LoginRequest
 import play.api.http._
+import play.api.libs.json.Json
 import play.api.mvc._
 
 import scala.concurrent.{Future, ExecutionContext}
@@ -19,11 +20,15 @@ class LoginController (
 
   def login(): EssentialAction = Action.async(controllerComponents.parsers.tolerantJson[LoginRequest]) { implicit request =>
     val req = request.body
-    loginService.checkLogin(req.id, req.password).map { verified =>
-      if (verified) {
-        Ok("Login accepted").withSession(idKey -> req.id)
-      } else {
-        Unauthorized("Not a known login")
+    loginService.checkLogin(req.id, req.password).map {
+      _ match {
+        case Some(user) => {
+          val json = Json.toJson(user)
+          Ok(Json.stringify(json)).withSession(idKey -> user.id.v)
+        }
+        case None => {
+          Unauthorized("""{"success":"false", "message":"Put a real error message here"}""")
+        }
       }
     }
   }
