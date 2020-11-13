@@ -2,6 +2,6 @@ package arisia.schedule
 
 import com.softwaremill.macwire._
 
-class ScheduleModule {
-
+trait ScheduleModule {
+  lazy val scheduleService: ScheduleService = wire[ScheduleServiceImpl]
 }

@@ -5,7 +5,7 @@
 
 # An example controller showing a sample home page
 # TODO: replace this with serving out the front end
-GET     /                           controllers.HomeController.index()
+GET     /                           arisia.controllers.HomeController.index()
 
 ##########
 #
@@ -17,13 +17,16 @@ GET     /                           controllers.HomeController.index()
 # { "id":"...", "password":"..." }
 # Returns OK (200) if the credentials match, or Unauthorized (401) if not
 # Sets the Play session cookie, which contains all of the live (non-DB) session information
-POST    /api/login                      controllers.LoginController.login()
+POST    /api/login                      arisia.controllers.LoginController.login()
 
 # Logs the current user out
 # No body is expected on this one
 # Always succeeds with OK (200), regardless of whether the user was logged in or not
 # Clears the Play session cookie
-POST    /api/logout                     controllers.LoginController.logout()
+POST    /api/logout                     arisia.controllers.LoginController.logout()
+
+# Fetches the current schedule
+GET     /api/schedule                   arisia.controllers.ScheduleController.getSchedule()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

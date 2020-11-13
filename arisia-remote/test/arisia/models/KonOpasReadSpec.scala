@@ -20,7 +20,7 @@ class KonOpasReadSpec
       // changed in the format since then:
       val jsonp: String = Resource.getAsString("konopastest.jsonp")
 
-      svc.ParseKonOpas(jsonp)
+      svc.parseKonOpas(jsonp)
     }
   }
 }
