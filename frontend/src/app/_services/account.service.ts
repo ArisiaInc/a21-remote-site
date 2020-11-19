@@ -5,11 +5,6 @@ import { tap, map } from 'rxjs/operators';
 import { User } from '@app/_models';
 import { of } from 'rxjs';
 
-interface LoginRequest {
-  id: string;
-  password: string
-}
-
 @Injectable({
   providedIn: 'root'
 })
@@ -22,9 +17,9 @@ export class AccountService {
     if (this.user) {
       return of(true);
     }
-    return this.http.get<User>(`${environment.backend}/me`).pipe(
+    return this.http.get<User>(`${environment.backend}/me`, {withCredentials: true}).pipe(
       tap(u => this.user = u),
-      map(u => u ? true : false)
+      map(u => u.id ? true : false)
     );
   }
 
