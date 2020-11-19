@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { AccountService } from './_services';
 
 @Component({
   selector: 'app-root',
@@ -7,4 +8,9 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'frontend';
+
+  constructor( private accountService: AccountService) {}
+
+  ngOnInit() {
+  }
 }
