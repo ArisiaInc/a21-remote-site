@@ -10,7 +10,7 @@ const scheduleModule = () => import('./schedule/schedule.module').then(x => x.Sc
 const routes: Routes = [
   {path: '', component: LandingComponent, canActivate: [AuthGuard]},
   {path: 'account', loadChildren: accountModule},
-  {path: 'schedule', loadChildren: scheduleModule},
+  {path: 'schedule', loadChildren: scheduleModule, canActivate: [AuthGuard]},
 
   //redirect home
   {path: '**', redirectTo: ''}
