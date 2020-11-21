@@ -5,7 +5,7 @@
 
 # An example controller showing a sample home page
 # TODO: replace this with serving out the front end
-GET     /                           arisia.controllers.HomeController.index()
+GET     /                           arisia.controllers.FrontendController.index()
 
 ##########
 #
@@ -31,4 +31,5 @@ POST    /api/logout                  arisia.controllers.LoginController.logout()
 GET     /api/schedule                arisia.controllers.ScheduleController.getSchedule()
 
 # Map static resources from the /public folder to the /assets URL path
+GET     /*file                       arisia.controllers.FrontendController.assetOrDefault(file)
 GET     /assets/*file                controllers.Assets.versioned(path="/public", file: Asset)

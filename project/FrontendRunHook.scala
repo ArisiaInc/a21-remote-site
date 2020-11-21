@@ -39,7 +39,7 @@ object FrontendRunHook {
        * Run npm install if node modules are not installed.
        */
       override def beforeStarted(): Unit = {
-        if (!(base / "frontend" / "node_modules").exists()) Process(npmInstall, base / "frontend").!
+        if (!(base / ".." / "frontend" / "node_modules").exists()) Process(npmInstall, base / ".." / "frontend").!
       }
 
       /**
@@ -48,7 +48,7 @@ object FrontendRunHook {
        */
       override def afterStarted(): Unit = {
         process = Option(
-          Process(npmRun, base / "frontend").run
+          Process(npmRun, base / ".." / "frontend").run
         )
       }
 
@@ -57,6 +57,8 @@ object FrontendRunHook {
        * Cleanup frontend execution processes.
        */
       override def afterStopped(): Unit = {
+        // TODO: this isn't working! The result is that we have port 4200 blocked up, which is a problem.
+        // Fix this!
         process.foreach(_.destroy())
         process = None
       }

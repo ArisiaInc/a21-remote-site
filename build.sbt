@@ -29,6 +29,7 @@ scalaVersion := "2.13.3"
 
 lazy val backend = (project in file("arisia-remote"))
   .settings(
+    PlayKeys.playRunHooks += baseDirectory.map(FrontendRunHook.apply).value,
     libraryDependencies += guice,
     libraryDependencies ++= Seq(
       betterFiles,

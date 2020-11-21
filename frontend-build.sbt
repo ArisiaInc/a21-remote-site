@@ -16,7 +16,8 @@ val Error = 1
 // https://www.playframework.com/documentation/2.8.3/sbtCookbook
 // TODO: this is a little suspicious, since it is forcing the setting instead of appending. But I get
 // an undefined-setting error if this is defined as a +=
-PlayKeys.playRunHooks := Seq(baseDirectory.map(FrontendRunHook.apply).value)
+// This needs to be in the main build.sbt:
+//PlayKeys.playRunHooks := Seq(baseDirectory.map(FrontendRunHook.apply).value)
 
 // True if build running operating system is windows.
 val isWindows = System.getProperty("os.name").toLowerCase().contains("win")
