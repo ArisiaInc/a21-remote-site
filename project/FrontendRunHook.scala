@@ -74,7 +74,9 @@ object FrontendRunHook {
        */
       override def afterStopped(): Unit = {
         // TODO: this isn't working! The result is that we have port 4200 blocked up, which is a problem.
-        // Fix this! Consider switching to Ammonite-Ops, so we can properly kill(9).
+        // Ammonite doesn't obviously help; nor did feeding in a ctrl-c.
+        // Consider dropping down to java.lang.ProcessBuilder/Process/ProcessHandle, which collectively should
+        // provide a lot more control over this.
         println(s"Destroying Process $process")
         process.foreach(_.destroy())
         process = None
