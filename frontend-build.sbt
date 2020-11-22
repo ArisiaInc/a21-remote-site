@@ -4,6 +4,9 @@ import play.sbt.PlayImport.PlayKeys
 
 /*
  * Frontend Build hook Scripts
+ *
+ * TODO: This whole file is weirdly duplicative with FrontendRunHook. Refactor to do something about that,
+ * if we care at all about this. (I think this is probably currently somewhat broken.)
  */
 
 // Execution status success.
@@ -31,7 +34,7 @@ def isNodeModulesInstalled(implicit dir: File): Boolean = (dir / "node_modules")
 
 // Execute `npm install` command to install all node module dependencies. Return Success if already installed.
 def runNpmInstall(implicit dir: File): Int =
-  if (isNodeModulesInstalled) Success else runOnCommandline(FrontendCommands.dependencyInstall)
+  if (isNodeModulesInstalled) Success else runOnCommandline(FrontendCommands.npmInstall)
 
 // Execute task if node modules are installed, else return Error status.
 def ifNodeModulesInstalled(task: => Int)(implicit dir: File): Int =

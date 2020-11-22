@@ -22,16 +22,26 @@ object FrontendRunHook {
 
       var process: Option[Process] = None
 
-      /**
-       * Change these commands if you want to use Yarn.
-       */
-      var npmInstall: String = FrontendCommands.dependencyInstall
-      var npmRun: String = FrontendCommands.serve
+      def makeProcessString(cmd: String): String = {
+        // Windows requires npm commands prefixed with cmd /c
+        if (System.getProperty("os.name").toLowerCase().contains("win")) {
+          s"cmd /c $cmd"
+        } else {
+          cmd
+        }
+      }
 
-      // Windows requires npm commands prefixed with cmd /c
-      if (System.getProperty("os.name").toLowerCase().contains("win")){
-        npmInstall = "cmd /c" + npmInstall
-        npmRun = "cmd /c" + npmRun
+      /**
+       * The path to the frontend directory from the Scala root directory.
+       */
+      val frontend: File = base / ".." / "frontend"
+
+      /**
+       * Runs the given shell command in the frontend dir, blocks until it is done, and returns the return code.
+       */
+      def runAndWait(cmd: String): Int = {
+        val fullCmd = makeProcessString(cmd)
+        Process(fullCmd, frontend).!
       }
 
       /**
@@ -39,7 +49,12 @@ object FrontendRunHook {
        * Run npm install if node modules are not installed.
        */
       override def beforeStarted(): Unit = {
-        if (!(base / ".." / "frontend" / "node_modules").exists()) Process(npmInstall, base / ".." / "frontend").!
+        if (!(frontend / "node_modules").exists()) {
+          println(s"Installing Angular")
+          runAndWait(FrontendCommands.npmInstall)
+          runAndWait(FrontendCommands.angularInstall)
+          runAndWait(FrontendCommands.devkitInstall)
+        }
       }
 
       /**
@@ -47,8 +62,9 @@ object FrontendRunHook {
        * Run npm start
        */
       override def afterStarted(): Unit = {
-        process = Option(
-          Process(npmRun, base / ".." / "frontend").run
+        println(s"Booting Angular")
+        process = Some(
+          Process(FrontendCommands.serve, frontend).run
         )
       }
 
@@ -58,7 +74,8 @@ object FrontendRunHook {
        */
       override def afterStopped(): Unit = {
         // TODO: this isn't working! The result is that we have port 4200 blocked up, which is a problem.
-        // Fix this!
+        // Fix this! Consider switching to Ammonite-Ops, so we can properly kill(9).
+        println(s"Destroying Process $process")
         process.foreach(_.destroy())
         process = None
       }
