@@ -8,7 +8,6 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-
     "start:fromback": "ng serve --open --proxy-config src/proxy.conf.js --host 0.0.0.0",
     "test:fromback": "ng test --watch",
     "test:ci": "ng test --watch=false --browsers ChromeHeadless",
