@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '@environments/environment';
 import { tap, map } from 'rxjs/operators';
 import { User } from '@app/_models';
-import { of } from 'rxjs';
+import { of, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +11,12 @@ import { of } from 'rxjs';
 export class AccountService {
   public user: User;
 
-  constructor( private http: HttpClient,) { }
+  // for testing
+  public badgeMap : {[_:string]: number[]};
+
+  constructor( private http: HttpClient,) {
+    this.badgeMap = {}
+   }
 
   loggedIn() {
     if (this.user) {
@@ -34,6 +39,27 @@ export class AccountService {
     return this.http.post(`${environment.backend}/logout`, {}, {withCredentials: true}).pipe(
       tap(d => this.user = undefined)
     );
+  }
+
+  getUser(id: string) : Observable<User> {
+    // this is for testing
+    if (!this.badgeMap[id]) {
+      this.badgeMap[id] = [8,5,10,15];
+    }
+    return of({id: 'joe', name: 'Joe', badges: this.badgeMap['joe']});
+    // below is the real one
+    //return this.http.get<User>(`${environment.backend}/user/${id}`, {withCredentials: true});
+  }
+
+  giveBadge(userId: string, badgeId: number) : Observable<User> {
+    // this is for testing
+    if (!this.badgeMap[userId]) {
+      this.badgeMap[userId] = [];
+    }
+    this.badgeMap[userId].push(badgeId)
+    return of({id: userId, name: 'Joe', badges: this.badgeMap[userId]})
+    // below is the real one
+    //return this.http.post<User>(`${environment.backend}/user/${userId}/badge/${badgeId}`, {}, {withCredentials: true});
   }
 
 }

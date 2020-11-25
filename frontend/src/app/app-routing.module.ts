@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { LandingComponent } from './landing/landing.component';
 import { AuthGuard } from './_helpers';
+import { UserComponent } from './user/user.component';
 
 const accountModule = () => import('./account/account.module').then(x => x.AccountModule);
 const scheduleModule = () => import('./schedule/schedule.module').then(x => x.ScheduleModule);
@@ -11,6 +12,7 @@ const routes: Routes = [
   {path: '', component: LandingComponent, canActivate: [AuthGuard]},
   {path: 'account', loadChildren: accountModule},
   {path: 'schedule', loadChildren: scheduleModule, canActivate: [AuthGuard]},
+  {path: 'user/:id', component: UserComponent, canActivate: [AuthGuard]},
 
   //redirect home
   {path: '**', redirectTo: ''}

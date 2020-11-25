@@ -1,0 +1,15 @@
+<div class="user">
+    <h1>User Page for {{user.name}}</h1>
+    <h3>Badges:</h3>
+    <div class="row">
+        <div class="col-3 badge" *ngFor="let num of user.badges">
+            <img src="/assets/images/badges/{{num}}.svg" />
+        </div>
+    </div>
+    <div ngClass="{'d-none': process.env.NODE_ENV == 'production'}">
+        <h4>Only for testing:</h4>
+        Assign yourself a badge: (1-50):
+        <input type="number" [(ngModel)]="badgeNum" placeholder="badge number">
+        <button type="button" (click)="giveBadge()">Assign</button>
+    </div>
+</div>
