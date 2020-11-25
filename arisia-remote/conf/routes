@@ -19,6 +19,8 @@ GET     /                           arisia.controllers.HomeController.index()
 # Sets the Play session cookie, which contains all of the live (non-DB) session information
 POST    /api/login                      arisia.controllers.LoginController.login()
 
+GET /api/me arisia.controllers.LoginController.me()
+
 # Logs the current user out
 # No body is expected on this one
 # Always succeeds with OK (200), regardless of whether the user was logged in or not

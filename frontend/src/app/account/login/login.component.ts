@@ -22,8 +22,6 @@ export class LoginComponent implements OnInit {
 
   login() {
     this.accountService.login('joe', 'volcano').subscribe( retval => {
-      console.log(retval);
-      this.accountService.userValue = true;
       console.log('logged in');
       this.router.navigate([this.returnUrl]);
     });

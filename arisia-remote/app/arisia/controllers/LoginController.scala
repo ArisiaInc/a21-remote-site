@@ -18,6 +18,10 @@ class LoginController (
 {
   final val idKey = "id"
 
+  def me(): EssentialAction = Action { implicit request =>
+    Ok(Json.obj(idKey -> request.session.get(idKey), "name" -> "placeholder"))
+  }
+
   def login(): EssentialAction = Action.async(controllerComponents.parsers.tolerantJson[LoginRequest]) { implicit request =>
     val req = request.body
     loginService.checkLogin(req.id, req.password).map {
@@ -34,6 +38,6 @@ class LoginController (
   }
 
   def logout(): EssentialAction = Action { implicit request =>
-    Ok("Logged out").withNewSession
+    Ok(Json.obj("success" -> true)).withNewSession
   }
 }
