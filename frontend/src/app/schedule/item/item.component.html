@@ -1,16 +1,17 @@
-<div class="item_frame" (click)="toggleExpand()">
-    <div class="item_star"></div>
+<div class="item_frame" (click)="toggleExpand()" [ngClass]="{'expanded': expanded}">
     <div class="item_base">
-        <div class="title">{{item.title}}</div>
-        <div class="loc">{{item.loc}}</div>
+        <h6 class="title" [ngClass]="{'font-weight-bold': expanded}">{{item.title}}</h6>
+        <div class="loc text-muted">Location: <span>{{item.loc}}</span></div>
     </div>
+    <span class="item_star"></span>
     <div class="extra" *ngIf="expanded">
-        <ul class="tags">
-            <li *ngFor="let tag of item.tags">{{tag}}</li>
-        </ul>
-        <div class="item-people">
-            <a *ngFor="let person of item.people" href="/schedule/people/{{person.id}}">{{person.name}}</a>
+        <div class="item_tag text-muted">Track: <span>{{track}}</span></div>
+        <div class="item_tag text-muted">Type: <span>{{type}}</span></div>
+        <div class="item-people mt-2">
+            <a *ngFor="let person of item.people; last as isLast" href="/schedule/people/{{person.id}}">
+                {{person.name}}<span *ngIf="!isLast">,&nbsp;</span>
+            </a>
         </div>
-        <p>{{item.desc}}</p>
+        <p class="mt-2">{{item.desc}}</p>
     </div>
 </div>

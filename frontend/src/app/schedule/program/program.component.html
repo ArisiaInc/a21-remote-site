@@ -2,12 +2,12 @@
     <app-filters (filtersChanged)="updateItems($event)"></app-filters>
     <div *ngFor="let date of items | keyvalue">
         <h4>{{date.key}}</h4>
-        <div *ngFor="let time of date.value | keyvalue">
+        <div *ngFor="let time of date.value | keyvalue" class="mb-4">
             <h5>{{time.key}}</h5>
-            <ul>
-            <li *ngFor="let p of time.value">
-                <app-item [item]="p"></app-item>
-            </li>
+            <ul class="list-group">
+                <li class="program_item list-group-item" *ngFor="let p of time.value">
+                    <app-item [item]="p"></app-item>
+                </li>
             </ul>
         </div>
     </div>
