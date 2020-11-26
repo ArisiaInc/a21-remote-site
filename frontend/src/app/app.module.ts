@@ -7,11 +7,13 @@ import { AppComponent } from './app.component';
 import { LandingComponent } from './landing/landing.component';
 import { SharedModule } from './_components';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NavigationComponent } from './navigation/navigation.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     LandingComponent,
+    NavigationComponent,
   ],
   imports: [
     BrowserModule,
