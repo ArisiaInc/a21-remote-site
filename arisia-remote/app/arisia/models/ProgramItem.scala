@@ -1,6 +1,7 @@
 package arisia.models
 
 import java.text.{DateFormat, SimpleDateFormat}
+import java.time.LocalTime
 import java.util.Date
 
 import arisia.util._
@@ -61,6 +62,34 @@ object ProgramItemDate {
   }
 }
 
+case class ProgramItemTime(t: LocalTime)
+object ProgramItemTime {
+  implicit val reads: Reads[ProgramItemTime] = new Reads[ProgramItemTime] {
+    override def reads(json: JsValue): JsResult[ProgramItemTime] = {
+      json match {
+        case JsString(str) => {
+          try {
+            JsSuccess(ProgramItemTime(LocalTime.parse(str)))
+          } catch {
+            case ex: Exception => {
+              // TODO: log this error!
+              JsError()
+            }
+          }
+        }
+        case _ => {
+          // TODO: log this error!
+          JsError()
+        }
+      }
+    }
+  }
+
+  implicit val writes: Writes[ProgramItemTime] = new Writes[ProgramItemTime] {
+    override def writes(o: ProgramItemTime): JsValue = JsString(o.t.toString)
+  }
+}
+
 /**
  * Represents a Program Item, in a way that exactly matches KonOpas.
  *
@@ -74,7 +103,7 @@ case class ProgramItem(
   title: Option[ProgramItemTitle],
   tags: List[ProgramItemTag],
   date: Option[ProgramItemDate],
-  // TODO: how do we represent "time" in the KonOpas sense?
+  time: Option[ProgramItemTime],
   // TODO: convert this String to Int on the way in and out:
   mins: Option[String],
   loc: List[ProgramItemLoc],
@@ -87,6 +116,7 @@ object ProgramItem {
       (JsPath \ "title").formatNullable[ProgramItemTitle] and
       (JsPath \ "tags").formatWithDefault[List[ProgramItemTag]](List.empty) and
       (JsPath \ "date").formatNullable[ProgramItemDate] and
+      (JsPath \ "time").formatNullable[ProgramItemTime] and
       (JsPath \ "mins").formatNullable[String] and
       (JsPath \ "loc").formatWithDefault[List[ProgramItemLoc]](List.empty) and
       (JsPath \ "people").formatWithDefault[List[ProgramItemPerson]](List.empty) and
