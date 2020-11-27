@@ -9,6 +9,7 @@ import { SharedModule } from './_components';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ProgrammingComponent } from './programming/programming.component';
 import { GamingComponent } from './gaming/gaming.component';
+import { NavigationComponent } from './navigation/navigation.component';
 
 @NgModule({
   declarations: [
@@ -16,6 +17,7 @@ import { GamingComponent } from './gaming/gaming.component';
     LandingComponent,
     ProgrammingComponent,
     GamingComponent,
+    NavigationComponent,
   ],
   imports: [
     BrowserModule,
