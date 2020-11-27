@@ -74,3 +74,9 @@ That will serve a basic page on localhost:4200.
 To run the backend, in the sbt shell, say `backend/run`. This will boot
 the backend server, and provide a basic "hello world" page on
 localhost:9000.
+
+## Structural Credits
+
+The way the front and back ends are hooked together is largely
+adapted from
+[this article on integrating Play and Angular](https://torre.me.uk/2019/03/06/scala-play-rest-and-angular/).

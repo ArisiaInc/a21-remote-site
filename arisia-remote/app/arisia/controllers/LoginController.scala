@@ -16,10 +16,14 @@ class LoginController (
 )
   extends BaseController
 {
-  final val idKey = "id"
+  final val userKey = "user"
 
   def me(): EssentialAction = Action { implicit request =>
-    Ok(Json.obj(idKey -> request.session.get(idKey), "name" -> "placeholder"))
+    request.session.get(userKey) match {
+      case Some(jsonStr) => Ok(jsonStr)
+        // TODO: is there a more robust way to make sure that we hit all the fields here?
+      case None => Ok("""{"id":null,"name":null}""")
+    }
   }
 
   def login(): EssentialAction = Action.async(controllerComponents.parsers.tolerantJson[LoginRequest]) { implicit request =>
@@ -28,7 +32,8 @@ class LoginController (
       _ match {
         case Some(user) => {
           val json = Json.toJson(user)
-          Ok(Json.stringify(json)).withSession(idKey -> user.id.v).as(JSON)
+          val jsStr = Json.stringify(json)
+          Ok(jsStr).withSession(userKey -> jsStr).as(JSON)
         }
         case None => {
           Unauthorized("""{"success":"false", "message":"Put a real error message here"}""")
