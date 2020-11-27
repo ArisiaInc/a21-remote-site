@@ -62,10 +62,11 @@ object FrontendRunHook {
        * Run npm start
        */
       override def afterStarted(): Unit = {
-        println(s"Booting Angular")
-        process = Some(
-          Process(FrontendCommands.serve, frontend).run
-        )
+        println(s"Not booting Angular for now, until we have this working")
+//        println(s"Booting Angular")
+//        process = Some(
+//          Process(FrontendCommands.serve, frontend).run
+//        )
       }
 
       /**
