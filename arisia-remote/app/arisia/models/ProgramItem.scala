@@ -38,24 +38,7 @@ case class ProgramItemDate(d: Date)
 object ProgramItemDate {
   val dateFormat: DateFormat = new SimpleDateFormat("yyyy-MM-dd")
 
-  implicit val reads: Reads[ProgramItemDate] = new Reads[ProgramItemDate] {
-    override def reads(json: JsValue): JsResult[ProgramItemDate] = {
-      json match {
-        case JsString(str) => {
-          try {
-            JsSuccess(ProgramItemDate(dateFormat.parse(str)))
-          } catch {
-            // TODO: log this error!
-            case ex: Exception => JsError()
-          }
-        }
-        case _ => {
-          // TODO: log this error!
-          JsError()
-        }
-      }
-    }
-  }
+  implicit val reads: Reads[ProgramItemDate] = JsUtils.stringReads(str => ProgramItemDate(dateFormat.parse(str)))
 
   implicit val writes: Writes[ProgramItemDate] = new Writes[ProgramItemDate] {
     override def writes(o: ProgramItemDate): JsValue = JsString(dateFormat.format(o.d))
@@ -64,26 +47,7 @@ object ProgramItemDate {
 
 case class ProgramItemTime(t: LocalTime)
 object ProgramItemTime {
-  implicit val reads: Reads[ProgramItemTime] = new Reads[ProgramItemTime] {
-    override def reads(json: JsValue): JsResult[ProgramItemTime] = {
-      json match {
-        case JsString(str) => {
-          try {
-            JsSuccess(ProgramItemTime(LocalTime.parse(str)))
-          } catch {
-            case ex: Exception => {
-              // TODO: log this error!
-              JsError()
-            }
-          }
-        }
-        case _ => {
-          // TODO: log this error!
-          JsError()
-        }
-      }
-    }
-  }
+  implicit val reads: Reads[ProgramItemTime] = JsUtils.stringReads(str => ProgramItemTime(LocalTime.parse(str)))
 
   implicit val writes: Writes[ProgramItemTime] = new Writes[ProgramItemTime] {
     override def writes(o: ProgramItemTime): JsValue = JsString(o.t.toString)
