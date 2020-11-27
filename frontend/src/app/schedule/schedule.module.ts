@@ -9,10 +9,11 @@ import { LayoutComponent } from './layout/layout.component';
 import { MenuComponent } from './menu/menu.component';
 import { PeopleComponent } from './people/people.component';
 import { FiltersComponent } from './filters/filters.component';
+import { ItemListComponent } from './item-list/item-list.component';
 
 
 @NgModule({
-  declarations: [ProgramComponent, PersonComponent, ItemComponent, LayoutComponent, MenuComponent, PeopleComponent, FiltersComponent],
+  declarations: [ProgramComponent, PersonComponent, ItemComponent, LayoutComponent, MenuComponent, PeopleComponent, FiltersComponent, ItemListComponent],
   imports: [
     CommonModule,
     ScheduleRoutingModule
