@@ -1,9 +1,9 @@
 package arisia.models
 
+import java.text.{DateFormat, SimpleDateFormat}
 import java.util.Date
 
 import arisia.util._
-
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
@@ -33,6 +33,34 @@ object ProgramItemPerson {
 case class ProgramItemDesc(v: String) extends StdString
 object ProgramItemDesc extends StdStringUtils(new ProgramItemDesc(_))
 
+case class ProgramItemDate(d: Date)
+object ProgramItemDate {
+  val dateFormat: DateFormat = new SimpleDateFormat("yyyy-MM-dd")
+
+  implicit val reads: Reads[ProgramItemDate] = new Reads[ProgramItemDate] {
+    override def reads(json: JsValue): JsResult[ProgramItemDate] = {
+      json match {
+        case JsString(str) => {
+          try {
+            JsSuccess(ProgramItemDate(dateFormat.parse(str)))
+          } catch {
+            // TODO: log this error!
+            case ex: Exception => JsError()
+          }
+        }
+        case _ => {
+          // TODO: log this error!
+          JsError()
+        }
+      }
+    }
+  }
+
+  implicit val writes: Writes[ProgramItemDate] = new Writes[ProgramItemDate] {
+    override def writes(o: ProgramItemDate): JsValue = JsString(dateFormat.format(o.d))
+  }
+}
+
 /**
  * Represents a Program Item, in a way that exactly matches KonOpas.
  *
@@ -45,7 +73,7 @@ case class ProgramItem(
   id: ProgramItemId,
   title: Option[ProgramItemTitle],
   tags: List[ProgramItemTag],
-  date: Option[Date],
+  date: Option[ProgramItemDate],
   // TODO: how do we represent "time" in the KonOpas sense?
   // TODO: convert this String to Int on the way in and out:
   mins: Option[String],
@@ -58,7 +86,7 @@ object ProgramItem {
     (JsPath \ "id").format[ProgramItemId] and
       (JsPath \ "title").formatNullable[ProgramItemTitle] and
       (JsPath \ "tags").formatWithDefault[List[ProgramItemTag]](List.empty) and
-      (JsPath \ "date").formatNullable[Date] and
+      (JsPath \ "date").formatNullable[ProgramItemDate] and
       (JsPath \ "mins").formatNullable[String] and
       (JsPath \ "loc").formatWithDefault[List[ProgramItemLoc]](List.empty) and
       (JsPath \ "people").formatWithDefault[List[ProgramItemPerson]](List.empty) and
