@@ -55,8 +55,6 @@ object FrontendRunHook {
           runAndWait(FrontendCommands.angularInstall)
           runAndWait(FrontendCommands.devkitInstall)
         }
-        println("Building Angular")
-        runAndWait(FrontendCommands.devBuild)
       }
 
       /**
@@ -64,10 +62,10 @@ object FrontendRunHook {
        * Run npm start
        */
       override def afterStarted(): Unit = {
-//        println(s"Booting Angular")
-//        process = Some(
-//          Process(FrontendCommands.serve, frontend).run
-//        )
+        println(s"Booting Angular")
+        process = Some(
+          Process(FrontendCommands.devBuild, frontend).run
+        )
       }
 
       /**
@@ -75,15 +73,9 @@ object FrontendRunHook {
        * Cleanup frontend execution processes.
        */
       override def afterStopped(): Unit = {
-        // TODO: this isn't working! The result is that we have port 4200 blocked up, which is a problem.
-        // Ammonite doesn't obviously help; nor did feeding in a ctrl-c.
-        // Consider dropping down to java.lang.ProcessBuilder/Process/ProcessHandle, which collectively should
-        // provide a lot more control over this.
-        // TODO: do we care about this? Why was the recipe bothering to run the ng server *and* the backend one?
-        // Is it in order to provide rapid-turnaround on the frontend server during dev?
-//        println(s"Destroying Process $process")
-//        process.foreach(_.destroy())
-//        process = None
+        println(s"Shutting down Angular")
+        process.foreach(_.destroy())
+        process = None
       }
 
     }

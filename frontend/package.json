@@ -13,7 +13,7 @@
     "test:ci": "ng test --watch=false --browsers ChromeHeadless",
     "test:coverage": "ng test --watch=true --code-coverage=true",
     "test:coverage:ci": "ng test --watch=false --code-coverage=true --browsers ChromeHeadless",
-    "build:dev": "ng build --progress --output-path ../arisia-remote/public/frontend",
+    "build:dev": "ng build --progress --output-path ../arisia-remote/public/frontend --watch",
     "build:prod": "ng build --progress --prod --output-path ../arisia-remote/public/frontend"
   },
   "private": true,
