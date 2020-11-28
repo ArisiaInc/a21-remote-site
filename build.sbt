@@ -50,7 +50,7 @@ lazy val frontend = (project in file("frontend"))
       val feDir: File = new File("./frontend")
       // This build process outputs an enormous number of blank lines for some reason, which is confusing.
       // Can we suppress those?
-      val exitCode = Process("ng build", feDir).!
+      val exitCode = Process("ng build --prod", feDir).!
       println("... done building.")
       // TODO: we really ought to fail the build if the exitCode is non-zero
     }
