@@ -31,5 +31,7 @@ POST    /api/logout                  arisia.controllers.LoginController.logout()
 GET     /api/schedule                arisia.controllers.ScheduleController.getSchedule()
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /*file                       arisia.controllers.FrontendController.assetOrDefault(file)
 GET     /assets/*file                controllers.Assets.versioned(path="/public", file: Asset)
+
+# Fetch frontend assets
+GET     /*file                       arisia.controllers.FrontendController.assetOrDefault(file)
