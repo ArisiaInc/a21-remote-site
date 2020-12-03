@@ -20,5 +20,5 @@ class FrontendController(
   def index(): Action[AnyContent] = assets.at("/frontend/index.html")
 
   def assetOrDefault(resource: String): Action[AnyContent] =
-    if (resource.contains(".")) assets.versioned(s"/frontend/$resource") else index
+    if (resource.contains(".")) assets.versioned(s"/frontend/$resource") else index()
 }
