@@ -93,6 +93,7 @@ lazy val backend = (project in file("arisia-remote"))
     maintainer := "remote@arisia.org",
       // Play built-in modules:
     libraryDependencies ++= Seq(
+      evolutions,
       guice,
       jdbc
     ),

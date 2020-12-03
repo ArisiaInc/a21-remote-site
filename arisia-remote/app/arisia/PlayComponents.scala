@@ -7,6 +7,8 @@ import _root_.controllers.AssetsComponents
 import arisia.auth.AuthModule
 import arisia.controllers.ControllerModule
 import arisia.schedule.ScheduleModule
+import play.api.db.{HikariCPComponents, DBComponents}
+import play.api.db.evolutions.EvolutionsComponents
 import play.api.i18n.I18nComponents
 import play.api.mvc.EssentialFilter
 import play.filters.cors.{CORSConfig, CORSFilter}
@@ -26,10 +28,16 @@ class PlayComponents(context: Context)
   with BuiltInComponents
   with I18nComponents
   with AssetsComponents
+  with EvolutionsComponents
+  with DBComponents
+  with HikariCPComponents
   with ControllerModule
   with AuthModule
   with ScheduleModule
 {
+  // When starting the application, run database evolutions and apply changes if needed:
+  applicationEvolutions
+
   lazy val httpFilters: Seq[EssentialFilter] = Seq(
     CORSFilter(
       CORSConfig.fromConfiguration(context.initialConfiguration)
