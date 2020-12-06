@@ -4,9 +4,7 @@ import play.api.ApplicationLoader.Context
 import play.api._
 import com.softwaremill.macwire._
 import _root_.controllers.AssetsComponents
-import arisia.auth.AuthModule
 import arisia.controllers.ControllerModule
-import arisia.schedule.ScheduleModule
 import play.api.db.{HikariCPComponents, DBComponents}
 import play.api.db.evolutions.EvolutionsComponents
 import play.api.i18n.I18nComponents
@@ -32,8 +30,7 @@ class PlayComponents(context: Context)
   with DBComponents
   with HikariCPComponents
   with ControllerModule
-  with AuthModule
-  with ScheduleModule
+  with GeneralModule
 {
   // When starting the application, run database evolutions and apply changes if needed:
   applicationEvolutions
