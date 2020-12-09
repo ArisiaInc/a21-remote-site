@@ -95,7 +95,8 @@ lazy val backend = (project in file("arisia-remote"))
     libraryDependencies ++= Seq(
       evolutions,
       guice,
-      jdbc
+      jdbc,
+      ws
     ),
     // Libraries we are pulling in:
     libraryDependencies ++= Seq(

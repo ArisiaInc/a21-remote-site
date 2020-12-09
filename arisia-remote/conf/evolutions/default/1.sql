@@ -17,7 +17,7 @@ CREATE TABLE permissions (
   -- True iff this is a member of Safety, capable of removing people from Zoom meetings
   safety boolean DEFAULT FALSE,
   -- True iff this person has early access to the Remote site, for testing and such
-  early_access DEFAULT FALSE,
+  early_access boolean DEFAULT FALSE,
   -- This becomes true iff this member is removed from the convention
   removed boolean DEFAULT FALSE,
   PRIMARY KEY (badge_number)

@@ -5,9 +5,10 @@ import play.api._
 import com.softwaremill.macwire._
 import _root_.controllers.AssetsComponents
 import arisia.controllers.ControllerModule
-import play.api.db.{HikariCPComponents, DBComponents}
+import play.api.db.{DBComponents, HikariCPComponents}
 import play.api.db.evolutions.EvolutionsComponents
 import play.api.i18n.I18nComponents
+import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc.EssentialFilter
 import play.filters.cors.{CORSConfig, CORSFilter}
 import router.Routes
@@ -29,6 +30,7 @@ class PlayComponents(context: Context)
   with EvolutionsComponents
   with DBComponents
   with HikariCPComponents
+  with AhcWSComponents
   with ControllerModule
   with GeneralModule
 {

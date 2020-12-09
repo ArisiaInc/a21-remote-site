@@ -5,6 +5,7 @@ import arisia.db.{DBServiceImpl, DBService}
 import com.softwaremill.macwire.wire
 import arisia.schedule.{ScheduleServiceImpl, ScheduleService}
 import play.api.Configuration
+import play.api.libs.ws.WSClient
 
 import scala.concurrent.ExecutionContext
 
@@ -14,6 +15,7 @@ import scala.concurrent.ExecutionContext
 trait GeneralModule {
   implicit def executionContext: ExecutionContext
   def configuration: Configuration
+  def wsClient: WSClient
 
   lazy val scheduleService: ScheduleService = wire[ScheduleServiceImpl]
   lazy val loginService: LoginService = wire[LoginServiceImpl]
