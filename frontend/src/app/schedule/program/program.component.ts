@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { ProgramItem } from '@app/_models';
-import { ScheduleService } from '../_services/schedule.service';
+import { ScheduleService } from '@app/_services/schedule.service';
 
 @Component({
   selector: 'app-program',

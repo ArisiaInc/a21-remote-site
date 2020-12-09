@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, zip, OperatorFunction } from 'rxjs';
-import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck } from 'rxjs/operators';
+import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck, every } from 'rxjs/operators';
 import { ProgramItem, ProgramPerson, ProgramFilter } from '@app/_models';
 
 import { program, people } from "test_data/konopas"
@@ -50,7 +50,19 @@ export class ScheduleService {
   get_person(id): Observable<ProgramPerson> {
     return this.get_people().pipe(
       map(people => people.find(p => p.id === id)),
+    );
+  }
 
+  get_featured_events(): Observable<ProgramItem[]> {
+    // for testing:
+    return of(['13','16','29']).pipe(
+    //return this.http.get<String[]>(`${environment.backend}/schedule/featured`).pipe(
+      flatMap(ids => this.get_data().pipe(
+        pluck('program'),
+        flatMap(x => of(...x)),
+        filter(p => ids.includes(p.id)),
+        toArray()
+      )),
     );
   }
 }
