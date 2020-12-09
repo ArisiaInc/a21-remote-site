@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { ProgramPerson } from '@app/_models';
 import { ActivatedRoute } from '@angular/router';
-import { ScheduleService } from '../_services/schedule.service';
+import { ScheduleService } from '@app/_services/schedule.service';
 import { pluck, flatMap, map } from 'rxjs/operators'
 import { Observable } from 'rxjs';
 

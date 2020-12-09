@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ProgramPerson } from '@app/_models';
-import { ScheduleService } from '../_services/schedule.service';
+import { ScheduleService } from '@app/_services/schedule.service';
 
 @Component({
   selector: 'app-people',
