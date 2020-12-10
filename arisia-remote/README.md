@@ -46,15 +46,15 @@ The key rules to keep in mind, if you aren't used to Scala, are:
   potentially mutable state: it's fine for constants, but you
   should never do it for anything else. All common state belongs
   in the top-level Service classes.
-* **Minimize mutability:** while we're not going full-on FP-style
-  No Mutability Period, `var`s should be very rare -- in general,
-  they should exist only at the top level of Service objects, and
-  even there they must be carefully controlled to avoid thread
-  contention. We *may* outlaw them outside of Akka Actors, which
-  are really the safest way to handle mutability.
+* **Avoid mutability:** while we're not going full-on FP-style
+  No Mutability Period, we are constraining it to safe
+  `AtomicReference`s in the top-level service objects. There
+  should be no need for it elsewhere. Top-level service objects
+  are allowed to have `var`s that are set *once*, during startup;
+  there should be no `var`s anywhere else outside of test code.
 * **No locks:** the equivalent of a Java lock is the Scala
-  `synchronized` construct. In general, don't use it -- if you
-  have a problem that can't be handled with an AtomicReference,
+  `synchronized` construct. Don't use it -- if you
+  have a problem that can't be handled with an `AtomicReference`,
   that indicates a design problem that needs to be rethought.
   
 Talk to Justin if you have questions about any of these, or need

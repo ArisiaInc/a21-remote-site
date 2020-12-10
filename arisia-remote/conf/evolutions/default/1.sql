@@ -12,6 +12,9 @@ CREATE TABLE text_files (
   PRIMARY KEY (name)
 );
 
+-- Start with an empty but valid schedule, so we can count on that being around:
+INSERT INTO text_files VALUES ('schedule', 'var program = []; var people = []');
+
 -- !Downs
 
 DROP TABLE text_files;

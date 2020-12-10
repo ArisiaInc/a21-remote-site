@@ -13,6 +13,8 @@ import play.api.mvc.EssentialFilter
 import play.filters.cors.{CORSConfig, CORSFilter}
 import router.Routes
 
+import scala.concurrent.Future
+
 /**
  * This is the master definition of the components in the application.
  *
@@ -37,6 +39,8 @@ class PlayComponents(context: Context)
   // When starting the application, run database evolutions and apply changes if needed:
   applicationEvolutions
 
+  timerService.init()
+
   lazy val httpFilters: Seq[EssentialFilter] = Seq(
     CORSFilter(
       CORSConfig.fromConfiguration(context.initialConfiguration)
@@ -46,5 +50,10 @@ class PlayComponents(context: Context)
   lazy val router: Routes = {
     val prefix: String = "/"
     wire[Routes]
+  }
+
+  applicationLifecycle.addStopHook { () =>
+    timerService.shutdown()
+    Future.successful(())
   }
 }
