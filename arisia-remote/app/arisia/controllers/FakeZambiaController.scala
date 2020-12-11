@@ -25,6 +25,10 @@ class FakeZambiaController (
     val s = _theSchedule match {
       case Some(schedule) => schedule
       case None => {
+        // EVIL: please note that the following line is *not* okay in real code, because it blocks the current
+        // thread. It's legit here only because this is test code that won't run in the real site. If you
+        // need to do file IO for real, let's talk about ways to do that more appropriately. (There are better
+        // options, they just require a bit more code.)
         _theSchedule = Some(Resource.getAsString("konopastest.jsonp"))
         _theSchedule.get
       }
