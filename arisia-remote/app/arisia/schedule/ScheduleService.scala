@@ -6,6 +6,7 @@ import arisia.db.DBService
 import arisia.models.Schedule
 import doobie._
 import doobie.implicits._
+import play.api.Logging
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.{Future, ExecutionContext}
@@ -27,7 +28,7 @@ class ScheduleServiceImpl(
   ws: WSClient
 )(
   implicit ec: ExecutionContext
-) extends ScheduleService {
+) extends ScheduleService with Logging {
 
   case class ScheduleCache(jsonp: String) {
     lazy val parsed = Schedule.parseKonOpas(jsonp)
@@ -48,11 +49,9 @@ class ScheduleServiceImpl(
 
   // At boot time, load the last-known version of the schedule:
   dbService.run(loadInitialScheduleQuery).map { jsonp =>
-    println(s"======> Schedule loaded from DB")
+    logger.info(s"Schedule loaded from DB")
     _theSchedule.set(ScheduleCache(jsonp))
   }
-
-  // TODO: on the clock timer, grab the schedule JSONP from a configurable URL, initially pointed at the FakeZambiaController
 
   /**
    * Go out to Zambia, and fetch the current version of the schedule.
@@ -67,21 +66,14 @@ class ScheduleServiceImpl(
       .map { response =>
         val jsonp = response.body
         if (jsonp == _theSchedule.get.jsonp) {
-          // TODO: replace all of these ======> printlns with proper logback logging:
-          println(s"======> Refresh -- schedule hasn't changed")
+          logger.info(s"Refresh -- schedule hasn't changed")
         } else {
-          println(s"======> Refreshed the schedule from Zambia")
+          logger.info(s"Refreshed the schedule from Zambia")
           // TODO: don't actually set the cache until we validate that the jsonp validates:
           _theSchedule.set(ScheduleCache(jsonp))
         }
       }
   }
-
-//  private def fetchSchedule(): Future[Schedule] = {
-//    val jsonp: String = Resource.getAsString("konopastest.jsonp")
-//    _theSchedule.set(Schedule.parseKonOpas(jsonp))
-//    Future.successful(_theSchedule.get)
-//  }
 
   def currentSchedule(): Schedule = {
     _theSchedule.get.parsed

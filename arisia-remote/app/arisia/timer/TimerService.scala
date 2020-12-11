@@ -2,6 +2,7 @@ package arisia.timer
 
 import akka.actor.Cancellable
 import arisia.schedule.ScheduleService
+import play.api.Logging
 
 import scala.concurrent.duration._
 
@@ -20,11 +21,12 @@ trait TimerService {
 class TimerServiceImpl(
   ticker: Ticker,
   scheduleService: ScheduleService
-) extends TimerService {
+) extends TimerService with Logging {
 
   class Runner() extends Runnable {
     // This is called on every "tick":
     def run(): Unit = {
+      logger.info("Tick: running events")
       scheduleService.refresh()
     }
   }
