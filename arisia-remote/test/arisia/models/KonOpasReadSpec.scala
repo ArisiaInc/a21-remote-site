@@ -14,8 +14,6 @@ class KonOpasReadSpec
 {
   "KonOpas data" should {
     "parse from a dump file" in {
-      val svc = new ScheduleServiceImpl
-
       // This file is the actual dump from A'14. It's large, complex, realistic, and we believe nothing has materially
       // changed in the format since then:
       val jsonp: String = Resource.getAsString("konopastest.jsonp")

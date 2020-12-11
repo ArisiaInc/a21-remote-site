@@ -9,6 +9,24 @@ import play.api.Configuration
 
 import scala.concurrent.{Future, ExecutionContext}
 
+/**
+ * This service does the actual interfacing with the database.
+ *
+ * In other services, you define SQL queries as needed -- they should then call DBService.run() to actually
+ * execute them.
+ *
+ * We are using Doobie as the database engine. For additional information, see:
+ *
+ *   https://tpolecat.github.io/doobie/index.html
+ *
+ * Suffice it to say, Doobie is one of the best DB interfaces for Scala. It is strongly-typed and prevents you
+ * from easily shooting yourself in the foot or committing security violations, while still providing an
+ * interface that looks and feels very much like writing ordinary SQL.
+ *
+ * Note that the database itself is defined via Play Evolutions, an unrelated mechanism. The DDL is defined in
+ * the files in conf/evolutions/default. That runs at startup, so the DB should be fully designed by the time
+ * we get to this code.
+ */
 trait DBService {
   /**
    * Given the Doobie description of a database operation, actually run it.

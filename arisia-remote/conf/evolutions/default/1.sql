@@ -12,8 +12,10 @@ CREATE TABLE text_files (
   PRIMARY KEY (name)
 );
 
--- Start with an empty but valid schedule, so we can count on that being around:
-INSERT INTO text_files VALUES ('schedule', 'var program = []; var people = []');
+-- Initialize the table with an empty schedule, so that we always have a valid value. Note that semicolons
+-- need to be escaped in Play Evolutions like this -- that's why the odd JSONP syntax.
+
+INSERT INTO text_files VALUES ('scheduleJsonp', 'var program = [];; var people = []');
 
 -- !Downs
 
