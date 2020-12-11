@@ -56,6 +56,14 @@ The key rules to keep in mind, if you aren't used to Scala, are:
   `synchronized` construct. Don't use it -- if you
   have a problem that can't be handled with an `AtomicReference`,
   that indicates a design problem that needs to be rethought.
+* **Separation of Interface and Implementation:** this one is less
+  standard-style, and more because it's necessary in order to have
+  any hope of serious automated tests. Most of the logic of the
+  system is in the top-level Service objects. In all cases, you
+  should expose the Service as an abstract trait (an interface),
+  and implement it as an Impl subclass of that trait. It's a little
+  extra boilerplate, but makes it vastly easier to set things up
+  to test.
   
 Talk to Justin if you have questions about any of these, or need
 examples of how to deal with them.
