@@ -43,13 +43,18 @@ class ScheduleServiceImpl(
   final val scheduleRowName: String = "scheduleJsonp"
 
   val loadInitialScheduleQuery: ConnectionIO[String] =
-    sql"SELECT value from text_files WHERE name = '$scheduleRowName'"
+    sql"SELECT value from text_files WHERE name = $scheduleRowName"
     .query[String]
     .unique
 
+  def updateScheduleStatement(scheduleJsonp: String): ConnectionIO[Int] =
+    sql"UPDATE text_files set value = $scheduleJsonp where name = $scheduleRowName"
+    .update
+    .run
+
   // At boot time, load the last-known version of the schedule:
   dbService.run(loadInitialScheduleQuery).map { jsonp =>
-    logger.info(s"Schedule loaded from DB")
+    logger.info(s"Schedule loaded from DB -- size ${jsonp.length}")
     _theSchedule.set(ScheduleCache(jsonp))
   }
 
@@ -61,16 +66,31 @@ class ScheduleServiceImpl(
   def refresh(): Unit = {
     // TODO: make the URL configurable so that we can actually point it to Zambia. But until we have
     // that, it can just be hardcoded.
-    ws.url("http://localhost:9000/test/fakseschedule")
+    ws.url("http://localhost:9000/test/fakeschedule")
       .get()
       .map { response =>
         val jsonp = response.body
         if (jsonp == _theSchedule.get.jsonp) {
           logger.info(s"Refresh -- schedule hasn't changed")
         } else {
-          logger.info(s"Refreshed the schedule from Zambia")
+          logger.info(s"Refreshed the schedule from Zambia -- size ${jsonp.length}")
           // TODO: don't actually set the cache until we validate that the jsonp validates:
-          _theSchedule.set(ScheduleCache(jsonp))
+          val cacheable = ScheduleCache(jsonp)
+          try {
+            // For the moment, this can throw Exceptions.
+            // TODO: make this pathway non-Exception-centric.
+            val parsed = cacheable.parsed
+            // Save it in the DB:
+            dbService.run(updateScheduleStatement(jsonp)).map { _ =>
+              logger.info(s"Saved new Schedule in the database")
+              // Once that's done, cache it:
+              _theSchedule.set(ScheduleCache(jsonp))
+            }
+          } catch {
+            case ex: Exception => {
+              logger.error(s"Unable to parse Schedule that we received from Zambia!")
+            }
+          }
         }
       }
   }
