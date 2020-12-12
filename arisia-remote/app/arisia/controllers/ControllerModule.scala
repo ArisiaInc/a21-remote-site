@@ -19,7 +19,6 @@ trait ControllerModule {
   def httpErrorHandler: HttpErrorHandler
   def configuration: Configuration
 
-  lazy val homeController: HomeController = wire[HomeController]
   lazy val loginController: LoginController = wire[LoginController]
   lazy val scheduleController: ScheduleController = wire[ScheduleController]
   lazy val frontendController: FrontendController = wire[FrontendController]
