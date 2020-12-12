@@ -1,7 +1,7 @@
 package arisia.controllers
 
 import arisia.auth.LoginService
-import arisia.models.LoginRequest
+import arisia.models.{LoginRequest, LoginUser}
 import play.api.http._
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -16,7 +16,7 @@ class LoginController (
 )
   extends BaseController
 {
-  final val userKey = "user"
+  import LoginController._
 
   def me(): EssentialAction = Action { implicit request =>
     request.session.get(userKey) match {
@@ -44,5 +44,22 @@ class LoginController (
 
   def logout(): EssentialAction = Action { implicit request =>
     Ok(Json.obj("success" -> true)).withNewSession
+  }
+}
+
+object LoginController {
+  final val userKey = "user"
+
+  def loggedInUser()(implicit request: Request[AnyContent]): Option[LoginUser] = {
+    try {
+      for {
+        userJson <- request.session.get(userKey)
+        jsValue = Json.parse(userJson)
+        loginUser <- jsValue.asOpt[LoginUser]
+      }
+        yield loginUser
+    } catch {
+      case ex: Exception => None
+    }
   }
 }

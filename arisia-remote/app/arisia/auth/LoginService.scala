@@ -1,8 +1,14 @@
 package arisia.auth
 
+import arisia.db.DBService
+
 import scala.concurrent.duration._
-import arisia.models.{LoginName, LoginUser, LoginId}
+import arisia.models.{LoginName, LoginUser, Permissions, LoginId}
+import doobie.free.connection.ConnectionIO
 import play.api.libs.ws.WSClient
+
+import doobie._
+import doobie.implicits._
 
 import scala.concurrent.{Future, ExecutionContext}
 
@@ -11,10 +17,16 @@ trait LoginService {
    * Given credentials, says whether they match a known login.
    */
   def checkLogin(id: String, password: String): Future[Option[LoginUser]]
+
+  /**
+   * Fetch any additional permissions that this person might have.
+   */
+  def getPermissions(user: LoginUser): Future[Permissions]
 }
 
 class LoginServiceImpl(
-  ws: WSClient
+  ws: WSClient,
+  dbService: DBService
 )(
   implicit ec: ExecutionContext
 ) extends LoginService {
@@ -71,5 +83,19 @@ class LoginServiceImpl(
           None
         }
       }
+  }
+
+  def fetchPermissionsQuery(user: LoginUser): ConnectionIO[Option[Permissions]] =
+    sql"""SELECT super_admin, admin, early_access
+         |FROM permissions
+         |WHERE username = ${user.id.v}""".stripMargin
+    .query[Permissions]
+    .option
+
+  def getPermissions(user: LoginUser): Future[Permissions] = {
+    dbService.run(fetchPermissionsQuery(user)).map {
+      // If we didn't find an entry in the database for this LoginUser, then they have empty Permissions:
+      _.getOrElse(Permissions.empty)
+    }
   }
 }

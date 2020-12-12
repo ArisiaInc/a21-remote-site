@@ -1,0 +1,9 @@
+@(permissions: arisia.models.Permissions)
+
+@main("Arisia Admin") {
+  <h1>Arisia Site Admin</h1>
+
+  @if(permissions.superAdmin) {
+    <h2><a href="/admin/manageAdmins">Manage Admins</a></h2>
+  }
+}
