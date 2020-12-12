@@ -1,5 +1,6 @@
 package arisia.controllers
 
+import arisia.admin.AdminService
 import arisia.auth.LoginService
 import arisia.models.{LoginUser, Permissions}
 import play.api.mvc._
@@ -8,6 +9,7 @@ import scala.concurrent.{Future, ExecutionContext}
 
 class AdminController (
   val controllerComponents: ControllerComponents,
+  adminService: AdminService,
   loginService: LoginService
 )(
   implicit ec: ExecutionContext
@@ -41,6 +43,9 @@ class AdminController (
     }
   }
 
+  /**
+   * Synchronous version of adminsOnlyAsync(), for simpler functions.
+   */
   def adminsOnly(f: AdminInfo => Result): EssentialAction = adminsOnlyAsync(info => Future.successful(f(info)))
 
   def home(): EssentialAction = adminsOnly { info =>
@@ -49,7 +54,10 @@ class AdminController (
 
   def manageAdmins(): EssentialAction = adminsOnlyAsync { info =>
     if (info.permissions.superAdmin) {
-      Future.successful(Ok(arisia.views.html.manageAdmins()))
+      adminService.getAdmins().map { admins =>
+        val sorted = admins.sortBy(_.v)
+        Ok(arisia.views.html.manageAdmins(sorted))
+      }
     } else {
       Future.successful(Forbidden("You don't have permissions to manage Admins"))
     }

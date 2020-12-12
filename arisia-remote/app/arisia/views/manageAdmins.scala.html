@@ -1,5 +1,13 @@
-@()
+@(admins: List[arisia.models.LoginName])
 
 @main("Arisia Admin - Manage Admins") {
   <h1>Manage Admins</h1>
+
+  <p>The currently-known Admins are:</p>
+
+  <ul>
+    @for(admin <- admins) {
+      <li>@{admin.v}</li>
+    }
+  </ul>
 }

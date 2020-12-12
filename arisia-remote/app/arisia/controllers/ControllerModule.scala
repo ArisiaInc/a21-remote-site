@@ -1,5 +1,6 @@
 package arisia.controllers
 
+import arisia.GeneralModule
 import arisia.auth.LoginService
 import arisia.schedule.ScheduleService
 import com.softwaremill.macwire._
@@ -10,11 +11,9 @@ import play.api.mvc.ControllerComponents
 
 import scala.concurrent.ExecutionContext
 
-trait ControllerModule {
+trait ControllerModule extends GeneralModule {
   implicit def executionContext: ExecutionContext
   def controllerComponents: ControllerComponents
-  def loginService: LoginService
-  def scheduleService: ScheduleService
   def assets: Assets
   def httpErrorHandler: HttpErrorHandler
   def configuration: Configuration
