@@ -23,4 +23,6 @@ trait ControllerModule {
   lazy val loginController: LoginController = wire[LoginController]
   lazy val scheduleController: ScheduleController = wire[ScheduleController]
   lazy val frontendController: FrontendController = wire[FrontendController]
+
+  lazy val fakeZambiaController: FakeZambiaController = wire[FakeZambiaController]
 }

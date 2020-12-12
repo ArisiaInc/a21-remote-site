@@ -7,6 +7,12 @@ There are two subdirectories under here, `arisia-remote` (the
 backend) and `frontend`. To build and run the system locally,
 here are the steps.
 
+### Install Postgres
+
+You will need a Postgres database in order to run the system.
+It doesn't matter how you install it or where it lives, but
+you need to know the JDBC connection URL to get to it.
+
 ### Install the Front End Tools
 
 See [the frontend README](frontend/README.md), specifically the
@@ -62,6 +68,31 @@ exit this shell with ctrl-d.)
 `build` command that compiles both the backend and frontend.
 (This is still pretty primitive, and likely to evolve, but is
 basically working.)
+
+#### Set up secrets.conf
+
+In the [arisia-remote/conf](arisia-remote/conf) directory, you
+will find a file named `secrets.conf.template`. Copy that to
+`secrets.conf`. This is where non-public, installation-specific
+stuff lives. You are **not allowed to check secrets.conf in!**
+That's important: it's full of secrets, and must not be checked
+into GitHub!
+
+##### Create an Application Secret
+
+The Application Secret is used to encrypt the session cookie.
+To create one of your own, go into `sbt`, and say
+`playGenerateSecret`. That will give you a long randomized
+string. In your `secrets.conf` file, put this string in the
+`play.http.secret.key` setting.
+
+###### Set the Postgres Connection URL
+
+Put the JDBC URL to connect to your development database into
+`secrets.conf`, in the `db.default.url` setting. (In a dev
+environment this may not contain any secrets, but it is not
+unusual for it to contain an embedded password, so it is
+generally considered a secret.)
 
 #### Running the System
 
