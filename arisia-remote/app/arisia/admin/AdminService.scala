@@ -4,6 +4,7 @@ import arisia.db.DBService
 import arisia.models.{LoginName, LoginId}
 import doobie._
 import doobie.implicits._
+import play.api.Logging
 
 import scala.concurrent.{Future, ExecutionContext}
 
@@ -31,7 +32,7 @@ class AdminServiceImpl(
   dbService: DBService
 )(
   implicit ec: ExecutionContext
-) extends AdminService {
+) extends AdminService with Logging {
 
   def getAdmins(): Future[List[LoginId]] = {
     dbService.run(
@@ -44,6 +45,7 @@ class AdminServiceImpl(
   }
 
   def addAdmin(id: LoginId): Future[Int] = {
+    logger.info(s"Adding ${id.v} as an Admin")
     // This call, like all of these permission-sets, needs to be structured as an upsert, since we don't
     // know whether the username already exists in the table or not. Note that this upsert syntax is
     // Postgres-specific.
@@ -61,6 +63,7 @@ class AdminServiceImpl(
   }
 
   def removeAdmin(id: LoginId): Future[Int] = {
+    logger.info(s"Removing ${id.v} as an Admin")
     dbService.run(
       sql"""UPDATE permissions
            |SET admin = FALSE

@@ -3,6 +3,7 @@ package arisia.controllers
 import arisia.admin.AdminService
 import arisia.auth.LoginService
 import arisia.models.{LoginName, LoginUser, Permissions, LoginId}
+import play.api.Logging
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
@@ -18,6 +19,7 @@ class AdminController (
   implicit ec: ExecutionContext
 ) extends BaseController
   with I18nSupport
+  with Logging
 {
   case class AdminInfo(request: Request[AnyContent], user: LoginUser, permissions: Permissions)
 
@@ -87,7 +89,7 @@ class AdminController (
 
     newAdminForm.bindFromRequest().fold(
       formWithErrors => {
-        // TODO: actually display an error
+        // TODO: actually display the error!
         Future.successful(Redirect(routes.AdminController.manageAdmins()))
       },
       loginName => {

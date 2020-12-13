@@ -18,7 +18,7 @@
   <p>Add another Admin:</p>
 
   @helper.form(action = arisia.controllers.routes.AdminController.addAdmin()) {
-    @helper.inputText(newAdminForm("CM Username for the new Admin"))
+    @helper.inputText(newAdminForm("username"))
   }
 
   @*
@@ -38,7 +38,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-danger">Remove Admin</button>
+          <button type="button" class="btn btn-danger confirmed-button" id="remove-admin-button">Remove Admin</button>
         </div>
       </div>
     </div>
