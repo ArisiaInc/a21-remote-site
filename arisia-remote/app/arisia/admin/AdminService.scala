@@ -39,10 +39,15 @@ class AdminServiceImpl(
     )
   }
   def addAdmin(name: LoginName): Future[Int] = {
+    // This call, like all of these permission-sets, needs to be structured as an upsert, since we don't
+    // know whether the username already exists in the table or not. Note that this upsert syntax is
+    // Postgres-specific.
     dbService.run(
       sql"""INSERT INTO permissions
            |(username, admin)
-           |VALUES (${name.v}, TRUE)""".stripMargin
+           |VALUES (${name.v}, TRUE)
+           |ON CONFLICT (username)
+           |DO UPDATE SET admin = TRUE""".stripMargin
         .update
         .run
     )
