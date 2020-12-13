@@ -11,3 +11,7 @@
     text-align: center;
     font-size: 2em;
 }
+
+:host.circle {
+    border-radius: 50%;
+}
