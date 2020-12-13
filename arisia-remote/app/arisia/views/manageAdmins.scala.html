@@ -1,4 +1,6 @@
-@(admins: List[arisia.models.LoginName])
+@(admins: List[arisia.models.LoginName], newAdminForm: Form[arisia.models.LoginName])(implicit request: RequestHeader, messagesProvider: MessagesProvider)
+
+@import helper._
 
 @main("Arisia Admin - Manage Admins") {
   <h1>Manage Admins</h1>
@@ -10,4 +12,10 @@
       <li>@{admin.v}</li>
     }
   </ul>
+
+  <p>Add another Admin:</p>
+
+  @helper.form(action = arisia.controllers.routes.AdminController.addAdmin()) {
+    @helper.inputText(newAdminForm("username"))
+  }
 }

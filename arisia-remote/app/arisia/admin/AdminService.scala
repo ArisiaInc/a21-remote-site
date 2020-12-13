@@ -16,6 +16,11 @@ trait AdminService {
    * Fetch all of the people listed as Admins for the site.
    */
   def getAdmins(): Future[List[LoginName]]
+
+  /**
+   * Add someone as an Admin.
+   */
+  def addAdmin(name: LoginName): Future[Int]
 }
 
 class AdminServiceImpl(
@@ -31,6 +36,15 @@ class AdminServiceImpl(
            |WHERE admin = TRUE""".stripMargin
         .query[LoginName]
         .to[List]
+    )
+  }
+  def addAdmin(name: LoginName): Future[Int] = {
+    dbService.run(
+      sql"""INSERT INTO permissions
+           |(username, admin)
+           |VALUES (${name.v}, TRUE)""".stripMargin
+        .update
+        .run
     )
   }
 }

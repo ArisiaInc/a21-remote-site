@@ -2,8 +2,11 @@ package arisia.controllers
 
 import arisia.admin.AdminService
 import arisia.auth.LoginService
-import arisia.models.{LoginUser, Permissions}
+import arisia.models.{LoginName, LoginUser, Permissions}
 import play.api.mvc._
+import play.api.data._
+import play.api.data.Forms._
+import play.api.i18n.I18nSupport
 
 import scala.concurrent.{Future, ExecutionContext}
 
@@ -14,6 +17,7 @@ class AdminController (
 )(
   implicit ec: ExecutionContext
 ) extends BaseController
+  with I18nSupport
 {
   case class AdminInfo(request: Request[AnyContent], user: LoginUser, permissions: Permissions)
 
@@ -48,18 +52,47 @@ class AdminController (
    */
   def adminsOnly(f: AdminInfo => Result): EssentialAction = adminsOnlyAsync(info => Future.successful(f(info)))
 
+  def superAdminsOnlyAsync(f: AdminInfo => Future[Result]): EssentialAction = adminsOnlyAsync { info =>
+    if (info.permissions.superAdmin) {
+      f(info)
+    } else {
+      Future.successful(Forbidden("You need super-admin permission for this"))
+    }
+  }
+
   def home(): EssentialAction = adminsOnly { info =>
     Ok(arisia.views.html.adminHome(info.permissions))
   }
 
-  def manageAdmins(): EssentialAction = adminsOnlyAsync { info =>
-    if (info.permissions.superAdmin) {
-      adminService.getAdmins().map { admins =>
-        val sorted = admins.sortBy(_.v)
-        Ok(arisia.views.html.manageAdmins(sorted))
-      }
-    } else {
-      Future.successful(Forbidden("You don't have permissions to manage Admins"))
+  val newAdminForm = Form(
+    mapping(
+      "username" -> nonEmptyText
+    )(LoginName.apply)(LoginName.unapply)
+  )
+
+  private def showManageAdmins()(implicit request: Request[AnyContent]) = {
+    adminService.getAdmins().map { admins =>
+      val sorted = admins.sortBy(_.v)
+      Ok(arisia.views.html.manageAdmins(sorted, newAdminForm.fill(LoginName(""))))
     }
+  }
+
+  def manageAdmins(): EssentialAction = superAdminsOnlyAsync { info =>
+    implicit val request = info.request
+    showManageAdmins()
+  }
+
+  def addAdmin(): EssentialAction = superAdminsOnlyAsync { info =>
+    implicit val request = info.request
+
+    newAdminForm.bindFromRequest().fold(
+      formWithErrors => {
+        // TODO: actually display an error
+        Future.successful(Redirect(routes.AdminController.manageAdmins()))
+      },
+      loginName => {
+        adminService.addAdmin(loginName).flatMap(_ => showManageAdmins())
+      }
+    )
   }
 }
