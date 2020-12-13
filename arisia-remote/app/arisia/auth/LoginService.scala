@@ -21,7 +21,7 @@ trait LoginService {
   /**
    * Fetch any additional permissions that this person might have.
    */
-  def getPermissions(user: LoginUser): Future[Permissions]
+  def getPermissions(id: LoginId): Future[Permissions]
 }
 
 class LoginServiceImpl(
@@ -85,15 +85,15 @@ class LoginServiceImpl(
       }
   }
 
-  def fetchPermissionsQuery(user: LoginUser): ConnectionIO[Option[Permissions]] =
+  def fetchPermissionsQuery(id: LoginId): ConnectionIO[Option[Permissions]] =
     sql"""SELECT super_admin, admin, early_access
          |FROM permissions
-         |WHERE username = ${user.id.v}""".stripMargin
+         |WHERE username = ${id.v}""".stripMargin
     .query[Permissions]
     .option
 
-  def getPermissions(user: LoginUser): Future[Permissions] = {
-    dbService.run(fetchPermissionsQuery(user)).map {
+  def getPermissions(id: LoginId): Future[Permissions] = {
+    dbService.run(fetchPermissionsQuery(id)).map {
       // If we didn't find an entry in the database for this LoginUser, then they have empty Permissions:
       _.getOrElse(Permissions.empty)
     }

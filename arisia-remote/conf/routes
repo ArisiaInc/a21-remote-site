@@ -35,6 +35,7 @@ GET     /admin                       arisia.controllers.AdminController.home()
 GET     /admin/                      arisia.controllers.AdminController.home()
 GET     /admin/manageAdmins          arisia.controllers.AdminController.manageAdmins()
 POST    /admin/manageAdmins          arisia.controllers.AdminController.addAdmin()
+DELETE  /admin/manageAdmins/:name    arisia.controllers.AdminController.removeAdmin(name)
 
 # Zambia emulator, providing test data
 GET     /test/fakeschedule           arisia.controllers.FakeZambiaController.getSchedule()

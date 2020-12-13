@@ -2,7 +2,7 @@ package arisia.controllers
 
 import arisia.admin.AdminService
 import arisia.auth.LoginService
-import arisia.models.{LoginName, LoginUser, Permissions}
+import arisia.models.{LoginName, LoginUser, Permissions, LoginId}
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
@@ -33,7 +33,7 @@ class AdminController (
   def adminsOnlyAsync(f: AdminInfo => Future[Result]): EssentialAction = Action.async { implicit request =>
     LoginController.loggedInUser() match {
       case Some(user) => {
-        loginService.getPermissions(user).flatMap { permissions =>
+        loginService.getPermissions(user.id).flatMap { permissions =>
           if (permissions.admin) {
             // Okay, this is a person who is allowed to use the Admin UI
             val info = AdminInfo(request, user, permissions)
@@ -67,13 +67,13 @@ class AdminController (
   val newAdminForm = Form(
     mapping(
       "username" -> nonEmptyText
-    )(LoginName.apply)(LoginName.unapply)
+    )(LoginId.apply)(LoginId.unapply)
   )
 
   private def showManageAdmins()(implicit request: Request[AnyContent]) = {
     adminService.getAdmins().map { admins =>
       val sorted = admins.sortBy(_.v)
-      Ok(arisia.views.html.manageAdmins(sorted, newAdminForm.fill(LoginName(""))))
+      Ok(arisia.views.html.manageAdmins(sorted, newAdminForm.fill(LoginId(""))))
     }
   }
 
@@ -94,5 +94,18 @@ class AdminController (
         adminService.addAdmin(loginName).flatMap(_ => showManageAdmins())
       }
     )
+  }
+
+  def removeAdmin(idStr: String): EssentialAction = superAdminsOnlyAsync { info =>
+    val id = LoginId(idStr)
+    val fut = for {
+      targetPerms <- loginService.getPermissions(id)
+      // Safety check: you can't remove admin privs from the super-admins:
+      if (!targetPerms.superAdmin)
+      _ <- adminService.removeAdmin(id)
+    }
+      yield ()
+
+    fut.map(_ => Redirect(routes.AdminController.manageAdmins()))
   }
 }
