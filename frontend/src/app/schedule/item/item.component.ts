@@ -7,10 +7,10 @@ import { ProgramItem } from '@app/_models';
   styleUrls: ['./item.component.scss']
 })
 export class ItemComponent implements OnInit {
-  @Input() item: ProgramItem;
+  @Input() item!: ProgramItem;
   expanded: boolean = false;
-  track: string;
-  type: string;
+  track!: string;
+  type!: string;
 
   constructor() { }
 

@@ -9,7 +9,7 @@ import { of } from 'rxjs';
   providedIn: 'root'
 })
 export class AccountService {
-  public user: User;
+  public user?: User;
 
   constructor( private http: HttpClient,) { }
 

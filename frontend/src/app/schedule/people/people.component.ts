@@ -8,7 +8,7 @@ import { ScheduleService } from '@app/_services/schedule.service';
   styleUrls: ['./people.component.scss']
 })
 export class PeopleComponent implements OnInit {
-  people: ProgramPerson[];
+  people: ProgramPerson[] = [];
 
   constructor(
     private scheduleService: ScheduleService

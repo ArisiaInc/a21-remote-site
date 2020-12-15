@@ -9,7 +9,7 @@ import { User } from '@app/_models';
   styleUrls: ['./landing.component.scss']
 })
 export class LandingComponent implements OnInit {
-  public user: User;
+  public user?: User;
 
   constructor(
     private accountService: AccountService,

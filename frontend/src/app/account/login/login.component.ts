@@ -9,8 +9,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
-  returnUrl: string;
-  form: FormGroup;
+  returnUrl!: string;
+  form!: FormGroup;
   loading = false;
   submitted = false;
 
