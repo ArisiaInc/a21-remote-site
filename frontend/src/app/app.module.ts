@@ -10,6 +10,9 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ProgrammingComponent } from './programming/programming.component';
 import { GamingComponent } from './gaming/gaming.component';
 import { NavigationComponent } from './navigation/navigation.component';
+import { InfodeskComponent } from './infodesk/infodesk.component';
+import { SafetyComponent } from './safety/safety.component';
+import { IrtComponent } from './irt/irt.component';
 
 @NgModule({
   declarations: [
@@ -18,6 +21,9 @@ import { NavigationComponent } from './navigation/navigation.component';
     ProgrammingComponent,
     GamingComponent,
     NavigationComponent,
+    InfodeskComponent,
+    SafetyComponent,
+    IrtComponent,
   ],
   imports: [
     BrowserModule,
@@ -27,6 +33,7 @@ import { NavigationComponent } from './navigation/navigation.component';
     NgbModule,
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  entryComponents: [InfodeskComponent, SafetyComponent, IrtComponent]
 })
 export class AppModule { }
