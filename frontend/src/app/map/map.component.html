@@ -1,40 +1,41 @@
 <div class="map-container row">
     <div class="col-6 col-md-3">
         <div class="row">
-            <app-map-link routerLink="/artshow">Art Show</app-map-link>
+            <app-link routerLink="/artshow">Art Show</app-link>
         </div>
         <div class="row">
-            <app-map-link routerLink="/gaming">Gaming</app-map-link>
+            <app-link routerLink="/gaming">Gaming</app-link>
         </div>
         <div class="row">
-            <app-map-link routerLink="/dealers">Dealer's Room</app-map-link>
+            <app-link routerLink="/dealers">Dealer's Room</app-link>
         </div>
         <div class="row">
-            <app-map-link routerLink="/discord">Social Areas</app-map-link>
-        </div>
-    </div>
-    <div class="col-6 col-md-3">
-        <div class="row">
-            <app-map-link circle=true (click)="openInfodesk()">Info/Help</app-map-link>
-        </div>
-        <div class="row">
-            <app-map-link circle=true (click)="openSafety()">Safety</app-map-link>
-        </div>
-        <div class="row">
-            <app-map-link circle=true (click)="openIrt()">IRT</app-map-link>
+            <app-link routerLink="/discord">Social Areas</app-link>
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="row">
-            <app-map-link height=3 color="rgba(56, 167, 202, 0.25)">Costume Feed</app-map-link>
+            <app-link circle=true (click)="openInfodesk()">Info/Help</app-link>
+        </div>
+        <div class="row">
+            <app-link circle=true (click)="openSafety()">Safety</app-link>
+        </div>
+        <div class="row">
+            <app-link circle=true (click)="openIrt()">IRT</app-link>
+>>>>>>> main
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="row">
-            <app-map-link routerLink="/events">Performance Hall</app-map-link>
+            <app-link height=3 color="rgba(56, 167, 202, 0.25)">Costume Feed</app-link>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="row">
+            <app-link routerLink="/events">Performance Hall</app-link>
         </div>
         <div class="row">
-            <app-map-link routerLink="/programming">Programming</app-map-link>
+            <app-link routerLink="/programming">Programming</app-link>
         </div>
         <div class="row">
             <app-featured-events></app-featured-events>
