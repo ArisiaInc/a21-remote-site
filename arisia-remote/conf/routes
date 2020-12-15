@@ -30,6 +30,13 @@ POST    /api/logout                  arisia.controllers.LoginController.logout()
 # Fetches the current schedule
 GET     /api/schedule                arisia.controllers.ScheduleController.getSchedule()
 
+# Admin UI, separate from the attendee-facing site
+GET     /admin                       arisia.controllers.AdminController.home()
+GET     /admin/                      arisia.controllers.AdminController.home()
+GET     /admin/manageAdmins          arisia.controllers.AdminController.manageAdmins()
+POST    /admin/manageAdmins          arisia.controllers.AdminController.addAdmin()
+DELETE  /admin/manageAdmins/:name    arisia.controllers.AdminController.removeAdmin(name)
+
 # Zambia emulator, providing test data
 GET     /test/fakeschedule           arisia.controllers.FakeZambiaController.getSchedule()
 

@@ -1,6 +1,7 @@
 package arisia
 
 import akka.actor.ActorSystem
+import arisia.admin.{AdminService, AdminServiceImpl}
 import arisia.auth.{LoginService, LoginServiceImpl}
 import arisia.db.{DBServiceImpl, DBService}
 import com.softwaremill.macwire.wire
@@ -25,4 +26,5 @@ trait GeneralModule {
   lazy val dbService: DBService = wire[DBServiceImpl]
   lazy val ticker: Ticker = wire[TickerImpl]
   lazy val timerService: TimerService = wire[TimerServiceImpl]
+  lazy val adminService: AdminService = wire[AdminServiceImpl]
 }
