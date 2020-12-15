@@ -1,7 +1,30 @@
 <div class="modal-header">
-  <h4 class="modal-title">Incident Report Team</h4>
-    <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
-        <span aria-hidden="true">&times;</span>
-    </button>
+  <h4 class="modal-title">INCIDENT REPORT TEAM</h4>
 </div>
-<div class="modal-body">This is where IRT content goes.</div>
+<div class="modal-body">
+  <h1>
+    FIXME: Add missing links
+  </h1>
+  <p>
+    The IRT is specifically tasked with intaking and addressing any
+    reports of violation of the Code of Conduct or other member
+    behavior issues. At any time, you can: <br>
+
+    Talk to an IRT staff member on Discord.<br>
+
+    File a report using the online form.<br>
+
+    <a href="mailto:incidents@arisia.org">File a report at incidents@arisia.org.</a>
+  </p>
+  <p>
+    More information about what to expect when reporting is available here.
+  </p>
+  <p>
+    To get help with other issues or concerns, contact <span (click)="switchToSafety()" class="link-alike">Safety</span>.
+  </p>
+  </div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-dark" aria-label="Close" (click)="activeModal.dismiss('Close click')">
+    Close
+  </button>
+</div>

@@ -11,4 +11,8 @@ export class IrtComponent implements OnInit {
 
     ngOnInit(): void {
     }
+
+    switchToSafety(): void {
+	this.activeModal.close("openSafety");
+    }
 }

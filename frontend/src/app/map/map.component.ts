@@ -22,9 +22,11 @@ export class MapComponent implements OnInit {
 
     openSafety(): void {
 	const modalRef = this.modalService.open(SafetyComponent);
+	modalRef.closed.toPromise().then((result) => { if (result == "openIrt") { this.openIrt(); } });
     }
 
     openIrt(): void {
 	const modalRef = this.modalService.open(IrtComponent);
+	modalRef.closed.toPromise().then((result) => { if (result == "openSafety") { this.openSafety(); } });
     }
 }

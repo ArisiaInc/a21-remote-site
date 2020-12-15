@@ -11,4 +11,12 @@ export class SafetyComponent implements OnInit {
 
     ngOnInit(): void {
     }
+
+    switchToIrt(): void {
+	this.activeModal.close("openIrt");
+    }
+
+    openTheWatch(): void {
+	window.open("https://arisia.org/TheWatch", "_blank");
+    }
 }
