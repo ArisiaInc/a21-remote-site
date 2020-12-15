@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./breadcrumb.component.scss']
 })
 export class BreadcrumbComponent implements OnInit {
-  crumbs: {path: string, label: string}[];
+  crumbs!: {path: string, label: string}[];
   @Input() lobby = true;
 
   constructor(private router: Router) { }

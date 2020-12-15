@@ -1,6 +1,6 @@
 import { ProgramItem } from './program_item'
 
-export class ProgramPerson {
+export interface ProgramPerson {
     id: string;
     name: string[] | string;
     tags?: string[];

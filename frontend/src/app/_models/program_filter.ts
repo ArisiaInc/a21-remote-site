@@ -1,11 +1,11 @@
-export class ProgramFilter {
+export interface ProgramFilter {
     loc?: string[];
     date?: string[];
     tags?: string[];
     id?: string[];
 }
 
-export class MungedProgramFilter {
+export interface MungedProgramFilter {
     tags?: (_:string[]) => boolean;
     loc?: (_:string[]) => boolean;
     date?: (_:string) => boolean;

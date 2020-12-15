@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { ProgramItem } from '@app/_models';
+import { ProgramFilter, ProgramItem } from '@app/_models';
 import { ScheduleService } from '@app/_services/schedule.service';
 
 @Component({
@@ -20,7 +20,7 @@ export class ProgramComponent implements OnInit {
     });
   }
 
-  updateItems(filters) {
+  updateItems(filters: ProgramFilter) {
     console.log('updating')
     this.items = {}
     this.scheduleService.get_schedule(filters).subscribe(items => {
