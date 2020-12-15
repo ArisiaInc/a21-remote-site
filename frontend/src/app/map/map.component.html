@@ -15,13 +15,13 @@
     </div>
     <div class="col-6 col-md-3">
         <div class="row">
-            <app-map-link circle=true>Info/Help</app-map-link>
+            <app-map-link circle=true (click)="openInfodesk()">Info/Help</app-map-link>
         </div>
         <div class="row">
-            <app-map-link circle=true>Safety</app-map-link>
+            <app-map-link circle=true (click)="openSafety()">Safety</app-map-link>
         </div>
         <div class="row">
-            <app-map-link circle=true>IRT</app-map-link>
+            <app-map-link circle=true (click)="openIrt()">IRT</app-map-link>
         </div>
     </div>
     <div class="col-6 col-md-3">
