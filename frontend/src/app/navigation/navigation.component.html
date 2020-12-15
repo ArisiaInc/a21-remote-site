@@ -4,8 +4,8 @@
 </button>
 <div class="collapse navbar-collapse" id="navbarSupportedContent">
   <ul ngbNav [activeId]="route.fragment | async" class="navbar-nav me-auto mb-2 mb-md-0">
-    <li ngbNavItem="/"><a ngbNavLink routerLink="/">Landing</a></li>
-    <li ngbNavItem="map"><a ngbNavLink routerLink="/map">Map</a></li>
-    <li ngbNavItem="schedule"><a ngbNavLink routerLink="/schedule">Schedule</a></li>
+    <app-navigation-link title="Landing" link="/"></app-navigation-link>
+    <app-navigation-link title="Map" link="/map"></app-navigation-link>
+    <app-navigation-link title="Schedule" link="/schedule"></app-navigation-link>
   </ul>
 </div>
