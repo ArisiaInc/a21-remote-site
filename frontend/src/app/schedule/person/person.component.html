@@ -1,5 +1,8 @@
-<div class="person">
+<div *ngIf="person as person; else elseBlock" class="person">
     <h2>{{person.name}}</h2>
     <p>{{person.bio}}</p>
     <app-item-list [items]="person.items"></app-item-list>
 </div>
+<ng-template #elseBlock><div *ngIf="loading; else error">Loading.</div></ng-template>
+<ng-template #error>Internal Error</ng-template>
+

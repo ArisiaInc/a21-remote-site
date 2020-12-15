@@ -1,5 +1,14 @@
-<ul ngbNav>
-    <li ngbNavItem><a ngbNavLink routerLink="/">Landing</a></li>
-    <li ngbNavItem><a ngbNavLink routerLink="/map">Map</a></li>
-    <li ngbNavItem><a ngbNavLink routerLink="/schedule">Schedule</a></li>
-</ul>
+<div class="navbar-brand">Arisia 2021</div>
+<button class="navbar-toggler" type="button"
+	data-toggle="collapse" data-target="#navbarContent"
+	aria-controls="navbarContent" aria-expanded="false"
+	aria-label="Toggle navigation" id="navbar-toggle">
+  <span class="navbar-toggler-icon"></span>
+</button>
+<div class="collapse navbar-collapse" id="navbarContent">
+  <ul ngbNav [activeId]="route.fragment | async" class="navbar-nav me-auto mb-2 mb-md-0">
+    <app-navigation-link title="Landing" link="/"></app-navigation-link>
+    <app-navigation-link title="Map" link="/map"></app-navigation-link>
+    <app-navigation-link title="Schedule" link="/schedule"></app-navigation-link>
+  </ul>
+</div>

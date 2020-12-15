@@ -22,20 +22,33 @@ export class ScheduleService {
   get_data() : Observable<ScheduleData>{
 
     // real is currently broken, we'll start with fake
-    return of<ScheduleData>({program, people});
+    return of<ScheduleData>({program: (program as ProgramItem[]), people: (people as ProgramPerson[])});
     // this is real
     // return this.http.get<ScheduleData>(`${environment.backend}/schedule`);
   }
 
   get_schedule(filters: ProgramFilter = {}): Observable<[string, string, ProgramItem[]]> {
-    const munged_filters: { tags?: (_:string[]) => boolean, loc?: (_:string[]) => boolean, date?: (_:string) => boolean } = {}
-    Object.keys(filters).forEach(f => {
-        munged_filters[f] = pf => filters[f].some(f => pf.includes(f) || pf === f)
-    });
+    const munged_filters: ((programItem: ProgramItem) => boolean)[] = [];
+    if (filters.tags && filters.tags.length > 0) {
+      const tags = filters.tags;
+      munged_filters.push(programItem => tags.some(filterString => programItem.tags.includes(filterString)))
+    }
+    if (filters.loc && filters.loc.length > 0) {
+      const loc = filters.loc;
+      munged_filters.push(programItem => loc.some(filterString => programItem.loc.includes(filterString)))
+    }
+    if (filters.date && filters.date.length > 0) {
+      const date = filters.date;
+      munged_filters.push(programItem => date.some(filterString => programItem.date.includes(filterString)))
+    }
+    if (filters.id && filters.id.length > 0) {
+      const id = filters.id;
+      munged_filters.push(programItem => id.some(filterString => programItem.id.includes(filterString)))
+    }
     return this.get_data().pipe(
       pluck('program'),
       flatMap(x => of(...x)),
-      filter(p => Object.keys(munged_filters).every(k => munged_filters[k](p[k]))),
+      filter(p => munged_filters.every(k => k(p))),
       groupBy(p => `${p.date}~${p.time}`),
       mergeMap(group => zip(of(group.key.split('~')[0]), of(group.key.split('~')[1]), group.pipe(toArray()))),
     );
@@ -47,7 +60,7 @@ export class ScheduleService {
     );
   }
 
-  get_person(id): Observable<ProgramPerson> {
+  get_person(id:string): Observable<ProgramPerson | undefined> {
     return this.get_people().pipe(
       map(people => people.find(p => p.id === id)),
     );

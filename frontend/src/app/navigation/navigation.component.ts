@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Component, OnInit, HostBinding } from '@angular/core';
+
 
 @Component({
   selector: 'app-navigation',
@@ -6,8 +8,9 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./navigation.component.scss']
 })
 export class NavigationComponent implements OnInit {
+  @HostBinding('class') class = 'navbar navbar-expand-md navbar-dark bg-primary row';
 
-  constructor() { }
+  constructor(public route: ActivatedRoute) { }
 
   ngOnInit(): void {
   }

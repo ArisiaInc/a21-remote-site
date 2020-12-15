@@ -8,7 +8,7 @@ import { ProgramItem } from '@app/_models';
   styleUrls: ['./featured-events.component.scss']
 })
 export class FeaturedEventsComponent implements OnInit {
-  items: ProgramItem[];
+  items: ProgramItem[] = [];
 
   constructor( private scheduleService: ScheduleService) { }
 
