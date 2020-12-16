@@ -10,6 +10,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ProgrammingComponent } from './programming/programming.component';
 import { GamingComponent } from './gaming/gaming.component';
 import { NavigationComponent } from './navigation/navigation.component';
+import { NavigationLinkComponent } from './navigation/navigation-link/navigation-link.component';
 import { InfodeskComponent } from './infodesk/infodesk.component';
 import { SafetyComponent } from './safety/safety.component';
 import { IrtComponent } from './irt/irt.component';
@@ -21,6 +22,7 @@ import { IrtComponent } from './irt/irt.component';
     ProgrammingComponent,
     GamingComponent,
     NavigationComponent,
+    NavigationLinkComponent,
     InfodeskComponent,
     SafetyComponent,
     IrtComponent,
