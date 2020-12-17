@@ -22,6 +22,8 @@ class LoginController (
 
   lazy val earlyAccessOnly: Boolean = config.get[Boolean]("arisia.early.access.only")
 
+  lazy val allowedLogins: Seq[String] = config.get[Seq[String]]("arisia.allow.logins")
+
   def me(): EssentialAction = Action { implicit request =>
     request.session.get(userKey) match {
       case Some(jsonStr) => Ok(jsonStr)
@@ -38,8 +40,9 @@ class LoginController (
           loginService.getPermissions(user.id).map { permissions =>
             val allowed =
               if (earlyAccessOnly)
-              // We're in early-access mode, so the general public is *not* allowed in:
-              permissions.superAdmin || permissions.admin || permissions.earlyAccess
+              // We're in early-access mode, so the general public is *not* allowed in
+              // In a dev environment, add your login to `arisia.allow.logins` in order to permit your own login:
+              permissions.superAdmin || permissions.admin || permissions.earlyAccess || allowedLogins.contains(user.id.v)
                 else
                 true
 
