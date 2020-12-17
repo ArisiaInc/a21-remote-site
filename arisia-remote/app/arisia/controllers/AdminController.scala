@@ -66,7 +66,7 @@ class AdminController (
     Ok(arisia.views.html.adminHome(info.permissions))
   }
 
-  val newAdminForm = Form(
+  val usernameForm = Form(
     mapping(
       "username" -> nonEmptyText
     )(LoginId.apply)(LoginId.unapply)
@@ -75,7 +75,7 @@ class AdminController (
   private def showManageAdmins()(implicit request: Request[AnyContent]) = {
     adminService.getAdmins().map { admins =>
       val sorted = admins.sortBy(_.v)
-      Ok(arisia.views.html.manageAdmins(sorted, newAdminForm.fill(LoginId(""))))
+      Ok(arisia.views.html.manageAdmins(sorted, usernameForm.fill(LoginId(""))))
     }
   }
 
@@ -87,7 +87,7 @@ class AdminController (
   def addAdmin(): EssentialAction = superAdminsOnlyAsync { info =>
     implicit val request = info.request
 
-    newAdminForm.bindFromRequest().fold(
+    usernameForm.bindFromRequest().fold(
       formWithErrors => {
         // TODO: actually display the error!
         Future.successful(Redirect(routes.AdminController.manageAdmins()))

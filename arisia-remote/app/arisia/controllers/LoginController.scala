@@ -2,6 +2,7 @@ package arisia.controllers
 
 import arisia.auth.LoginService
 import arisia.models.{LoginRequest, LoginUser}
+import play.api.Configuration
 import play.api.http._
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -10,6 +11,7 @@ import scala.concurrent.{Future, ExecutionContext}
 
 class LoginController (
   val controllerComponents: ControllerComponents,
+  config: Configuration,
   loginService: LoginService
 )(
   implicit ec: ExecutionContext
@@ -17,6 +19,8 @@ class LoginController (
   extends BaseController
 {
   import LoginController._
+
+  lazy val earlyAccessOnly: Boolean = config.get[Boolean]("arisia.early.access.only")
 
   def me(): EssentialAction = Action { implicit request =>
     request.session.get(userKey) match {
@@ -28,15 +32,28 @@ class LoginController (
 
   def login(): EssentialAction = Action.async(controllerComponents.parsers.tolerantJson[LoginRequest]) { implicit request =>
     val req = request.body
-    loginService.checkLogin(req.id, req.password).map {
+    loginService.checkLogin(req.id, req.password).flatMap {
       _ match {
         case Some(user) => {
-          val json = Json.toJson(user)
-          val jsStr = Json.stringify(json)
-          Ok(jsStr).withSession(userKey -> jsStr).as(JSON)
+          loginService.getPermissions(user.id).map { permissions =>
+            val allowed =
+              if (earlyAccessOnly)
+              // We're in early-access mode, so the general public is *not* allowed in:
+              permissions.superAdmin || permissions.admin || permissions.earlyAccess
+                else
+                true
+
+            if (allowed) {
+              val json = Json.toJson(user)
+              val jsStr = Json.stringify(json)
+              Ok(jsStr).withSession(userKey -> jsStr).as(JSON)
+            } else {
+              Unauthorized("""{"success":"false", "message":"Sorry - you aren't allowed into this site yet. Talk to Remote if you believe you should have access."}""")
+            }
+          }
         }
         case None => {
-          Unauthorized("""{"success":"false", "message":"Put a real error message here"}""")
+          Future.successful(Unauthorized("""{"success":"false", "message":"Sorry - that isn't a valid username and password"}"""))
         }
       }
     }
