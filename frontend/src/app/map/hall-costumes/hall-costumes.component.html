@@ -1,12 +1,13 @@
 <ngb-carousel #carousel class="hall-costumes-carousel" *ngIf="imageBuffer.length > 0"
-              [showNavigationArrows]="true" [showNavigationIndicators]="false" [pauseOnHover]="false" [pauseOnFocus]="false"
+              [showNavigationArrows]="true" [showNavigationIndicators]="false"
+              [pauseOnHover]="false" [pauseOnFocus]="false" [interval]="20000"
               (slid)="handleSlidEvent($event)">
   <ng-template ngbSlide *ngFor="let image of imageBuffer">
     <div class="image-wrapper">
       <img class="image" [src]="image.src" [alt]="image.caption">
     </div>
-    <div class="carousel-caption">
-      <p>{{image.caption}}</p>
+    <div class="carousel-caption hall-costume-caption">
+      {{image.caption}}
     </div>
   </ng-template>
 </ngb-carousel>

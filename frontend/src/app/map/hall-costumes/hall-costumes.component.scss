@@ -24,10 +24,15 @@
     overflow: hidden;
 }
 
+.hall-costume-caption {
+    bottom: 1.5rem;
+    padding: 0;
+}
+
 .playpause {
     position: absolute;
 
-    bottom: 20px;
+    bottom: 1.5rem;
     right: 8px;
 
     height: 32px;
@@ -38,9 +43,9 @@
     z-index: 10;
     cursor: pointer;
 
-    opacity: 0.5;
+    opacity: 0.7;
     transition: opacity 0.15s ease;
 }
 .playpause:hover, .playpause:focus {
-    opacity: 0.9;
+    opacity: 1;
 }
