@@ -36,12 +36,12 @@ GET     /admin/                      arisia.controllers.AdminController.home()
 GET     /admin/manageAdmins          arisia.controllers.AdminController.manageAdmins()
 POST    /admin/manageAdmins          arisia.controllers.AdminController.addAdmin()
 DELETE  /admin/manageAdmins/:name    arisia.controllers.AdminController.removeAdmin(name)
+# Note the non-standard path, which is configured in application.conf, so that frontend
+# can own /assets
+GET     /admin/assets/*file          controllers.Assets.versioned(path="/public", file: Asset)
 
 # Zambia emulator, providing test data
 GET     /test/fakeschedule           arisia.controllers.FakeZambiaController.getSchedule()
-
-# Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file                controllers.Assets.versioned(path="/public", file: Asset)
 
 # Fetch frontend assets
 GET     /*file                       arisia.controllers.FrontendController.assetOrDefault(file)
