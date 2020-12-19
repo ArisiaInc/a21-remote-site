@@ -22,12 +22,13 @@ $('#remove-admin-button').click(function(event) {
   });
 });
 
-$('#remove-early-access-button').click(function(event) {
-  var button = $('#remove-early-access-button'); // Button that triggered the modal
+$('#remove-button').click(function(event) {
+  var button = $('#remove-button'); // Button that triggered the modal
   var who = button.data('who');
+  var baseUrl = button.data('baseurl')
   console.log("The person we are removing is " + who);
   $.ajax({
-    url: '/admin/manageEarlyAccess/' + who,
+    url: baseUrl + who,
     type: 'DELETE',
     complete: function() {
       var url = window.location.href;
