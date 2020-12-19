@@ -39,13 +39,13 @@ class LoginController (
         case Some(user) => {
           loginService.getPermissions(user.id).map { permissions =>
             val allowed =
-//              if (earlyAccessOnly) {
-//                // We're in early-access mode, so the general public is *not* allowed in
-//                // In a dev environment, add your login to `arisia.allow.logins` in order to permit your own login:
-//                permissions.superAdmin || permissions.admin || permissions.earlyAccess || allowedLogins.contains(user.id.v)
-//              } else {
+              if (earlyAccessOnly) {
+                // We're in early-access mode, so the general public is *not* allowed in
+                // In a dev environment, add your login to `arisia.allow.logins` in order to permit your own login:
+                permissions.superAdmin || permissions.admin || permissions.earlyAccess || allowedLogins.contains(user.id.v)
+              } else {
                 true
-//              }
+              }
 
             if (allowed) {
               val json = Json.toJson(user)

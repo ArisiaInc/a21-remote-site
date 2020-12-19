@@ -4,6 +4,7 @@ import arisia.db.DBService
 import arisia.models.{LoginName, LoginId}
 import doobie._
 import doobie.implicits._
+import doobie.util.fragment
 import play.api.Logging
 
 import scala.concurrent.{Future, ExecutionContext}
@@ -35,10 +36,13 @@ class AdminServiceImpl(
 ) extends AdminService with Logging {
 
   def getAdmins(): Future[List[LoginId]] = {
+    val column = Fragment.const("admin")
+    val query =
+      fr"""SELECT username
+          FROM permissions
+          WHERE""" ++ column ++ fr"= TRUE"
     dbService.run(
-      sql"""SELECT username
-           |FROM permissions
-           |WHERE admin = TRUE""".stripMargin
+      query
         .query[LoginId]
         .to[List]
     )
@@ -49,14 +53,15 @@ class AdminServiceImpl(
     // This call, like all of these permission-sets, needs to be structured as an upsert, since we don't
     // know whether the username already exists in the table or not. Note that this upsert syntax is
     // Postgres-specific.
-    // TODO: refactor this call into Doobie Fragments, so that we can reuse the same upsert logic for all
-    // of the different flags.
+    val column = Fragment.const("admin")
+    val query =
+      fr"""INSERT INTO permissions
+           (username, """ ++ column ++ fr""")
+           VALUES (${id.v}, TRUE)
+           ON CONFLICT (username)
+           DO UPDATE SET""" ++ column ++ fr"= TRUE"
     dbService.run(
-      sql"""INSERT INTO permissions
-           |(username, admin)
-           |VALUES (${id.v}, TRUE)
-           |ON CONFLICT (username)
-           |DO UPDATE SET admin = TRUE""".stripMargin
+      query
         .update
         .run
     )
@@ -64,10 +69,13 @@ class AdminServiceImpl(
 
   def removeAdmin(id: LoginId): Future[Int] = {
     logger.info(s"Removing ${id.v} as an Admin")
+    val column = Fragment.const("admin")
+    val query =
+      fr"""UPDATE permissions
+           SET""" ++ column ++ fr"""= FALSE
+           WHERE username = ${id.v}"""
     dbService.run(
-      sql"""UPDATE permissions
-           |SET admin = FALSE
-           |WHERE username = ${id.v}""".stripMargin
+      query
         .update
         .run
     )
