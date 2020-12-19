@@ -133,10 +133,10 @@ class AdminController (
    */
 
   private def showManageAdmins()(implicit request: Request[AnyContent]) = {
-    adminService.getAdmins().map { admins =>
-      val sorted = admins.sortBy(_.v)
-      Ok(arisia.views.html.manageAdmins(sorted, usernameForm.fill(LoginId(""))))
-    }
+    showPermissionMembers(
+      _.getAdmins(),
+      arisia.views.html.manageAdmins(_, usernameForm.fill(LoginId("")))
+    )
   }
 
   def manageAdmins(): EssentialAction = superAdminsOnlyAsync { info =>
@@ -144,31 +144,16 @@ class AdminController (
     showManageAdmins()
   }
 
-  def addAdmin(): EssentialAction = superAdminsOnlyAsync { info =>
-    implicit val request = info.request
-
-    usernameForm.bindFromRequest().fold(
-      formWithErrors => {
-        // TODO: actually display the error!
-        Future.successful(Redirect(routes.AdminController.manageAdmins()))
-      },
-      loginName => {
-        adminService.addAdmin(loginName).flatMap(_ => showManageAdmins())
-      }
+  def addAdmin(): EssentialAction = superAdminsOnlyAsync {
+    addPermission(
+      _.addAdmin(_),
+      showManageAdmins()(_),
+      routes.AdminController.manageAdmins()
     )
   }
 
-  def removeAdmin(idStr: String): EssentialAction = superAdminsOnlyAsync { info =>
-    val id = LoginId(idStr)
-    val fut = for {
-      targetPerms <- loginService.getPermissions(id)
-      // Safety check: you can't remove admin privs from the super-admins:
-      if (!targetPerms.superAdmin)
-      _ <- adminService.removeAdmin(id)
-    }
-      yield ()
-
-    fut.map(_ => Redirect(routes.AdminController.manageAdmins()))
+  def removeAdmin(idStr: String): EssentialAction = superAdminsOnlyAsync {
+    removePermission(idStr, _.removeAdmin(_), routes.AdminController.manageAdmins())
   }
 
   /* ******************
