@@ -21,3 +21,17 @@ $('#remove-admin-button').click(function(event) {
     }
   });
 });
+
+$('#remove-early-access-button').click(function(event) {
+  var button = $('#remove-early-access-button'); // Button that triggered the modal
+  var who = button.data('who');
+  console.log("The person we are removing is " + who);
+  $.ajax({
+    url: '/admin/manageEarlyAccess/' + who,
+    type: 'DELETE',
+    complete: function() {
+      var url = window.location.href;
+      window.location.href = url;
+    }
+  });
+});

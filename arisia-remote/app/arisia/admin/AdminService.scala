@@ -1,10 +1,9 @@
 package arisia.admin
 
 import arisia.db.DBService
-import arisia.models.{LoginName, LoginId}
+import arisia.models.LoginId
 import doobie._
 import doobie.implicits._
-import doobie.util.fragment
 import play.api.Logging
 
 import scala.concurrent.{Future, ExecutionContext}
@@ -27,6 +26,10 @@ trait AdminService {
    * Take away this person's Admin rights.
    */
   def removeAdmin(name: LoginId): Future[Int]
+
+  def getEarlyAccess(): Future[List[LoginId]]
+  def addEarlyAccess(id: LoginId): Future[Int]
+  def removeEarlyAccess(id: LoginId): Future[Int]
 }
 
 class AdminServiceImpl(
@@ -82,8 +85,18 @@ class AdminServiceImpl(
     }
   }
 
+  // TODO: in a perfect world, we would do something more typeclass-based, to remove the boilerplate of all these
+  // distinct calls. But I don't have time right now to work out all the interlocking classes needed to make it
+  // properly strongly-typed all the way down.
+
   lazy val admins = new PermissionColumn("admin")
   def getAdmins(): Future[List[LoginId]] = admins.getMembers()
   def addAdmin(id: LoginId): Future[Int] = admins.addMember(id)
   def removeAdmin(id: LoginId): Future[Int] = admins.removeMember(id)
+
+  lazy val earlyAccess = new PermissionColumn("early_access")
+  def getEarlyAccess(): Future[List[LoginId]] = earlyAccess.getMembers()
+  def addEarlyAccess(id: LoginId): Future[Int] = earlyAccess.addMember(id)
+  def removeEarlyAccess(id: LoginId): Future[Int] = earlyAccess.removeMember(id)
+
 }

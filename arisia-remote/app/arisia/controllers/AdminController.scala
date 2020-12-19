@@ -110,4 +110,45 @@ class AdminController (
 
     fut.map(_ => Redirect(routes.AdminController.manageAdmins()))
   }
+
+  // TODO: the boilerplate, it burns!!! Figure out how to DRY up these various permission management pages:
+
+  private def showManageEarlyAccess()(implicit request: Request[AnyContent]) = {
+    adminService.getEarlyAccess().map { members =>
+      val sorted = members.sortBy(_.v)
+      Ok(arisia.views.html.manageEarlyAccess(sorted, usernameForm.fill(LoginId(""))))
+    }
+  }
+
+  def manageEarlyAccess(): EssentialAction = adminsOnlyAsync { info =>
+    implicit val request = info.request
+    showManageEarlyAccess()
+  }
+
+  def addEarlyAccess(): EssentialAction = adminsOnlyAsync { info =>
+    implicit val request = info.request
+
+    usernameForm.bindFromRequest().fold(
+      formWithErrors => {
+        // TODO: actually display the error!
+        Future.successful(Redirect(routes.AdminController.manageEarlyAccess()))
+      },
+      loginName => {
+        adminService.addEarlyAccess(loginName).flatMap(_ => showManageEarlyAccess())
+      }
+    )
+  }
+
+  def removeEarlyAccess(idStr: String): EssentialAction = adminsOnlyAsync { info =>
+    val id = LoginId(idStr)
+    val fut = for {
+      targetPerms <- loginService.getPermissions(id)
+      // Safety check: you can't remove privs from the super-admins:
+      if (!targetPerms.superAdmin)
+      _ <- adminService.removeEarlyAccess(id)
+    }
+      yield ()
+
+    fut.map(_ => Redirect(routes.AdminController.manageEarlyAccess()))
+  }
 }
