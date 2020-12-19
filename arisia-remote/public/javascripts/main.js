@@ -8,20 +8,6 @@ $('.confirmModal').on('show.bs.modal', function (event) {
   modal.find('.confirmed-button').data('who', recipient)
 })
 
-$('#remove-admin-button').click(function(event) {
-  var button = $('#remove-admin-button'); // Button that triggered the modal
-  var who = button.data('who');
-  console.log("The person we are removing is " + who);
-  $.ajax({
-    url: '/admin/manageAdmins/' + who,
-    type: 'DELETE',
-    complete: function() {
-      var url = window.location.href;
-      window.location.href = url;
-    }
-  });
-});
-
 $('#remove-button').click(function(event) {
   var button = $('#remove-button'); // Button that triggered the modal
   var who = button.data('who');
