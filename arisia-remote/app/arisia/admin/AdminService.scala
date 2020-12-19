@@ -35,49 +35,55 @@ class AdminServiceImpl(
   implicit ec: ExecutionContext
 ) extends AdminService with Logging {
 
-  def getAdmins(): Future[List[LoginId]] = {
-    val column = Fragment.const("admin")
-    val query =
-      fr"""SELECT username
+  class PermissionColumn(name: String) {
+    val column = Fragment.const(name)
+
+    def getMembers(): Future[List[LoginId]] = {
+      val query =
+        fr"""SELECT username
           FROM permissions
           WHERE""" ++ column ++ fr"= TRUE"
-    dbService.run(
-      query
-        .query[LoginId]
-        .to[List]
-    )
-  }
+      dbService.run(
+        query
+          .query[LoginId]
+          .to[List]
+      )
+    }
 
-  def addAdmin(id: LoginId): Future[Int] = {
-    logger.info(s"Adding ${id.v} as an Admin")
-    // This call, like all of these permission-sets, needs to be structured as an upsert, since we don't
-    // know whether the username already exists in the table or not. Note that this upsert syntax is
-    // Postgres-specific.
-    val column = Fragment.const("admin")
-    val query =
-      fr"""INSERT INTO permissions
+    def addMember(id: LoginId): Future[Int] = {
+      logger.info(s"Adding ${id.v} as a $name")
+      // This call needs to be structured as an upsert, since we don't
+      // know whether the username already exists in the table or not. Note that this upsert syntax is
+      // Postgres-specific.
+      val query =
+        fr"""INSERT INTO permissions
            (username, """ ++ column ++ fr""")
            VALUES (${id.v}, TRUE)
            ON CONFLICT (username)
            DO UPDATE SET""" ++ column ++ fr"= TRUE"
-    dbService.run(
-      query
-        .update
-        .run
-    )
-  }
+      dbService.run(
+        query
+          .update
+          .run
+      )
+    }
 
-  def removeAdmin(id: LoginId): Future[Int] = {
-    logger.info(s"Removing ${id.v} as an Admin")
-    val column = Fragment.const("admin")
-    val query =
-      fr"""UPDATE permissions
+    def removeMember(id: LoginId): Future[Int] = {
+      logger.info(s"Removing ${id.v} as a $name")
+      val query =
+        fr"""UPDATE permissions
            SET""" ++ column ++ fr"""= FALSE
            WHERE username = ${id.v}"""
-    dbService.run(
-      query
-        .update
-        .run
-    )
+      dbService.run(
+        query
+          .update
+          .run
+      )
+    }
   }
+
+  lazy val admins = new PermissionColumn("admin")
+  def getAdmins(): Future[List[LoginId]] = admins.getMembers()
+  def addAdmin(id: LoginId): Future[Int] = admins.addMember(id)
+  def removeAdmin(id: LoginId): Future[Int] = admins.removeMember(id)
 }
