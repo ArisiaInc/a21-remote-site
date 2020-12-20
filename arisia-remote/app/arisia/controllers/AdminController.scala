@@ -55,6 +55,9 @@ class AdminController (
    */
   def adminsOnly(f: AdminInfo => Result): EssentialAction = adminsOnlyAsync(info => Future.successful(f(info)))
 
+  /**
+   * Enhanced version of adminsOnlyAsync, for stuff that only super-admins can do.
+   */
   def superAdminsOnlyAsync(f: AdminInfo => Future[Result]): EssentialAction = adminsOnlyAsync { info =>
     if (info.permissions.superAdmin) {
       f(info)
