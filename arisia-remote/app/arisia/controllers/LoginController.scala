@@ -1,7 +1,7 @@
 package arisia.controllers
 
 import arisia.auth.LoginService
-import arisia.models.{LoginRequest, LoginUser}
+import arisia.models.{LoginRequest, LoginUser, LoginId}
 import play.api.Configuration
 import play.api.http._
 import play.api.libs.json.Json
@@ -22,7 +22,8 @@ class LoginController (
 
   lazy val earlyAccessOnly: Boolean = config.get[Boolean]("arisia.early.access.only")
 
-  lazy val allowedLogins: Seq[String] = config.get[Seq[String]]("arisia.allow.logins")
+  lazy val allowedLogins: Seq[LoginId] =
+    config.get[Seq[String]]("arisia.allow.logins").map(LoginId(_))
 
   def me(): EssentialAction = Action { implicit request =>
     request.session.get(userKey) match {
@@ -42,7 +43,7 @@ class LoginController (
               if (earlyAccessOnly) {
                 // We're in early-access mode, so the general public is *not* allowed in
                 // In a dev environment, add your login to `arisia.allow.logins` in order to permit your own login:
-                permissions.superAdmin || permissions.admin || permissions.earlyAccess || allowedLogins.contains(user.id.v)
+                permissions.superAdmin || permissions.admin || permissions.earlyAccess || allowedLogins.contains(user.id)
               } else {
                 true
               }
