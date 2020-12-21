@@ -7,6 +7,7 @@ import arisia.models.Schedule
 import doobie._
 import doobie.implicits._
 import play.api.Logging
+import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.{Future, ExecutionContext}
@@ -30,32 +31,35 @@ class ScheduleServiceImpl(
   implicit ec: ExecutionContext
 ) extends ScheduleService with Logging {
 
-  case class ScheduleCache(jsonp: String) {
-    lazy val parsed = Schedule.parseKonOpas(jsonp)
+  case class ScheduleCache(jsonStr: String) {
+    lazy val parsed: Schedule = {
+      // TODO: make this cope with failure!
+      Json.parse(jsonStr).as[Schedule]
+    }
   }
 
   // The currently-cached schedule, to serve out whenever the frontend needs it.
   // The initial value is just there so that we have something valid while we wait to load the initial value
   // from the DB
   val _theSchedule: AtomicReference[ScheduleCache] =
-    new AtomicReference(ScheduleCache("var program = []; var people = []"))
+    new AtomicReference(ScheduleCache("{\"program\":[], \"people\": []}"))
 
-  final val scheduleRowName: String = "scheduleJsonp"
+  final val scheduleRowName: String = "scheduleJson"
 
   val loadInitialScheduleQuery: ConnectionIO[String] =
     sql"SELECT value from text_files WHERE name = $scheduleRowName"
     .query[String]
     .unique
 
-  def updateScheduleStatement(scheduleJsonp: String): ConnectionIO[Int] =
-    sql"UPDATE text_files set value = $scheduleJsonp where name = $scheduleRowName"
+  def updateScheduleStatement(scheduleJson: String): ConnectionIO[Int] =
+    sql"UPDATE text_files set value = $scheduleJson where name = $scheduleRowName"
     .update
     .run
 
   // At boot time, load the last-known version of the schedule:
-  dbService.run(loadInitialScheduleQuery).map { jsonp =>
-    logger.info(s"Schedule loaded from DB -- size ${jsonp.length}")
-    _theSchedule.set(ScheduleCache(jsonp))
+  dbService.run(loadInitialScheduleQuery).map { json =>
+    logger.info(s"Schedule loaded from DB -- size ${json.length}")
+    _theSchedule.set(ScheduleCache(json))
   }
 
   /**
@@ -69,22 +73,22 @@ class ScheduleServiceImpl(
     ws.url("http://localhost:9000/test/fakeschedule")
       .get()
       .map { response =>
-        val jsonp = response.body
-        if (jsonp == _theSchedule.get.jsonp) {
+        val json = response.body
+        if (json == _theSchedule.get.jsonStr) {
           logger.info(s"Refresh -- schedule hasn't changed")
         } else {
-          logger.info(s"Refreshed the schedule from Zambia -- size ${jsonp.length}")
+          logger.info(s"Refreshed the schedule from Zambia -- size ${json.length}")
           // TODO: don't actually set the cache until we validate that the jsonp validates:
-          val cacheable = ScheduleCache(jsonp)
+          val cacheable = ScheduleCache(json)
           try {
             // For the moment, this can throw Exceptions.
             // TODO: make this pathway non-Exception-centric.
             val parsed = cacheable.parsed
             // Save it in the DB:
-            dbService.run(updateScheduleStatement(jsonp)).map { _ =>
+            dbService.run(updateScheduleStatement(json)).map { _ =>
               logger.info(s"Saved new Schedule in the database")
               // Once that's done, cache it:
-              _theSchedule.set(ScheduleCache(jsonp))
+              _theSchedule.set(ScheduleCache(json))
             }
           } catch {
             case ex: Exception => {
