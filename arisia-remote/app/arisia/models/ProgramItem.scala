@@ -1,8 +1,7 @@
 package arisia.models
 
-import java.text.{DateFormat, SimpleDateFormat}
-import java.time.LocalTime
-import java.util.Date
+import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, LocalTime}
 
 import arisia.util._
 import play.api.libs.json._
@@ -34,11 +33,11 @@ object ProgramItemPerson {
 case class ProgramItemDesc(v: String) extends StdString
 object ProgramItemDesc extends StdStringUtils(new ProgramItemDesc(_))
 
-case class ProgramItemDate(d: Date)
+case class ProgramItemDate(d: LocalDate)
 object ProgramItemDate {
-  val dateFormat: DateFormat = new SimpleDateFormat("yyyy-MM-dd")
+  val dateFormat: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
 
-  implicit val reads: Reads[ProgramItemDate] = JsUtils.stringReads(str => ProgramItemDate(dateFormat.parse(str)))
+  implicit val reads: Reads[ProgramItemDate] = JsUtils.stringReads(str => ProgramItemDate(LocalDate.parse(str, dateFormat)))
 
   implicit val writes: Writes[ProgramItemDate] = new Writes[ProgramItemDate] {
     override def writes(o: ProgramItemDate): JsValue = JsString(dateFormat.format(o.d))
