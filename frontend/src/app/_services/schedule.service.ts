@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, zip, OperatorFunction } from 'rxjs';
 import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck, every } from 'rxjs/operators';
-import { ProgramItem, ProgramPerson, ProgramFilter } from '@app/_models';
+import { ProgramItem, ProgramPerson, ProgramFilter, Room } from '@app/_models';
 
 import { program, people } from "test_data/konopas"
 import { HttpClient } from '@angular/common/http';
@@ -76,6 +76,32 @@ export class ScheduleService {
         filter(p => ids.includes(p.id)),
         toArray()
       )),
+    );
+  }
+
+  get_rooms(): Observable<Room[]> {
+    // Fake data
+    const currentEvent = {
+      id: 'a',
+      title: 'Panel XYZ',
+      people: [{name: 'Panelist A'}, {name: 'Panelist B'}, {name: 'Panelist C'}, {name: 'Panelist D'}, {name: ['Panelist E', 'Other name']}],
+      desc: 'This is the panel description. It would be longer and more interesting in real life, and hopefully get you excited about the topic being discussed! I’m going to write a couple more sentences so we get a more realistic sense of how much space this might take up. The quick brown fox jumps over the lazy dog. Bowties are cool. Live long and prosper. May the Force be with you.',
+      tags: [],
+      date: '',
+      time: '',
+      mins: '',
+      loc: [],
+    };
+    return of([new Room('room_1', 'Room 1', currentEvent),
+               new Room('room_2', 'Room 2', currentEvent),
+               new Room('room_3', 'Room 3', currentEvent),
+               new Room('room_4', 'Room 4', currentEvent),
+               new Room('room_5', 'Room 5', currentEvent)]);
+  }
+
+  get_room(id: string): Observable<Room | undefined> {
+    return this.get_rooms().pipe(
+      map(rooms => rooms.find(room => room.id === id)),
     );
   }
 }
