@@ -1,0 +1,14 @@
+@(people: List[arisia.models.LoginId], newPersonForm: Form[arisia.models.LoginId])(implicit request: RequestHeader, messagesProvider: MessagesProvider)
+
+@import helper._
+
+@managePermissionTemplate(
+  people,
+  newPersonForm,
+  "Early Access",
+  "/admin/manageEarlyAccess/"
+) {
+  @helper.form(action = arisia.controllers.routes.AdminController.addEarlyAccess()) {
+    @helper.inputText(newPersonForm("username"))
+  }
+}

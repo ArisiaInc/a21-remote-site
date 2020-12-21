@@ -8,12 +8,13 @@ $('.confirmModal').on('show.bs.modal', function (event) {
   modal.find('.confirmed-button').data('who', recipient)
 })
 
-$('#remove-admin-button').click(function(event) {
-  var button = $('#remove-admin-button'); // Button that triggered the modal
+$('#remove-button').click(function(event) {
+  var button = $('#remove-button'); // Button that triggered the modal
   var who = button.data('who');
+  var baseUrl = button.data('baseurl')
   console.log("The person we are removing is " + who);
   $.ajax({
-    url: '/admin/manageAdmins/' + who,
+    url: baseUrl + who,
     type: 'DELETE',
     complete: function() {
       var url = window.location.href;

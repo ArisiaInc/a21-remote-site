@@ -7,6 +7,7 @@ import play.api.Logging
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
+import play.api.http.Writeable
 import play.api.i18n.I18nSupport
 
 import scala.concurrent.{Future, ExecutionContext}
@@ -54,6 +55,9 @@ class AdminController (
    */
   def adminsOnly(f: AdminInfo => Result): EssentialAction = adminsOnlyAsync(info => Future.successful(f(info)))
 
+  /**
+   * Enhanced version of adminsOnlyAsync, for stuff that only super-admins can do.
+   */
   def superAdminsOnlyAsync(f: AdminInfo => Future[Result]): EssentialAction = adminsOnlyAsync { info =>
     if (info.permissions.superAdmin) {
       f(info)
@@ -66,17 +70,76 @@ class AdminController (
     Ok(arisia.views.html.adminHome(info.permissions))
   }
 
-  val newAdminForm = Form(
+  val usernameForm = Form(
     mapping(
       "username" -> nonEmptyText
     )(LoginId.apply)(LoginId.unapply)
   )
 
-  private def showManageAdmins()(implicit request: Request[AnyContent]) = {
-    adminService.getAdmins().map { admins =>
-      val sorted = admins.sortBy(_.v)
-      Ok(arisia.views.html.manageAdmins(sorted, newAdminForm.fill(LoginId(""))))
+  /* ********************
+   *
+   * Generic Permission controller functions
+   *
+   * These are the template functions, which we reuse for the various specific permissions.
+   *
+   */
+
+  private def showPermissionMembers[C: Writeable](
+    getMembers: AdminService => Future[List[LoginId]],
+    display: List[LoginId] => C
+  )(implicit request: Request[AnyContent]) = {
+    getMembers(adminService).map { members =>
+      val sorted = members.sortBy(_.v)
+      Ok(display(sorted))
     }
+  }
+
+  private def addPermission(
+    addFunc: (AdminService, LoginId) => Future[Int],
+    onSuccess: Request[AnyContent] => Future[Result],
+    onError: Call
+  ): AdminInfo => Future[Result] = { info =>
+    implicit val request = info.request
+
+    usernameForm.bindFromRequest().fold(
+      formWithErrors => {
+        // TODO: actually display the error!
+        Future.successful(Redirect(onError))
+      },
+      loginName => {
+        addFunc(adminService, loginName).flatMap(_ => onSuccess(request))
+      }
+    )
+  }
+
+  private def removePermission(
+    idStr: String,
+    removeFunc: (AdminService, LoginId) => Future[Int],
+    whenFinished: Call
+  ): AdminInfo => Future[Result] = { info =>
+    val id = LoginId(idStr)
+    val fut = for {
+      targetPerms <- loginService.getPermissions(id)
+      // Safety check: you can't remove privs from the super-admins:
+      if (!targetPerms.superAdmin)
+      _ <- removeFunc(adminService, id)
+    }
+      yield ()
+
+    fut.map(_ => Redirect(whenFinished))
+  }
+
+  /* ******************
+   *
+   * Admin permission
+   *
+   */
+
+  private def showManageAdmins()(implicit request: Request[AnyContent]) = {
+    showPermissionMembers(
+      _.getAdmins(),
+      arisia.views.html.manageAdmins(_, usernameForm.fill(LoginId("")))
+    )
   }
 
   def manageAdmins(): EssentialAction = superAdminsOnlyAsync { info =>
@@ -84,30 +147,44 @@ class AdminController (
     showManageAdmins()
   }
 
-  def addAdmin(): EssentialAction = superAdminsOnlyAsync { info =>
-    implicit val request = info.request
-
-    newAdminForm.bindFromRequest().fold(
-      formWithErrors => {
-        // TODO: actually display the error!
-        Future.successful(Redirect(routes.AdminController.manageAdmins()))
-      },
-      loginName => {
-        adminService.addAdmin(loginName).flatMap(_ => showManageAdmins())
-      }
+  def addAdmin(): EssentialAction = superAdminsOnlyAsync {
+    addPermission(
+      _.addAdmin(_),
+      showManageAdmins()(_),
+      routes.AdminController.manageAdmins()
     )
   }
 
-  def removeAdmin(idStr: String): EssentialAction = superAdminsOnlyAsync { info =>
-    val id = LoginId(idStr)
-    val fut = for {
-      targetPerms <- loginService.getPermissions(id)
-      // Safety check: you can't remove admin privs from the super-admins:
-      if (!targetPerms.superAdmin)
-      _ <- adminService.removeAdmin(id)
-    }
-      yield ()
+  def removeAdmin(idStr: String): EssentialAction = superAdminsOnlyAsync {
+    removePermission(idStr, _.removeAdmin(_), routes.AdminController.manageAdmins())
+  }
 
-    fut.map(_ => Redirect(routes.AdminController.manageAdmins()))
+  /* ******************
+   *
+   * Early access permission
+   *
+   */
+
+  private def showManageEarlyAccess()(implicit request: Request[AnyContent]) =
+    showPermissionMembers(
+      _.getEarlyAccess(),
+      arisia.views.html.manageEarlyAccess(_, usernameForm.fill(LoginId("")))
+    )
+
+  def manageEarlyAccess(): EssentialAction = adminsOnlyAsync { info =>
+    implicit val request = info.request
+    showManageEarlyAccess()
+  }
+
+  def addEarlyAccess(): EssentialAction = adminsOnlyAsync {
+    addPermission(
+      _.addEarlyAccess(_),
+      showManageEarlyAccess()(_),
+      routes.AdminController.manageEarlyAccess()
+    )
+  }
+
+  def removeEarlyAccess(idStr: String): EssentialAction = adminsOnlyAsync {
+    removePermission(idStr, _.removeEarlyAccess(_), routes.AdminController.manageEarlyAccess())
   }
 }
