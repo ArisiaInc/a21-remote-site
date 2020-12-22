@@ -14,6 +14,8 @@ import { NavigationLinkComponent } from './navigation/navigation-link/navigation
 import { InfodeskComponent } from './infodesk/infodesk.component';
 import { SafetyComponent } from './safety/safety.component';
 import { IrtComponent } from './irt/irt.component';
+import { RoomComponent } from './programming/room/room.component';
+import { ProgramItemPanelistsPipe } from './_pipes/program-item-panelists.pipe';
 
 @NgModule({
   declarations: [
@@ -26,6 +28,8 @@ import { IrtComponent } from './irt/irt.component';
     InfodeskComponent,
     SafetyComponent,
     IrtComponent,
+    RoomComponent,
+    ProgramItemPanelistsPipe,
   ],
   imports: [
     BrowserModule,

@@ -26,7 +26,7 @@ export class BreadcrumbComponent implements OnInit {
     if (path == 'map') {
       return "Lobby";
     }
-    return path[0].toUpperCase() + path.slice(1);
+    return path.replace('_', ' ');
   }
 
 }

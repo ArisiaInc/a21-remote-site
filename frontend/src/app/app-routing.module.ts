@@ -5,6 +5,7 @@ import { LandingComponent } from './landing/landing.component';
 import { AuthGuard } from './_helpers';
 import { ProgrammingComponent } from './programming/programming.component';
 import { GamingComponent } from './gaming/gaming.component';
+import { RoomComponent } from './programming/room/room.component';
 
 const accountModule = () => import('./account/account.module').then(x => x.AccountModule);
 const scheduleModule = () => import('./schedule/schedule.module').then(x => x.ScheduleModule);
@@ -16,6 +17,7 @@ const routes: Routes = [
   {path: 'schedule', loadChildren: scheduleModule, canActivate: [AuthGuard]},
   {path: 'map', loadChildren: mapModule, canActivate: [AuthGuard]},
   {path: 'programming', component: ProgrammingComponent, canActivate: [AuthGuard]},
+  {path: 'programming/:id', component: RoomComponent, canActivate: [AuthGuard]},
   {path: 'gaming', component: GamingComponent, canActivate: [AuthGuard]},
 
   //redirect home

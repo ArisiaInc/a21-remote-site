@@ -3,8 +3,8 @@
         <li class="breadcrumb-item" [ngClass]="{active: isLast}" 
             *ngFor="let crumb of crumbs; last as isLast"
             [attr.aria-current]="isLast ? 'page' : undefined">
-            <a href="{{crumb.path}}" [routerLink]="crumb.path" *ngIf="!isLast">{{crumb.label}}</a>
-            <span *ngIf="isLast">{{ crumb.label }}</span>
+            <a href="{{crumb.path}}" [routerLink]="crumb.path" *ngIf="!isLast">{{crumb.label | titlecase}}</a>
+            <span *ngIf="isLast">{{ crumb.label | titlecase }}</span>
         </li>
     </ol>
 </nav>
