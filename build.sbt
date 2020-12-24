@@ -110,10 +110,12 @@ lazy val backend = (project in file("arisia-remote"))
       macwireUtil,
       scalactic,
       scalaTest,
-      scalatestPlusPlay
-    )
+      scalatestPlusPlay,
+      swaggerUI
+    ),
+    swaggerDomainNameSpaces := Seq("arisia.models")
   )
-  .enablePlugins(PlayScala)
+  .enablePlugins(PlayScala, SwaggerPlugin)
 
 lazy val frontend = (project in file("frontend"))
   .settings(
