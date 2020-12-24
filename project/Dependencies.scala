@@ -24,6 +24,8 @@ object Dependencies {
 
   val scalatestPlusPlayVersion = "5.0.0"
 
+  val swaggerUIVersion = "3.35.0"
+
   ///////////////////////
 
   val betterFiles = "com.github.pathikrit" %% "better-files" % betterFilesVersion
@@ -39,4 +41,6 @@ object Dependencies {
   val scalactic = "org.scalactic" %% "scalactic" % scalaTestVersion
   val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
   val scalatestPlusPlay = "org.scalatestplus.play" %% "scalatestplus-play" % scalatestPlusPlayVersion % Test
+
+  val swaggerUI = "org.webjars" % "swagger-ui" % swaggerUIVersion
 }

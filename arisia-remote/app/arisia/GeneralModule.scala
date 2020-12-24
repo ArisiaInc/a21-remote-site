@@ -1,11 +1,11 @@
 package arisia
 
 import akka.actor.ActorSystem
-import arisia.admin.{AdminService, AdminServiceImpl}
+import arisia.admin.{AdminServiceImpl, AdminService}
 import arisia.auth.{LoginService, LoginServiceImpl}
 import arisia.db.{DBServiceImpl, DBService}
 import com.softwaremill.macwire.wire
-import arisia.schedule.{ScheduleServiceImpl, ScheduleService}
+import arisia.schedule.{ScheduleServiceImpl, ScheduleService, StarService, StarServiceImpl}
 import arisia.timer.{TimerServiceImpl, Ticker, TimerService, TickerImpl}
 import play.api.Configuration
 import play.api.libs.ws.WSClient
@@ -22,6 +22,7 @@ trait GeneralModule {
   def actorSystem: ActorSystem
 
   lazy val scheduleService: ScheduleService = wire[ScheduleServiceImpl]
+  lazy val starService: StarService = wire[StarServiceImpl]
   lazy val loginService: LoginService = wire[LoginServiceImpl]
   lazy val dbService: DBService = wire[DBServiceImpl]
   lazy val ticker: Ticker = wire[TickerImpl]

@@ -29,6 +29,12 @@ POST    /api/logout                  arisia.controllers.LoginController.logout()
 
 # Fetches the current schedule
 GET     /api/schedule                arisia.controllers.ScheduleController.getSchedule()
+# Fetch the stars for the current user; returns a JSON list of program IDs
+GET     /api/schedule/stars          arisia.controllers.ScheduleController.getStars()
+# Add a star from the specified program item ID
+PUT     /api/schedule/stars/:which   arisia.controllers.ScheduleController.addStar(which)
+# Remove the star for the specified program item ID
+DELETE  /api/schedule/stars/:which   arisia.controllers.ScheduleController.removeStar(which)
 
 # Admin UI, separate from the attendee-facing site
 GET     /admin                       arisia.controllers.AdminController.home()
@@ -45,6 +51,11 @@ GET     /admin/assets/*file          controllers.Assets.versioned(path="/public"
 
 # Zambia emulator, providing test data
 GET     /test/fakeschedule           arisia.controllers.FakeZambiaController.getSchedule()
+
+# During development, get the Swagger UI at:
+#   http://localhost:9000/docs/swagger-ui/index.html?url=/admin/assets/swagger.json
+### NoDocs ###
+GET   /docs/swagger-ui/*file        controllers.Assets.at(path:String="/public/lib/swagger-ui", file:String)
 
 # Fetch frontend assets
 GET     /*file                       arisia.controllers.FrontendController.assetOrDefault(file)

@@ -1,0 +1,9 @@
+---
+  swagger: "2.0"
+  info:
+    title: "Arisia 2021 API"
+    description: "Backend for the A'21 website"
+  consumes:
+    - application/json
+  produces:
+    - application/json
