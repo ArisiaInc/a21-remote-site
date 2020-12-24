@@ -6,9 +6,9 @@ import scala.concurrent.duration._
 import arisia.models.{LoginName, LoginUser, Permissions, LoginId}
 import doobie.free.connection.ConnectionIO
 import play.api.libs.ws.WSClient
-
 import doobie._
 import doobie.implicits._
+import play.api.Configuration
 
 import scala.concurrent.{Future, ExecutionContext}
 
@@ -26,12 +26,23 @@ trait LoginService {
 
 class LoginServiceImpl(
   ws: WSClient,
-  dbService: DBService
+  dbService: DBService,
+  config: Configuration
 )(
   implicit ec: ExecutionContext
 ) extends LoginService {
 
   val badgeNamePrefix = """<input type=text name="registrant_fan_name_new" value=""""
+
+  /**
+   * These two config settings are intended for local development use only -- to allow yourself to frontend access
+   * or admin access, add your CM username to these fields in your secrets.conf:
+   */
+  lazy val hardcodedEarlyAccess: Seq[LoginId] =
+    config.get[Seq[String]]("arisia.allow.logins").map(LoginId(_))
+
+  lazy val hardcodedAdmin: Seq[LoginId] =
+    config.get[Seq[String]]("arisia.dev.admins").map(LoginId(_))
 
   /**
    * Check the passed-in login credentials.
@@ -93,9 +104,22 @@ class LoginServiceImpl(
     .option
 
   def getPermissions(id: LoginId): Future[Permissions] = {
-    dbService.run(fetchPermissionsQuery(id)).map {
+    dbService.run(fetchPermissionsQuery(id)).map { dbPerms =>
       // If we didn't find an entry in the database for this LoginUser, then they have empty Permissions:
-      _.getOrElse(Permissions.empty)
+      val perms = dbPerms.getOrElse(Permissions.empty)
+      val withHardcodedEarlyAccess =
+        if (hardcodedEarlyAccess.contains(id)) {
+          perms.copy(earlyAccess = true)
+        } else {
+          perms
+        }
+      val withHardcodedAdmin =
+        if (hardcodedAdmin.contains(id)) {
+          withHardcodedEarlyAccess.copy(admin = true)
+        } else {
+          withHardcodedEarlyAccess
+        }
+      withHardcodedAdmin
     }
   }
 }
