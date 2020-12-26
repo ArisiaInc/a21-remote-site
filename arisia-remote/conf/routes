@@ -51,6 +51,8 @@ GET     /admin/assets/*file          controllers.Assets.versioned(path="/public"
 
 # Zambia emulator, providing test data
 GET     /test/fakeschedule           arisia.controllers.FakeZambiaController.getSchedule()
+# TODO: remove
+GET     /test/zoomcall               arisia.controllers.ZoomController.test()
 
 # During development, get the Swagger UI at:
 #   http://localhost:9000/docs/swagger-ui/index.html?url=/admin/assets/swagger.json

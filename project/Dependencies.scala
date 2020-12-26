@@ -16,6 +16,8 @@ object Dependencies {
 
   val doobieVersion = "0.9.0"
 
+  val jwtPlayVersion = "4.2.0"
+
   val macwireVersion = "2.3.7"
 
   val postgresDriverVersion = "42.2.18"
@@ -34,6 +36,8 @@ object Dependencies {
 
   val doobieCore = "org.tpolecat" %% "doobie-core" % doobieVersion
   val doobiePostgres = "org.tpolecat" %% "doobie-postgres" % doobieVersion
+
+  val jwtPlay = "com.pauldijou" %% "jwt-play" % jwtPlayVersion
 
   val macwireMacros = "com.softwaremill.macwire" %% "macros" % macwireVersion % "provided"
   val macwireUtil = "com.softwaremill.macwire" %% "util" % macwireVersion
