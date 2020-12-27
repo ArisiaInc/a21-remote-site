@@ -9,6 +9,7 @@ import { Component, OnInit, HostBinding } from '@angular/core';
 })
 export class NavigationComponent implements OnInit {
   @HostBinding('class') class = 'navbar navbar-expand-md navbar-light row sticky-top';
+  public isMenuCollapsed = true;
 
   constructor(public route: ActivatedRoute) { }
 

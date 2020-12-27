@@ -1,5 +1,3 @@
 <li [ngbNavItem]="link">
-  <a ngbNavLink [routerLink]="link"
-     data-toggle="collapse" data-target="#navbarContent"
-     >{{title}}</a>
+  <a ngbNavLink [routerLink]="link" (click)="activated.emit()">{{title}}</a>
 </li>
