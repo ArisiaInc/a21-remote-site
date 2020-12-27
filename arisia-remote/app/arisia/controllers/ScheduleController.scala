@@ -17,9 +17,16 @@ class ScheduleController(
   extends BaseController with LoginControllerFuncs
 {
   def getSchedule(): EssentialAction = Action { implicit request =>
+    // Note: we explicitly assume that this fetch is synchronous and fast. It is up to the ScheduleService to
+    // ensure that.
     val schedule = scheduleService.currentSchedule()
-    val json = Json.toJson(schedule)
-    Ok(json).as(JSON)
+    // The HTTP standard says that the hash should be in double-quotes in both directions:
+    //   https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
+    val hashStr = s""""${schedule.hash}""""
+    request.headers.get("If-None-Match") match {
+      case Some(prev) if (prev == hashStr) => NotModified
+      case _ => Ok(schedule.json).as(JSON).withHeaders(("ETag", hashStr))
+    }
   }
 
   def addStar(whichStr: String): EssentialAction = withLoggedInAsync { info =>
