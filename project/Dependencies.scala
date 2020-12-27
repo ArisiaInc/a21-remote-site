@@ -16,6 +16,8 @@ object Dependencies {
 
   val doobieVersion = "0.9.0"
 
+  val hasherVersion = "1.2.2"
+
   val jwtPlayVersion = "4.2.0"
 
   val macwireVersion = "2.3.7"
@@ -36,6 +38,8 @@ object Dependencies {
 
   val doobieCore = "org.tpolecat" %% "doobie-core" % doobieVersion
   val doobiePostgres = "org.tpolecat" %% "doobie-postgres" % doobieVersion
+
+  val hasher = "com.outr" %% "hasher" % hasherVersion
 
   val jwtPlay = "com.pauldijou" %% "jwt-play" % jwtPlayVersion
 

@@ -106,6 +106,7 @@ lazy val backend = (project in file("arisia-remote"))
       catsCore,
       doobieCore,
       doobiePostgres,
+      hasher,
       jwtPlay,
       macwireMacros,
       macwireUtil,
