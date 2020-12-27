@@ -1,9 +1,10 @@
 package arisia.schedule
 
+import java.time.{LocalDateTime, ZoneId}
 import java.util.concurrent.atomic.AtomicReference
 
 import arisia.db.DBService
-import arisia.models.Schedule
+import arisia.models.{Schedule, ProgramItemTimestamp}
 import doobie._
 import doobie.implicits._
 import play.api.Logging
@@ -31,10 +32,31 @@ class ScheduleServiceImpl(
   implicit ec: ExecutionContext
 ) extends ScheduleService with Logging {
 
+  /**
+   * The timezone that the Zambia data is assuming.
+   *
+   * In principle, this should come from config -- if anybody uses this for other conventions, I would recommend
+   * doing that.
+   */
+  lazy val arisiaZone: ZoneId = ZoneId.of("EST", ZoneId.SHORT_IDS)
+
   case class ScheduleCache(jsonStr: String) {
     lazy val parsed: Schedule = {
       // TODO: make this cope with failure!
-      Json.parse(jsonStr).as[Schedule]
+      val originalSchedule = Json.parse(jsonStr).as[Schedule]
+      // We are enhancing the Zambia data with pre-calculated timestamps for each program item, to ease the effort
+      // on the frontend side:
+      val itemsWithTimestamps = originalSchedule.program.map { item =>
+        val instant = for {
+          date <- item.date
+          time <- item.time
+          dateTime = LocalDateTime.of(date.d, time.t)
+          zoned = dateTime.atZone(arisiaZone)
+        }
+          yield ProgramItemTimestamp(zoned.toInstant)
+        item.copy(timestamp = instant)
+      }
+      originalSchedule.copy(program = itemsWithTimestamps)
     }
   }
 

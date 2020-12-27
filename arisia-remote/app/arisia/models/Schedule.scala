@@ -22,8 +22,9 @@ object Schedule {
 
   /**
    * Given a dump from Zambia, parse that into our internal structure.
+   *
+   * TODO: this is mostly obsolete, since we are now getting JSON from Zambia instead of KonOpas JSONP.
    */
-  // TODO: wrap this in some sort of validation type, so we can cope cleanly with errors:
   def parseKonOpas(konopasJsonp: String): Schedule = {
     // We are assuming the format of the JSONP pretty precisely -- it's generated, so we should be able to count
     // on it. This is a known fragility, but we aren't pretending that this is general-purpose at this stage of the
