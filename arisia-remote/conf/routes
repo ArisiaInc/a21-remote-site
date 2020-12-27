@@ -45,6 +45,8 @@ DELETE  /admin/manageAdmins/:name    arisia.controllers.AdminController.removeAd
 GET     /admin/manageEarlyAccess          arisia.controllers.AdminController.manageEarlyAccess()
 POST    /admin/manageEarlyAccess          arisia.controllers.AdminController.addEarlyAccess()
 DELETE  /admin/manageEarlyAccess/:name    arisia.controllers.AdminController.removeEarlyAccess(name)
+# This is mainly internal, for testing; we might add a UI if we find a use for it, but don't do that casually:
+POST    /admin/startAdHocMeeting     arisia.controllers.AdminController.startMeeting()
 # Note the non-standard path, which is configured in application.conf, so that frontend
 # can own /assets
 GET     /admin/assets/*file          controllers.Assets.versioned(path="/public", file: Asset)
