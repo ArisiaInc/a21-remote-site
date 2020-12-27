@@ -5,6 +5,7 @@ import play.api._
 import com.softwaremill.macwire._
 import _root_.controllers.AssetsComponents
 import arisia.controllers.ControllerModule
+import arisia.zoom.ZoomModule
 import play.api.db.{DBComponents, HikariCPComponents}
 import play.api.db.evolutions.EvolutionsComponents
 import play.api.i18n.I18nComponents
@@ -35,6 +36,7 @@ class PlayComponents(context: Context)
   with AhcWSComponents
   with ControllerModule
   with GeneralModule
+  with ZoomModule
 {
   // When starting the application, run database evolutions and apply changes if needed:
   applicationEvolutions
