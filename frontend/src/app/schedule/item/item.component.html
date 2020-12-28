@@ -12,6 +12,6 @@
                 {{person.name}}<span *ngIf="!isLast">,&nbsp;</span>
             </a>
         </div>
-        <p class="mt-2">{{item.desc}}</p>
+        <p class="mt-2" [innerHTML]="item.desc | sanitizeHtml | linkify"></p>
     </div>
 </div>
