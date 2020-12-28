@@ -8,7 +8,8 @@ import { Component, OnInit, HostBinding } from '@angular/core';
   styleUrls: ['./navigation.component.scss']
 })
 export class NavigationComponent implements OnInit {
-  @HostBinding('class') class = 'navbar navbar-expand-md navbar-dark bg-primary row';
+  @HostBinding('class') class = 'navbar navbar-expand-md navbar-light row sticky-top py-md-0';
+  public isMenuCollapsed = true;
 
   constructor(public route: ActivatedRoute) { }
 

@@ -1,7 +1,7 @@
 package arisia.models
 
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, LocalTime}
+import java.time.{LocalDate, LocalTime, Instant}
 
 import arisia.util._
 import play.api.libs.json._
@@ -53,6 +53,14 @@ object ProgramItemTime {
   }
 }
 
+case class ProgramItemTimestamp(t: Instant)
+object ProgramItemTimestamp {
+  implicit val reads: Reads[ProgramItemTimestamp] =
+    JsUtils.stringReads(str => new ProgramItemTimestamp(Instant.parse(str)))
+
+  implicit val writes: Writes[ProgramItemTimestamp] = (o: ProgramItemTimestamp) => JsString(o.t.toString)
+}
+
 /**
  * Represents a Program Item, in a way that exactly matches KonOpas.
  *
@@ -71,7 +79,8 @@ case class ProgramItem(
   mins: Option[String],
   loc: List[ProgramItemLoc],
   people: List[ProgramItemPerson],
-  desc: Option[ProgramItemDesc]
+  desc: Option[ProgramItemDesc],
+  timestamp: Option[ProgramItemTimestamp]
 )
 object ProgramItem {
   implicit val fmt: Format[ProgramItem] = (
@@ -83,6 +92,7 @@ object ProgramItem {
       (JsPath \ "mins").formatNullable[String] and
       (JsPath \ "loc").formatWithDefault[List[ProgramItemLoc]](List.empty) and
       (JsPath \ "people").formatWithDefault[List[ProgramItemPerson]](List.empty) and
-      (JsPath \ "desc").formatNullable[ProgramItemDesc]
+      (JsPath \ "desc").formatNullable[ProgramItemDesc] and
+      (JsPath \ "timestamp").formatNullable[ProgramItemTimestamp]
     )(ProgramItem.apply, unlift(ProgramItem.unapply))
 }

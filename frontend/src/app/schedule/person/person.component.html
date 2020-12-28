@@ -1,7 +1,6 @@
 <div *ngIf="person$ | async as person; else error" class="person">
     <h2>{{person.name}}</h2>
-    <p>{{person.bio}}</p>
+    <p [innerHTML] = "person.bio | sanitizeHtml | linkify"></p>
     <app-item-list [items]="person.items"></app-item-list>
 </div>
 <ng-template #error>Internal Error</ng-template>
-

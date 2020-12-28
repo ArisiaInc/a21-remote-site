@@ -3,19 +3,22 @@ package arisia.controllers
 import arisia.admin.AdminService
 import arisia.auth.LoginService
 import arisia.models.{LoginName, LoginUser, Permissions, LoginId}
+import arisia.zoom.ZoomService
 import play.api.Logging
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
 import play.api.http.Writeable
 import play.api.i18n.I18nSupport
+import play.api.libs.json.Json
 
 import scala.concurrent.{Future, ExecutionContext}
 
 class AdminController (
   val controllerComponents: ControllerComponents,
   adminService: AdminService,
-  loginService: LoginService
+  loginService: LoginService,
+  zoomService: ZoomService
 )(
   implicit ec: ExecutionContext
 ) extends BaseController
@@ -75,6 +78,21 @@ class AdminController (
       "username" -> nonEmptyText
     )(LoginId.apply)(LoginId.unapply)
   )
+
+  /* ********************
+   *
+   * Other ad-hoc functions
+   *
+   */
+
+  /**
+   * For now, this is internal-only, for testing, and can only be accessed from Swagger.
+   */
+  def startMeeting(): EssentialAction = adminsOnlyAsync { info =>
+    zoomService.startMeeting("Ad hoc meeting").map { meeting =>
+      Ok(Json.toJson(meeting).toString())
+    }
+  }
 
   /* ********************
    *
