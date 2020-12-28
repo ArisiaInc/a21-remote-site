@@ -1,33 +1,126 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, zip, OperatorFunction } from 'rxjs';
-import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck, every } from 'rxjs/operators';
+import { BehaviorSubject, ReplaySubject, Observable, of, zip, OperatorFunction, timer } from 'rxjs';
+import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck, every, switchMap } from 'rxjs/operators';
 import { ProgramItem, ProgramPerson, ProgramFilter, Room } from '@app/_models';
 
 import { program, people } from "test_data/konopas"
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '@environments/environment';
 
-interface ScheduleData {
+export enum ScheduleState {
+  IDLE,
+  LOADING,
+  READY,
+  ERROR,
+}
+
+export interface ScheduleStatus {
+  state: ScheduleState;
+  error?: HttpErrorResponse;
+  lastUpdate?: Date;
+}
+
+export interface ScheduleData {
   program: ProgramItem[],
   people: ProgramPerson[]
 }
+
+export interface StructuredScheduleItems {
+  [date: string]: {[time: string]: ProgramItem[]}
+}
+
+const RELOAD_TIMER = 10 * 1000;
+const USE_FAKE_DATA = false;
 
 @Injectable({
   providedIn: 'root'
 })
 export class ScheduleService {
 
-  constructor(private http: HttpClient) { }
+  private etag?: string;
+  private loading = false;
+  private inited = false;
 
-  get_data() : Observable<ScheduleData>{
+  private schedule?: ScheduleData;
+  schedule$ = new ReplaySubject<ScheduleData>(1);
 
-    // real is currently broken, we'll start with fake
-    return of<ScheduleData>({program: (program as ProgramItem[]), people: (people as ProgramPerson[])});
-    // this is real
-    // return this.http.get<ScheduleData>(`${environment.backend}/schedule`);
+  private status: ScheduleStatus = {state: ScheduleState.IDLE};
+  status$ = new BehaviorSubject<ScheduleStatus>(this.status);
+
+  constructor(private http: HttpClient) {
+    this.init();
   }
 
-  get_schedule(filters: ProgramFilter = {}): Observable<[string, string, ProgramItem[]]> {
+  private reload(): void {
+    if (this.loading) {
+      // Notice if the update has been going for a long time.
+      return;
+    }
+    this.loading = true;
+    if (this.status.state === ScheduleState.IDLE) {
+      this.status.state = ScheduleState.LOADING;
+      this.status$.next(this.status);
+    }
+    this.http.get<ScheduleData>
+      (`${environment.backend}/schedule`,
+       {observe: 'response',
+        headers: this.etag !== undefined ? {ETag: this.etag} : {}
+       }
+      ).subscribe({
+        next: (response) => this.handleResponse(response),
+        error: (error) => this.handleError(error)
+      });
+  }
+
+  private handleResponse(response: HttpResponse<ScheduleData>): void {
+    if (response.body === null) {
+      this.handleError();
+      return;
+    }
+
+    const schedule = response.body;
+
+    this.status.state = ScheduleState.READY;
+    this.status.lastUpdate = new Date();
+    this.status.error = undefined;
+    this.status$.next(this.status);
+
+    this.schedule = schedule;
+    this.schedule$.next(this.schedule);
+    this.etag = response.headers.get('etag') || undefined;
+    this.loading = false;
+  }
+
+  private handleError(error?: HttpErrorResponse): void {
+    if (error && !(error.error instanceof ErrorEvent) && error.status === 304) {
+      this.status.state = ScheduleState.READY;
+      this.status.lastUpdate = new Date();
+      this.status.error = undefined;
+      this.status$.next(this.status);
+    } else {
+      this.status.state = ScheduleState.ERROR;
+      this.status.error = error;
+      this.status$.next(this.status);
+    }
+    this.loading = false;
+  }
+
+  init() {
+    if (this.inited) {
+      return;
+    }
+    if (USE_FAKE_DATA) {
+      this.status.state = ScheduleState.READY;
+      this.status$.next(this.status);
+      this.schedule = {program: (program as ProgramItem[]), people: (people as ProgramPerson[])};
+      this.schedule$.next(this.schedule);
+    } else {
+      timer(0, RELOAD_TIMER).subscribe(() => this.reload());
+    }
+    this.inited = true;
+  }
+
+  get_schedule(filters: ProgramFilter = {}): Observable<StructuredScheduleItems> {
     const munged_filters: ((programItem: ProgramItem) => boolean)[] = [];
     if (filters.tags && filters.tags.length > 0) {
       const tags = filters.tags;
@@ -45,17 +138,24 @@ export class ScheduleService {
       const id = filters.id;
       munged_filters.push(programItem => id.some(filterString => programItem.id.includes(filterString)))
     }
-    return this.get_data().pipe(
+    return this.schedule$.pipe(
       pluck('program'),
-      flatMap(x => of(...x)),
-      filter(p => munged_filters.every(k => k(p))),
-      groupBy(p => `${p.date}~${p.time}`),
-      mergeMap(group => zip(of(group.key.split('~')[0]), of(group.key.split('~')[1]), group.pipe(toArray()))),
+      map(items => {
+        const structured: StructuredScheduleItems = {};
+        items.forEach((item) => {
+          if (munged_filters.every(filter => filter(item))) {
+            structured[item.date] = structured[item.date] || {};
+            structured[item.date][item.time] = structured[item.date][item.time] || [];
+            structured[item.date][item.time].push(item);
+          }
+        });
+        return structured;
+      }),
     );
   }
 
   get_people(): Observable<ProgramPerson[]> {
-    return this.get_data().pipe(
+    return this.schedule$.pipe(
       pluck('people'),
     );
   }
@@ -66,11 +166,28 @@ export class ScheduleService {
     );
   }
 
+  private get_items_for_person(person?: ProgramPerson): Observable<[ProgramPerson | undefined, StructuredScheduleItems | undefined]> {
+    if (person) {
+      return this.get_schedule({id: person.prog}).pipe(
+        map(items => [person, items])
+      );
+    } else {
+      return of([undefined, undefined]);
+    }
+  }
+
+  get_person_with_items(id: string): Observable<ProgramPerson | undefined> {
+    return this.get_person(id).pipe(
+      switchMap(person => this.get_items_for_person(person)),
+      map(([person, items]) => { if (person) { person.items = items; } return person; }),
+    );
+  }
+
   get_featured_events(): Observable<ProgramItem[]> {
     // for testing:
     return of(['13','16','29']).pipe(
     //return this.http.get<String[]>(`${environment.backend}/schedule/featured`).pipe(
-      flatMap(ids => this.get_data().pipe(
+      flatMap(ids => this.schedule$.pipe(
         pluck('program'),
         flatMap(x => of(...x)),
         filter(p => ids.includes(p.id)),
