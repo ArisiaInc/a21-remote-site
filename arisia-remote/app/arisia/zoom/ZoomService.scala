@@ -1,9 +1,11 @@
 package arisia.zoom
 
-import arisia.zoom.models.{ZoomUser, ZoomMeeting, ZoomMeetingType}
-import play.api.libs.json.{Format, Json}
+import arisia.util.Done
+import arisia.zoom.models.{ZoomMeetingType, ZoomUser, ZoomMeeting}
+import play.api.libs.json.{Format, Json, JsObject, JsString}
 import play.api.{Configuration, Logging}
 import play.api.libs.ws._
+import play.api.http.Status
 
 import scala.concurrent.{Future, ExecutionContext}
 import scala.util.Random
@@ -16,7 +18,8 @@ import scala.util.Random
 trait ZoomService {
   def getUsers(): Future[List[ZoomUser]]
 
-  def startMeeting(topic: String): Future[ZoomMeeting]
+  def startMeeting(topic: String): Future[Either[String, ZoomMeeting]]
+  def endMeeting(meetingId: Long): Future[Done]
 }
 
 private[zoom] case class ZoomMeetingParams(
@@ -59,7 +62,7 @@ class ZoomServiceImpl(
       }
   }
 
-  def startMeeting(topic: String): Future[ZoomMeeting] = {
+  def startMeeting(topic: String): Future[Either[String, ZoomMeeting]] = {
     // Generate a random password for this meeting:
     val password = Random.alphanumeric.take(10).mkString
     val params = ZoomMeetingParams(
@@ -70,14 +73,33 @@ class ZoomServiceImpl(
     urlWithJwt(s"/users/$zoomUserId/meetings")
       .post(Json.toJson(params))
       .map { response =>
-        // TODO: handle errors more correctly, and remove the logging here:
-        logger.info(s"The response from Zoom is $response, body ${response.body}")
-        Json.parse(response.body).as[ZoomMeeting]
+        if (response.status == Status.CREATED) {
+          // TODO: remove the logging here:
+          logger.info(s"The response from Zoom is $response, body ${response.body}")
+          Right(Json.parse(response.body).as[ZoomMeeting])
+        } else {
+          val error = s"Failure in trying to start a meeting: ${response.status}"
+          logger.error(error)
+          Left(error)
+        }
+      }
+  }
+
+  def endMeeting(meetingId: Long): Future[Done] = {
+    urlWithJwt(s"/meetings/$meetingId/status")
+      // This one is so simple, we're not even bothering to make a data structure yet:
+      .put(JsObject(Seq(("action", JsString("end")))))
+      .map { response =>
+        if (response.status != Status.NO_CONTENT) {
+          logger.error(s"Failure when trying to stop meeting $meetingId: ${response.status}:\n${response.body}")
+        }
+        Done
       }
   }
 }
 
 class DisabledZoomService() extends ZoomService {
   def getUsers(): Future[List[ZoomUser]] = ???
-  def startMeeting(topic: String): Future[ZoomMeeting] = ???
+  def startMeeting(topic: String): Future[Either[String, ZoomMeeting]] = ???
+  def endMeeting(meetingId: Long): Future[Done] = ???
 }
