@@ -64,7 +64,7 @@ export class ScheduleService {
     this.http.get<ScheduleData>
       (`${environment.backend}/schedule`,
        {observe: 'response',
-        headers: this.etag !== undefined ? {ETag: this.etag} : {}
+        headers: this.etag !== undefined ? {'If-None-Match': this.etag} : {}
        }
       ).subscribe({
         next: (response) => this.handleResponse(response),
@@ -132,11 +132,11 @@ export class ScheduleService {
     }
     if (filters.date && filters.date.length > 0) {
       const date = filters.date;
-      munged_filters.push(programItem => date.some(filterString => programItem.date.includes(filterString)))
+      munged_filters.push(programItem => date.some(filterString => programItem.date === filterString))
     }
     if (filters.id && filters.id.length > 0) {
       const id = filters.id;
-      munged_filters.push(programItem => id.some(filterString => programItem.id.includes(filterString)))
+      munged_filters.push(programItem => id.some(filterString => programItem.id === filterString))
     }
     return this.schedule$.pipe(
       pluck('program'),
