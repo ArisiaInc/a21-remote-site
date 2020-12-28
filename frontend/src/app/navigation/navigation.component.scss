@@ -1,3 +1,32 @@
+@import "node_modules/bootstrap/scss/functions";
+@import "node_modules/bootstrap/scss/variables";
+@import "node_modules/bootstrap/scss/mixins/_breakpoints";
+
 :host {
     background: #74ABF4;
+}
+@include media-breakpoint-up(md) {
+    :host {
+        height: 3.375rem;
+    }
+
+    .navbar-nav {
+        height: 3.375rem;
+    }
+
+
+    .logo {
+        height: 3rem;
+    }
+
+    .list {
+        width: 100%;
+    }
+}
+
+@include media-breakpoint-down(sm) {
+    .logo {
+        margin: -1.5rem 0;
+        height: 2.5rem;
+    }
 }

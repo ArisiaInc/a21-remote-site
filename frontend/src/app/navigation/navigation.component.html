@@ -1,4 +1,4 @@
-<div class="navbar-brand">Arisia 2021</div>
+<div class="navbar-brand" routerLink="/" (click)="isMenuCollapsed=true"><img class="logo" src="assets/images/a21logo.png"></div>
 <button class="navbar-toggler" type="button"
 	aria-controls="navbarContent" [attr.aria-expanded]="!isMenuCollapsed"
 	aria-label="Toggle navigation" id="navbar-toggle"
@@ -6,9 +6,11 @@
   <span class="navbar-toggler-icon"></span>
 </button>
 <div [ngbCollapse]="isMenuCollapsed" class="collapse navbar-collapse" id="navbarContent">
-  <ul ngbNav [activeId]="route.fragment | async" class="navbar-nav me-auto mb-2 mb-md-0">
-    <app-navigation-link (activated)="isMenuCollapsed=true" title="Landing" link="/"></app-navigation-link>
+  <ul ngbNav [activeId]="route.fragment | async" class="navbar-nav me-auto mb-2 mb-md-0 list">
     <app-navigation-link (activated)="isMenuCollapsed=true" title="Map" link="/map"></app-navigation-link>
     <app-navigation-link (activated)="isMenuCollapsed=true" title="Schedule" link="/schedule"></app-navigation-link>
+    <app-navigation-link (activated)="isMenuCollapsed=true" title="Profile" link="/profile"></app-navigation-link>
+    <app-navigation-link (activated)="isMenuCollapsed=true" title="Help" link="/help"></app-navigation-link>
+    <app-navigation-link (activated)="isMenuCollapsed=true" title="Log Out" link="/logout"></app-navigation-link>
   </ul>
 </div>
