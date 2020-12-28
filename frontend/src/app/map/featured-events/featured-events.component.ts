@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostBinding } from '@angular/core';
 import { ScheduleService } from '@app/_services';
 import { ProgramItem } from '@app/_models';
 
@@ -9,6 +9,8 @@ import { ProgramItem } from '@app/_models';
 })
 export class FeaturedEventsComponent implements OnInit {
   items: ProgramItem[] = [];
+
+  @HostBinding('class') class = 'm-2';
 
   constructor( private scheduleService: ScheduleService) { }
 

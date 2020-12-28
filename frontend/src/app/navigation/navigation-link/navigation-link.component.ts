@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
     selector: 'app-navigation-link',
@@ -6,14 +6,16 @@ import { Component, OnInit, Input } from '@angular/core';
     styleUrls: ['./navigation-link.component.scss']
 })
 export class NavigationLinkComponent implements OnInit {
-    @Input() link!: string;
-    @Input() title!: string;
+  @Input() link!: string;
+  @Input() title!: string;
 
-    constructor() {
-    }
+  @Output() activated: EventEmitter<void> = new EventEmitter();
 
-    ngOnInit(): void {
-	// assert (this.link !== undefined);
-	// assert (this.title !== undefined);
-    }
+  constructor() {
+  }
+
+  ngOnInit(): void {
+    // assert (this.link !== undefined);
+    // assert (this.title !== undefined);
+  }
 }
