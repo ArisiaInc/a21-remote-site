@@ -2,7 +2,7 @@ package arisia.timer
 
 import akka.actor.Cancellable
 import arisia.schedule.ScheduleService
-import play.api.Logging
+import play.api.{Logging, Configuration}
 
 import scala.concurrent.duration._
 
@@ -20,8 +20,12 @@ trait TimerService {
 
 class TimerServiceImpl(
   ticker: Ticker,
-  scheduleService: ScheduleService
+  scheduleService: ScheduleService,
+  config: Configuration
 ) extends TimerService with Logging {
+
+  lazy val initialDelay = config.get[FiniteDuration]("arisia.timer.initial.delay")
+  lazy val interval = config.get[FiniteDuration]("arisia.timer.interval")
 
   class Runner() extends Runnable {
     // This is called on every "tick":
@@ -34,8 +38,7 @@ class TimerServiceImpl(
   var _cancellable: Option[Cancellable] = None
 
   def init(): Unit = {
-    // TODO: make the durations configurable
-    _cancellable = Some(ticker.scheduleAtFixedRate(10.seconds, 5.minutes)(new Runner()))
+    _cancellable = Some(ticker.scheduleAtFixedRate(initialDelay, interval)(new Runner()))
   }
 
   def shutdown(): Unit = {
