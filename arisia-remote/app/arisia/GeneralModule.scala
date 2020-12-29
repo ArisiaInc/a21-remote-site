@@ -5,8 +5,8 @@ import arisia.admin.{AdminServiceImpl, AdminService}
 import arisia.auth.{LoginService, LoginServiceImpl}
 import arisia.db.{DBServiceImpl, DBService}
 import com.softwaremill.macwire.wire
-import arisia.schedule.{ScheduleServiceImpl, ScheduleService, StarService, StarServiceImpl}
-import arisia.timer.{TimerServiceImpl, Ticker, TimerService, TickerImpl}
+import arisia.schedule.{ScheduleServiceImpl, ScheduleService, StarServiceImpl, StarService}
+import arisia.timer.{TimerService, TimeServiceImpl, TimerServiceImpl, TimeService, Ticker, TickerImpl}
 import play.api.Configuration
 import play.api.libs.ws.WSClient
 
@@ -26,6 +26,7 @@ trait GeneralModule {
   lazy val loginService: LoginService = wire[LoginServiceImpl]
   lazy val dbService: DBService = wire[DBServiceImpl]
   lazy val ticker: Ticker = wire[TickerImpl]
+  lazy val timeService: TimeService = wire[TimeServiceImpl]
   lazy val timerService: TimerService = wire[TimerServiceImpl]
   lazy val adminService: AdminService = wire[AdminServiceImpl]
 }
