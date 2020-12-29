@@ -94,6 +94,15 @@ environment this may not contain any secrets, but it is not
 unusual for it to contain an embedded password, so it is
 generally considered a secret.)
 
+###### Alternatively to installing postgres, use the docker file
+
+You need to already have docker (and docker-compose, which comes with it)
+on your machine. Then you can run `docker-compose up -d` and it will
+spawn a postgres server running on localhost:5432 for you. The connection
+string for this db is commented out in the `secrets.conf.template` file.
+
+Note: this will not work if you have something running at 5432 already.
+
 #### Running the System
 
 At the moment, the backend and frontend are not connected to
