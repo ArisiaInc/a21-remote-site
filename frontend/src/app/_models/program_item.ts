@@ -1,7 +1,3 @@
-import { Time } from '@angular/common'
-
-import { ProgramPerson } from "@app/_models";
-
 export interface ProgramItem {
     id: string;
     title: string;

@@ -3,6 +3,11 @@ import { CommonModule } from '@angular/common';
 import { ButtonComponent } from './button/button.component';
 import { BreadcrumbComponent } from './breadcrumb/breadcrumb.component';
 import { LinkComponent } from './link/link.component';
+import { CreatorCardComponent } from './creator-card/creator-card.component';
+import { CreatorListComponent } from './creator-list/creator-list.component';
+import { RouterModule } from '@angular/router';
+import { CreatorPageComponent } from './creator-page/creator-page.component';
+import { CalloutBoxComponent } from './callout-box/callout-box.component';
 
 
 
@@ -11,14 +16,23 @@ import { LinkComponent } from './link/link.component';
     ButtonComponent,
     BreadcrumbComponent,
     LinkComponent,
+    CreatorCardComponent,
+    CreatorListComponent,
+    CreatorPageComponent,
+    CalloutBoxComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    RouterModule
   ],
   exports: [
     ButtonComponent,
     BreadcrumbComponent,
-    LinkComponent
+    LinkComponent,
+    CreatorCardComponent,
+    CreatorListComponent,
+    CreatorPageComponent,
+    CalloutBoxComponent
   ]
 })
 export class SharedModule { }

@@ -16,6 +16,8 @@ import { SafetyComponent } from './safety/safety.component';
 import { IrtComponent } from './irt/irt.component';
 import { RoomComponent } from './programming/room/room.component';
 import { PipesModule } from './pipes/pipes.module';
+import { ArtshowComponent } from './artshow/artshow.component';
+import { ArtistComponent } from './artshow/artist/artist.component';
 
 @NgModule({
   declarations: [
@@ -29,6 +31,8 @@ import { PipesModule } from './pipes/pipes.module';
     SafetyComponent,
     IrtComponent,
     RoomComponent,
+    ArtshowComponent,
+    ArtistComponent,
   ],
   imports: [
     BrowserModule,
