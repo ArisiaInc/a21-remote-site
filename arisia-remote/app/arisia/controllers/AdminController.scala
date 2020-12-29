@@ -89,8 +89,24 @@ class AdminController (
    * For now, this is internal-only, for testing, and can only be accessed from Swagger.
    */
   def startMeeting(): EssentialAction = adminsOnlyAsync { info =>
-    zoomService.startMeeting("Ad hoc meeting").map { meeting =>
-      Ok(Json.toJson(meeting).toString())
+    zoomService.startMeeting("Ad hoc meeting").map { errorOrMeeting =>
+      errorOrMeeting match {
+        case Right(meeting) => Ok(Json.toJson(meeting).toString())
+        case Left(error) => InternalServerError(error)
+      }
+    }
+  }
+
+  def endMeeting(meetingIdStr: String): EssentialAction = adminsOnlyAsync { info =>
+    meetingIdStr.toLongOption match {
+      case Some(meetingId) => {
+        zoomService.endMeeting(meetingId).map { _ =>
+          Ok(s"Meeting $meetingId ended")
+        }
+      }
+      case _ => {
+        Future.successful(BadRequest(s"$meetingIdStr is not a valid meeting ID"))
+      }
     }
   }
 
