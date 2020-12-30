@@ -1,6 +1,8 @@
 .hall-costumes-carousel {
     height: 100%;
     width: 100%;
+    border: 1px solid #006382;
+    border-top: none;
 }
 
 :host {
@@ -14,6 +16,8 @@
     position: absolute;
     bottom: 0;
 
+    pointer-events: none;
+
     height: 10rem;
     width: 100%;
 
@@ -21,8 +25,15 @@
 }
 
 .image-wrapper {
-    height: 29em;
+    height: 100%;
+    background: black;
     overflow: hidden;
+}
+
+.image {
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
 }
 
 .hall-costume-caption {
