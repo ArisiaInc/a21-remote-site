@@ -1,9 +1,9 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { ScheduleService } from '@app/_services';
 import { ProgramFilter } from '@app/_models';
 
 enum Property {
   LOC,
-  DATE,
 };
 
 @Component({
@@ -13,11 +13,12 @@ enum Property {
 })
 export class FiltersComponent implements OnInit {
   filters: ProgramFilter = {};
+  dateFilters: number[] = [];
+
   @Output() filtersChanged = new EventEmitter<ProgramFilter>();
-  DATE = Property.DATE;
   LOC = Property.LOC;
 
-  constructor() { }
+  constructor(public scheduleService: ScheduleService) { }
 
   ngOnInit(): void {
   }
@@ -28,10 +29,6 @@ export class FiltersComponent implements OnInit {
       case Property.LOC:
         this.filters.loc = this.filters.loc || [];
         propList = this.filters.loc;
-        break;
-      case Property.DATE:
-        this.filters.date = this.filters.date || []
-        propList = this.filters.date;
         break;
     }
     const target = (event.target as Element);
@@ -45,6 +42,20 @@ export class FiltersComponent implements OnInit {
     }
     console.log(this.filters)
     console.log(target.classList)
+    this.filtersChanged.emit(this.filters);
+  }
+  onChangeDate(event:MouseEvent, value: number) {
+    this.dateFilters = this.dateFilters || [];
+    const target = (event.target as Element);
+    const index = this.dateFilters.indexOf(value);
+    if(index > -1) {
+      this.dateFilters.splice(index, 1);
+      target.classList.remove('active');
+    } else {
+      this.dateFilters.push(value);
+      target.classList.add('active');
+    }
+    this.filters.date = this.dateFilters.map(date => ({start: new Date(2021, 0, date), end: new Date(2021, 0, date + 1)}));
     this.filtersChanged.emit(this.filters);
   }
 

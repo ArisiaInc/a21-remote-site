@@ -1,6 +1,7 @@
 import { Component, OnInit, HostBinding } from '@angular/core';
-import { ScheduleService } from '@app/_services';
-import { ProgramItem } from '@app/_models';
+import { Observable } from 'rxjs';
+
+import { ScheduleService, StructuredEvents } from '@app/_services';
 
 @Component({
   selector: 'app-featured-events',
@@ -8,14 +9,14 @@ import { ProgramItem } from '@app/_models';
   styleUrls: ['./featured-events.component.scss']
 })
 export class FeaturedEventsComponent implements OnInit {
-  items: ProgramItem[] = [];
+  events$!: Observable<StructuredEvents>;
 
   @HostBinding('class') class = 'm-2';
 
   constructor( private scheduleService: ScheduleService) { }
 
   ngOnInit(): void {
-    this.scheduleService.get_featured_events().subscribe(items => this.items = items);
+    this.events$ = this.scheduleService.get_featured_events()
   }
 
 }

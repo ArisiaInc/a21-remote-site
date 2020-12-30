@@ -1,10 +1,10 @@
-<div *ngFor="let date of items | keyvalue">
-    <h4>{{date.key}}</h4>
-    <div *ngFor="let time of date.value | keyvalue" class="mb-4">
-        <h5>{{time.key}}</h5>
+<div *ngFor="let day of events">
+    <h4>{{day.dateString}}</h4>
+    <div *ngFor="let time of day.times" class="mb-4">
+        <h5>{{time.timeString}}</h5>
         <ul class="list-group">
-            <li class="program_item list-group-item list-group-item-action" *ngFor="let p of time.value">
-                <app-item [item]="p"></app-item>
+            <li class="program_item list-group-item list-group-item-action" *ngFor="let event of time.events">
+                <app-item [event]="event"></app-item>
             </li>
         </ul>
     </div>
