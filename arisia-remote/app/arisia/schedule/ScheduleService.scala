@@ -1,11 +1,12 @@
 package arisia.schedule
 
-import java.time.{LocalDateTime, ZoneId}
+import java.time.{LocalDateTime, ZoneId, Instant}
 import java.util.concurrent.atomic.AtomicReference
 
 import scala.concurrent.duration._
 import arisia.db.DBService
 import arisia.models.{Schedule, ProgramItemTimestamp}
+import arisia.timer.TimerService
 import arisia.util.Done
 import doobie._
 import doobie.implicits._
@@ -20,14 +21,10 @@ trait ScheduleService {
    * Returns the currently-cached Schedule.
    */
   def currentSchedule(): Schedule
-
-  /**
-   * Go out to Zambia and fetch the current version of the Schedule.
-   */
-  def refresh(): Unit
 }
 
 class ScheduleServiceImpl(
+  timerService: TimerService,
   dbService: DBService,
   ws: WSClient,
   config: Configuration,
@@ -36,10 +33,14 @@ class ScheduleServiceImpl(
   implicit ec: ExecutionContext
 ) extends ScheduleService with Logging {
 
+  lazy val zambiaRefreshInterval = config.get[FiniteDuration]("arisia.zambia.refresh.interval")
   lazy val zambiaUrl = config.get[String]("arisia.zambia.url")
   lazy val zambiaLoginUrl = config.get[String]("arisia.zambia.loginUrl")
   lazy val zambiaBadgeId = config.get[String]("arisia.zambia.badgeId")
   lazy val zambiaPassword = config.get[String]("arisia.zambia.password")
+
+  // At boot time, start refreshing from Zambia on a regular basis
+  timerService.register("Schedule Service", zambiaRefreshInterval)(refresh)
 
   /**
    * The timezone that the Zambia data is assuming.
@@ -114,7 +115,7 @@ class ScheduleServiceImpl(
    *
    * This is called by the TimerService periodically.
    */
-  def refresh(): Unit = {
+  private def refresh(now: Instant): Unit = {
     // For the moment, we are logging in each time
     // TODO: cache the login cookies, and try using those instead of re-logging in each time. The current
     // approach works, but is a bit of extra labor for both Remote and Zambia.
