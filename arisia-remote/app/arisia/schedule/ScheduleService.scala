@@ -6,11 +6,12 @@ import java.util.concurrent.atomic.AtomicReference
 import scala.concurrent.duration._
 import arisia.db.DBService
 import arisia.models.{Schedule, ProgramItemTimestamp}
+import arisia.util.Done
 import doobie._
 import doobie.implicits._
 import play.api.{Configuration, Logging}
 import play.api.libs.json.Json
-import play.api.libs.ws.{WSClient, WSCookie}
+import play.api.libs.ws.{WSCookie, WSClient}
 
 import scala.concurrent.{Future, ExecutionContext}
 
@@ -29,7 +30,8 @@ trait ScheduleService {
 class ScheduleServiceImpl(
   dbService: DBService,
   ws: WSClient,
-  config: Configuration
+  config: Configuration,
+  queueService: ScheduleQueueService
 )(
   implicit ec: ExecutionContext
 ) extends ScheduleService with Logging {
@@ -73,6 +75,11 @@ class ScheduleServiceImpl(
   val _theSchedule: AtomicReference[ScheduleCache] =
     new AtomicReference(ScheduleCache("{\"program\":[], \"people\": []}"))
 
+  def setSchedule(cache: ScheduleCache): Future[Done] = {
+    _theSchedule.set(cache)
+    queueService.setSchedule(cache.parsed)
+  }
+
   final val scheduleRowName: String = "scheduleJson"
 
   val loadInitialScheduleQuery: ConnectionIO[String] =
@@ -88,7 +95,7 @@ class ScheduleServiceImpl(
   // At boot time, load the last-known version of the schedule:
   dbService.run(loadInitialScheduleQuery).map { json =>
     logger.info(s"Schedule loaded from DB -- size ${json.length}")
-    _theSchedule.set(ScheduleCache(json))
+    setSchedule(ScheduleCache(json))
   }
 
   def logIntoZambia(): Future[Seq[WSCookie]] = {
@@ -121,17 +128,16 @@ class ScheduleServiceImpl(
             logger.info(s"Refresh -- schedule hasn't changed")
           } else {
             logger.info(s"Refreshed the schedule from Zambia -- size ${json.length}")
-            // TODO: don't actually set the cache until we validate that the jsonp validates:
             val cacheable = ScheduleCache(json)
             try {
               // For the moment, this can throw Exceptions.
               // TODO: make this pathway non-Exception-centric.
               val parsed = cacheable.parsed
               // Save it in the DB:
-              dbService.run(updateScheduleStatement(json)).map { _ =>
+              dbService.run(updateScheduleStatement(json)).flatMap { _ =>
                 logger.info(s"Saved new Schedule in the database")
                 // Once that's done, cache it:
-                _theSchedule.set(ScheduleCache(json))
+                setSchedule(ScheduleCache(json))
               }
             } catch {
               case ex: Exception => {

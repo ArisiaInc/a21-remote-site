@@ -53,7 +53,9 @@ object ProgramItemTime {
   }
 }
 
-case class ProgramItemTimestamp(t: Instant)
+case class ProgramItemTimestamp(t: Instant) {
+  def toLong: Long = t.toEpochMilli
+}
 object ProgramItemTimestamp {
   implicit val reads: Reads[ProgramItemTimestamp] =
     JsUtils.stringReads(str => new ProgramItemTimestamp(Instant.parse(str)))
