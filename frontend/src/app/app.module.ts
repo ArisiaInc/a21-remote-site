@@ -15,7 +15,7 @@ import { InfodeskComponent } from './infodesk/infodesk.component';
 import { SafetyComponent } from './safety/safety.component';
 import { IrtComponent } from './irt/irt.component';
 import { RoomComponent } from './programming/room/room.component';
-import { ProgramItemPanelistsPipe } from './_pipes/program-item-panelists.pipe';
+import { PipesModule } from './pipes/pipes.module';
 
 @NgModule({
   declarations: [
@@ -29,7 +29,6 @@ import { ProgramItemPanelistsPipe } from './_pipes/program-item-panelists.pipe';
     SafetyComponent,
     IrtComponent,
     RoomComponent,
-    ProgramItemPanelistsPipe,
   ],
   imports: [
     BrowserModule,
@@ -37,8 +36,8 @@ import { ProgramItemPanelistsPipe } from './_pipes/program-item-panelists.pipe';
     SharedModule,
     HttpClientModule,
     NgbModule,
+    PipesModule,
   ],
-  providers: [],
   bootstrap: [AppComponent],
   entryComponents: [InfodeskComponent, SafetyComponent, IrtComponent]
 })

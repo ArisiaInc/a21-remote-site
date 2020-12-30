@@ -1,11 +1,19 @@
 package arisia.models
 
 import play.api.libs.json._
+import com.roundeights.hasher.Implicits._
+import scala.language.postfixOps
 
 /**
  * The representation of the entire schedule.
  */
-case class Schedule(program: List[ProgramItem], people: List[ProgramPerson])
+case class Schedule(program: List[ProgramItem], people: List[ProgramPerson]) {
+  lazy val json: String = Json.toJson(this).toString()
+  // Note that we do *not* care about a cryptographically-sound hash here -- we just need something large and
+  // well-enough-distributed to make hash collisions unlikely. So MD5 should suffice -- we don't need to waste
+  // extra cycles on SHA256 or BCrypt:
+  lazy val hash: String = json.md5.hex
+}
 
 object Schedule {
   implicit val scheduleFormat: Format[Schedule] = Json.format
@@ -14,8 +22,9 @@ object Schedule {
 
   /**
    * Given a dump from Zambia, parse that into our internal structure.
+   *
+   * TODO: this is mostly obsolete, since we are now getting JSON from Zambia instead of KonOpas JSONP.
    */
-  // TODO: wrap this in some sort of validation type, so we can cope cleanly with errors:
   def parseKonOpas(konopasJsonp: String): Schedule = {
     // We are assuming the format of the JSONP pretty precisely -- it's generated, so we should be able to count
     // on it. This is a known fragility, but we aren't pretending that this is general-purpose at this stage of the

@@ -45,12 +45,17 @@ DELETE  /admin/manageAdmins/:name    arisia.controllers.AdminController.removeAd
 GET     /admin/manageEarlyAccess          arisia.controllers.AdminController.manageEarlyAccess()
 POST    /admin/manageEarlyAccess          arisia.controllers.AdminController.addEarlyAccess()
 DELETE  /admin/manageEarlyAccess/:name    arisia.controllers.AdminController.removeEarlyAccess(name)
+# This is mainly internal, for testing; we might add a UI if we find a use for it, but don't do that casually:
+POST    /admin/meeting               arisia.controllers.AdminController.startMeeting()
+DELETE  /admin/meeting/:meetingId    arisia.controllers.AdminController.endMeeting(meetingId)
 # Note the non-standard path, which is configured in application.conf, so that frontend
 # can own /assets
 GET     /admin/assets/*file          controllers.Assets.versioned(path="/public", file: Asset)
 
 # Zambia emulator, providing test data
 GET     /test/fakeschedule           arisia.controllers.FakeZambiaController.getSchedule()
+# TODO: remove
+GET     /test/zoomcall               arisia.controllers.ZoomController.test()
 
 # During development, get the Swagger UI at:
 #   http://localhost:9000/docs/swagger-ui/index.html?url=/admin/assets/swagger.json

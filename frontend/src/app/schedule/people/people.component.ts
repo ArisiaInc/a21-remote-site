@@ -1,6 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { ProgramPerson } from '@app/_models';
 import { ScheduleService } from '@app/_services/schedule.service';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+function personName(person: ProgramPerson): string {
+  return Array.isArray(person.name) ? person.name.join(' ') : person.name;
+}
 
 @Component({
   selector: 'app-people',
@@ -8,14 +14,18 @@ import { ScheduleService } from '@app/_services/schedule.service';
   styleUrls: ['./people.component.scss']
 })
 export class PeopleComponent implements OnInit {
-  people: ProgramPerson[] = [];
+  people$!: Observable<ProgramPerson[]>;
 
   constructor(
     private scheduleService: ScheduleService
   ) { }
 
   ngOnInit(): void {
-    this.scheduleService.get_people().subscribe(people => this.people = people.sort((a, b)=> (Array.isArray(a.name) ? a.name.join(' ') : a.name).localeCompare(Array.isArray(b.name) ? b.name.join(' ') : b.name)))
+    this.people$ = this.scheduleService.get_people().pipe(
+      map(people => [...people].sort(
+        (a, b) => (
+          personName(a).localeCompare(personName(b)))))
+    );
   }
 
 }
