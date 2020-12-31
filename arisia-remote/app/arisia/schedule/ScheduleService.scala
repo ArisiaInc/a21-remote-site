@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicReference
 import scala.jdk.DurationConverters._
 import scala.concurrent.duration._
 import arisia.db.DBService
-import arisia.models.{ProgramItemTime, ProgramItem, ProgramItemTimestamp, Schedule, ProgramItemId}
+import arisia.models.{ProgramItemTime, ProgramItem, ProgramItemTimestamp, Schedule, ProgramItemId, ProgramItemTitle}
 import arisia.timer.TimerService
 import arisia.util.Done
 import doobie._
@@ -90,13 +90,14 @@ class ScheduleServiceImpl(
       base.program
         // TODO: filter so this only happens for the Zoom rooms
         .map { item =>
-          val title = s""
+          val prepTitle = item.title.map(t => ProgramItemTitle(s"Prep - ${t.v}"))
           val itemStart = item.when
           val prepStart = itemStart.minus(schedulePrepStart.toJava)
           val prepTime = item.time.map(time => ProgramItemTime(time.t.minus(schedulePrepStart.toJava)))
           val zoomEnd = itemStart.plus(item.duration.toJava)
           item.copy(
             id = ProgramItemId(item.id.v + "-prep"),
+            title = prepTitle,
             prepFor = Some(item.id),
             time = prepTime,
             timestamp = Some(ProgramItemTimestamp(prepStart)),
