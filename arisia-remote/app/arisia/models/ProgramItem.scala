@@ -1,11 +1,13 @@
 package arisia.models
 
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, LocalTime, Instant}
+import java.time.{Instant, LocalDate, LocalTime}
 
 import arisia.util._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
+
+import scala.concurrent.duration._
 
 case class ProgramItemId(v: String) extends StdString
 object ProgramItemId extends StdStringUtils(new ProgramItemId(_))
@@ -82,8 +84,18 @@ case class ProgramItem(
   loc: List[ProgramItemLoc],
   people: List[ProgramItemPerson],
   desc: Option[ProgramItemDesc],
-  timestamp: Option[ProgramItemTimestamp]
-)
+  timestamp: Option[ProgramItemTimestamp],
+  prepFor: Option[ProgramItemId],
+  zoomStart: Option[ProgramItemTimestamp],
+  zoomEnd: Option[ProgramItemTimestamp]
+) {
+  lazy val when: Instant = {
+    timestamp.map(_.t).getOrElse(Instant.MIN)
+  }
+  lazy val duration: FiniteDuration = {
+    mins.map(_.toInt.minutes).getOrElse(0.minutes)
+  }
+}
 object ProgramItem {
   implicit val fmt: Format[ProgramItem] = (
     (JsPath \ "id").format[ProgramItemId] and
@@ -95,6 +107,12 @@ object ProgramItem {
       (JsPath \ "loc").formatWithDefault[List[ProgramItemLoc]](List.empty) and
       (JsPath \ "people").formatWithDefault[List[ProgramItemPerson]](List.empty) and
       (JsPath \ "desc").formatNullable[ProgramItemDesc] and
-      (JsPath \ "timestamp").formatNullable[ProgramItemTimestamp]
+      // Everything below here is synthesized by the backend
+      (JsPath \ "timestamp").formatNullable[ProgramItemTimestamp] and
+      // Set iff this is a prep session
+      (JsPath \ "prepFor").formatNullable[ProgramItemId] and
+      // The times that the Zoom meetings starts/stops -- only set for prep sessions
+      (JsPath \ "zoomStart").formatNullable[ProgramItemTimestamp] and
+      (JsPath \ "zoomEnd").formatNullable[ProgramItemTimestamp]
     )(ProgramItem.apply, unlift(ProgramItem.unapply))
 }
