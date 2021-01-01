@@ -5,9 +5,10 @@ import doobie.implicits._
 import cats._
 import cats.effect._
 import cats.implicits._
-import play.api.Configuration
+import play.api.{Configuration, Logging}
 
 import scala.concurrent.{Future, ExecutionContext}
+import scala.util.{Failure, Success}
 
 /**
  * This service does the actual interfacing with the database.
@@ -44,7 +45,7 @@ class DBServiceImpl(
   config: Configuration
 )(
   implicit ec: ExecutionContext
-) extends DBService {
+) extends DBService with Logging {
   implicit val nonBlockingCS = IO.contextShift(ec)
 
   val xa = Transactor.fromDriverManager[IO](
@@ -54,6 +55,10 @@ class DBServiceImpl(
 
   def run[T](op: ConnectionIO[T]): Future[T] = {
     val io = op.transact(xa)
-    io.unsafeToFuture()
+    io.unsafeToFuture().andThen {
+      // Log all DB errors:
+      case Failure(th) => logger.error(s"Error from DB: $th")
+      case Success(value) =>
+    }
   }
 }

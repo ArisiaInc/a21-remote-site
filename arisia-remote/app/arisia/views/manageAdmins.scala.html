@@ -8,7 +8,7 @@
   "Admin",
   "/admin/manageAdmins/"
 ) {
-  @helper.form(action = arisia.controllers.routes.AdminController.addAdmin()) {
-    @helper.inputText(newAdminForm("username"))
+  @b4.horizontal.form(arisia.controllers.routes.AdminController.addAdmin(), "col-md-2", "col-md-10") { implicit hfc =>
+    @b4.text(newAdminForm("username"), Symbol("_label") -> "Username", Symbol("placeholder") -> "Login username from Registration")
   }
 }
