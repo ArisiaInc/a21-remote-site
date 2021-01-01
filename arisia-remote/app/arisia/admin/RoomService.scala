@@ -1,7 +1,7 @@
 package arisia.admin
 
 import arisia.db.DBService
-import arisia.models.ZoomRoom
+import arisia.models.{ZoomRoom, ProgramItemLoc}
 import play.api.Logging
 import doobie._
 import doobie.implicits._
@@ -15,6 +15,8 @@ trait RoomService {
   def getRooms(): Future[List[ZoomRoom]]
   def addRoom(room: ZoomRoom): Future[Int]
   def editRoom(room: ZoomRoom): Future[Int]
+
+  def getRoomForZambia(loc: ProgramItemLoc): Future[Option[ZoomRoom]]
 }
 
 class RoomServiceImpl(
@@ -55,4 +57,14 @@ class RoomServiceImpl(
         .update
         .run
     )
+
+  def getRoomForZambia(loc: ProgramItemLoc): Future[Option[ZoomRoom]] = {
+    dbService.run(
+      sql"""
+            SELECT did, display_name, zoom_id, zambia_name, manual, webinar
+              FROM zoom_rooms"""
+        .query[ZoomRoom]
+        .option
+    )
+  }
 }
