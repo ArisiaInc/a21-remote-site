@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
   styleUrls: ['./creator-list.component.scss']
 })
 export class CreatorListComponent implements OnInit {
-  @Input() creators!: Creator[];
+  @Input() creators: Creator[] = [];
 
   constructor() { }
 

@@ -1,27 +1,27 @@
 import { Component, OnInit } from '@angular/core';
-import { Creator } from '@app/_models';
 import { Observable } from 'rxjs';
+import { Creator } from '@app/_models';
 import { ActivatedRoute } from '@angular/router';
 import { CreatorService } from '@app/_services';
 import { pluck, map, switchMap } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-artist',
-  templateUrl: './artist.component.html',
-  styleUrls: ['./artist.component.scss']
+  selector: 'app-dealer',
+  templateUrl: './dealer.component.html',
+  styleUrls: ['./dealer.component.scss']
 })
-export class ArtistComponent implements OnInit {
-  artist$!: Observable<Creator | undefined>;
+export class DealerComponent implements OnInit {
+  dealer$!: Observable<Creator | undefined>;
 
   constructor(private route: ActivatedRoute,
     private creatorService: CreatorService) { }
 
   ngOnInit(): void {
-    this.artist$ = this.route.params.pipe(
+    this.dealer$ = this.route.params.pipe(
       pluck('id'),
-      switchMap(id => this.creatorService.get_artists([id])),
+      switchMap(id => this.creatorService.get_dealers([id])),
       map(x => x.length ? x[0] : undefined)
-    );
+    )
   }
 
 }

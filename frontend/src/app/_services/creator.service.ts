@@ -5,101 +5,19 @@ import { Observable, of, pipe, OperatorFunction } from 'rxjs';
 import { Creator } from '@app/_models';
 import { flatMap, filter, toArray } from 'rxjs/operators';
 
-const fake_data: Creator[] = [
-  {
-    id: '1',
-    name: 'Mr. Artsypants',
-    summary: 'i am an artist',
-    links: {
-      web: "http://google.com",
-      preferred: "web"
-    },
-    images: [{
-      creator_id: '1',
-      url: "https://homepages.cae.wisc.edu/~ece533/images/baboon.png",
-      alt: "This is a picture of a beautiful babboon.",
-      title: "babboon at rest"
-    }]
-  },
-  {
-    id: '2',
-    name: 'Mx. Artsypants',
-    summary: 'i am a better artist',
-    links: {
-      insta: "http://instagram.com",
-      web: "http://google.com",
-      preferred: "insta"
-    },
-    images: [{
-      creator_id: '2',
-      url: "https://homepages.cae.wisc.edu/~ece533/images/airplane.png",
-      alt: "This is a picture of a more beautiful airplane.",
-      title: "airplane in motion"
-    }]
-  },
-  {
-    id: '3',
-    name: 'Mr. Artsypants 3',
-    summary: 'i am an artist',
-    images: [{
-      creator_id: '3',
-      url: "https://homepages.cae.wisc.edu/~ece533/images/baboon.png",
-      alt: "This is a picture of a beautiful babboon.",
-      title: "babboon at rest"
-    }]
-  },
-  {
-    id: '4',
-    name: 'Mr. Artsypants 4',
-    summary: 'i am an artist',
-    images: [{
-      creator_id: '4',
-      url: "https://homepages.cae.wisc.edu/~ece533/images/baboon.png",
-      alt: "This is a picture of a beautiful babboon.",
-      title: "babboon at rest"
-    }]
-  },
-  {
-    id: '5',
-    name: 'Mr. Artsypants 5',
-    summary: 'i am an artist',
-    images: [{
-      creator_id: '5',
-      url: "https://homepages.cae.wisc.edu/~ece533/images/baboon.png",
-      alt: "This is a picture of a beautiful babboon.",
-      title: "babboon at rest"
-    }]
-  },
-  {
-    id: '6',
-    name: 'Mr. Artsypants 6',
-    summary: 'i am an artist',
-    images: [{
-      creator_id: '6',
-      url: "https://homepages.cae.wisc.edu/~ece533/images/baboon.png",
-      alt: "This is a picture of a beautiful babboon.",
-      title: "babboon at rest"
-    }]
-  },
-  {
-    id: '7',
-    name: 'Mr. Artsypants 7 ',
-    summary: 'i am an artist',
-    images: [{
-      creator_id: '7',
-      url: "https://homepages.cae.wisc.edu/~ece533/images/baboon.png",
-      alt: "This is a picture of a beautiful babboon.",
-      title: "babboon at rest"
-    }]
-  },
-]
-
 @Injectable({
   providedIn: 'root'
 })
 export class CreatorService {
 
   constructor( private http: HttpClient) { }
+
+  get_dealer_data(local: boolean) {
+    if (local) {
+      return this.http.get<Creator[]>(`assets/data/dealers_1231_1.json`);
+    }
+    return this.http.get<Creator[]>(`${environment.backend}/dealers`);
+  }
 
   make_id_filter(ids?: string[]) : OperatorFunction<Creator[], Creator[]> {
     if (ids) {
@@ -113,16 +31,14 @@ export class CreatorService {
   }
 
   get_artists(ids?: string[]) : Observable<Creator[]>{
-    return of(fake_data).pipe(
+    return this.http.get<Creator[]>(`${environment.backend}/artists`).pipe(
       this.make_id_filter(ids)
     );
-    /*return this.http.get<Creator[]>(`${environment.backend}/artists`).pipe(
-      this.make_id_filter(ids)
-    );*/
   }
 
   get_dealers(ids?: string[]) : Observable<Creator[]>{
-    return this.http.get<Creator[]>(`${environment.backend}/dealers`).pipe(
+    // change the below value to false to get from the server
+    return this.get_dealer_data(true).pipe(
       this.make_id_filter(ids)
     );
   }

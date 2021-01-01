@@ -12,6 +12,7 @@ export class CreatorPageComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+    // TODO check for undefined creator & handle. 404?
   }
 
   nameFromLinkType(linkType: string) {

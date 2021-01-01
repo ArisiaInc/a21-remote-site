@@ -15,6 +15,7 @@ export interface Creator {
     summary: string;
     description?: string;
     images: CreatorImage[];
+    order: number;
 }
 
 // TODO do we need priority/order for images?
@@ -25,4 +26,5 @@ export interface CreatorImage {
     alt: string;
     title: string;
     description?: string;
+    image_id: string;
 }

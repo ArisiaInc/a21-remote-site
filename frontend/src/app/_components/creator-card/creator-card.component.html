@@ -1,10 +1,11 @@
 <div  class="creator card">
-    <img [routerLink]="'/' + component + '/' + creator.id" src="{{creator.images[0].url}}" class="card-img-top" alt="{{creator.images[0].alt}}" />
+    <img [routerLink]="'/' + component + '/' + creator.id" [src]="creator.images[0].url" class="card-img-top" [alt]="creator.images[0].alt" />
     <div [routerLink]="'/' + component + '/' + creator.id" class="card-body">
         <h5 class="card-title">{{creator.name}}</h5>
         <p class="card-text">{{creator.summary}}</p>
     </div>
     <ul class="list-group list-group-flush" *ngIf="creator.links">
-        <li class="list-group-item"><a href="{{creator.links[creator.links.preferred]}}" target="_blank">{{creator.name}}'s {{nameFromLinkType(creator.links.preferred)}}</a></li>
+        <!-- TODO fix possessive pluralization s's case-->
+        <li class="list-group-item"><a [href]="creator.links[creator.links.preferred]" target="_blank">{{creator.name}}'s {{nameFromLinkType(creator.links.preferred)}}</a></li>
     </ul>
 </div>

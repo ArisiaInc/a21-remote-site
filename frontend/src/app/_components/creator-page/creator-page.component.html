@@ -1,18 +1,10 @@
 <app-breadcrumb [lastCrumbText]="creator.name"></app-breadcrumb>
 <div class="row creator-page">
-    <div class="col-sm-4 col-6">
-        <div class="row">
-            <div class="col-12">
-                <h3>{{creator.name}}</h3>
-                <p>{{creator.description ? creator.description : creator.summary}}</p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-12">
-                <div class="list-group" *ngIf="creator.links">
-                    <a href="{{item.value}}" target="blank" class="list-group-item list-group-item-action" *ngFor="let item of linksToDisplay() | keyvalue">{{nameFromLinkType(item.key)}}</a>
-                </div>
-            </div>
+    <div class="col-sm-4 col-12">
+        <h3>{{creator.name}}</h3>
+        <p>{{creator.description ? creator.description : creator.summary}}</p>
+        <div class="list-group" *ngIf="creator.links">
+            <a href="{{item.value}}" target="blank" class="list-group-item list-group-item-action" *ngFor="let item of linksToDisplay() | keyvalue">{{nameFromLinkType(item.key)}}</a>
         </div>
     </div>
     <div class="col-12 col-sm-8">
