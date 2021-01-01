@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, ReplaySubject, Observable, of, zip, OperatorFunction, timer } from 'rxjs';
 import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck, every, switchMap } from 'rxjs/operators';
-import { ProgramItem, ProgramPerson, ProgramFilter, Room } from '@app/_models';
-
-import { program, people } from "test_data/konopas"
 import { HttpClient, HttpResponse, HttpErrorResponse } from '@angular/common/http';
+
+import { ProgramItem, ProgramPerson, ProgramFilter, Room } from '@app/_models';
 import { environment } from '@environments/environment';
 
 export enum ScheduleState {
@@ -19,6 +18,8 @@ export interface ScheduleStatus {
   error?: HttpErrorResponse;
   lastUpdate?: Date;
 }
+
+const tzoffset: number = new Date().getTimezoneOffset();
 
 export class ScheduleEvent {
   constructor (item: ProgramItem) {
@@ -51,7 +52,16 @@ export class ScheduleEvent {
 
   getTimeString(): string {
     if (!this.timeString) {
-      this.timeString = this.start.toLocaleTimeString(undefined, {hour:'numeric', minute: 'numeric', hour12: true});
+      const localTime = this.start.toLocaleTimeString(undefined, {hour:'numeric', minute: 'numeric', hour12: true});
+      // Check only works when outside daylight savings time. We could
+      // change to always generate the EST time and compare the
+      // strings instead, but that would be slower.
+      if (tzoffset === 5 * 60) {
+        this.timeString = localTime;
+      } else {
+        const estTime = this.start.toLocaleTimeString(undefined, {hour: 'numeric', minute: 'numeric', hour12: true, timeZone: 'EST'});
+        this.timeString = `${localTime} (${estTime} EST)`
+      }
     }
     return this.timeString;
   }

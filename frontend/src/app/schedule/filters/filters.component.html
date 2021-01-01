@@ -3,10 +3,10 @@
         <div class="card">
             <h6 class="card-header">Day</h6>
             <ul class="list-group list-group-flush">
-                <li (click)="onChangeDate($event, 15)" class="list-group-item list-group-item-action filter_item">Friday</li>
-                <li (click)="onChangeDate($event, 16)" class="list-group-item list-group-item-action filter_item">Saturday</li>
-                <li (click)="onChangeDate($event, 17)" class="list-group-item list-group-item-action filter_item">Sunday</li>
-                <li (click)="onChangeDate($event, 18)" class="list-group-item list-group-item-action filter_item">Monday</li>
+              <li *ngFor="let day of days"
+                  (click)="onChangeDate($event, day)"
+                  class="list-group-item list-group-item-action filter_item"
+                  >{{dayWeekday[day]}}</li>
             </ul>
         </div>
     </div>

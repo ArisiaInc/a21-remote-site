@@ -20,7 +20,25 @@ export class FiltersComponent implements OnInit {
 
   constructor(public scheduleService: ScheduleService) { }
 
+  days: number[] = [];
+  dayWeekday: {[_: string]: string} = {
+    15: 'Friday',
+    16: 'Saturday',
+    17: 'Sunday',
+    18: 'Monday',
+    19: 'Tuesday'};
+
   ngOnInit(): void {
+    const tzoffset: number = new Date().getTimezoneOffset();
+    // Allows filtering for events from 2020-01-15T17:30 EST to
+    // 2020-01-18T15:30 EST
+    this.days = [16, 17, 18];
+    if (tzoffset >= -1.5 * 60) {
+      this.days.unshift(15);
+    }
+    if (tzoffset <= -4.5 * 60) {
+      this.days.push(19);
+    }
   }
 
   onChange(event:MouseEvent, prop:Property, value:string) {
