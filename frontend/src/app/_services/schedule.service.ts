@@ -29,6 +29,11 @@ export interface StructuredScheduleItems {
   [date: string]: {[time: string]: ProgramItem[]}
 }
 
+export interface GamingMeta {
+    id: string;
+    loc: string[];
+  }
+
 const RELOAD_TIMER = 10 * 1000;
 const USE_FAKE_DATA = false;
 
@@ -184,6 +189,7 @@ export class ScheduleService {
   }
 
   get_featured_events(): Observable<ProgramItem[]> {
+    // TODO turn this into filtering on the featured tag (is that how it shows up?)
     // for testing:
     return of(['13','16','29']).pipe(
     //return this.http.get<String[]>(`${environment.backend}/schedule/featured`).pipe(
@@ -194,6 +200,15 @@ export class ScheduleService {
         toArray()
       )),
     );
+  }
+
+
+  // TODO merge this in with the program data from the db ?
+  get_gaming_meta(local: false): Observable<GamingMeta[]> {
+    if (local) {
+      return this.http.get<GamingMeta[]>('assets/data/gaming_11_1.json');
+    }
+    return this.http.get<GamingMeta[]>(`${environment.backend}/schedule/gamingmeta`);
   }
 
   get_rooms(): Observable<Room[]> {
