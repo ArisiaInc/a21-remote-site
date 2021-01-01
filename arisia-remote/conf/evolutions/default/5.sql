@@ -1,6 +1,7 @@
 -- !Ups
 
 CREATE TABLE zoom_rooms (
+  did integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   display_name text NOT NULL,
   zoom_id text NOT NULL,
   zambia_name text DEFAULT '' NOT NULL,

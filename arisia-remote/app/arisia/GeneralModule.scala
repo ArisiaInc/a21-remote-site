@@ -1,7 +1,7 @@
 package arisia
 
 import akka.actor.ActorSystem
-import arisia.admin.{AdminServiceImpl, AdminService}
+import arisia.admin.{RoomService, AdminServiceImpl, AdminService, RoomServiceImpl}
 import arisia.auth.{LoginService, LoginServiceImpl}
 import arisia.db.{DBServiceImpl, DBService}
 import com.softwaremill.macwire.wire
@@ -24,6 +24,7 @@ trait GeneralModule {
   lazy val adminService: AdminService = wire[AdminServiceImpl]
   lazy val dbService: DBService = wire[DBServiceImpl]
   lazy val loginService: LoginService = wire[LoginServiceImpl]
+  lazy val roomService: RoomService = wire[RoomServiceImpl]
   lazy val scheduleQueueService: ScheduleQueueService = wire[ScheduleQueueServiceImpl]
   lazy val scheduleService: ScheduleService = wire[ScheduleServiceImpl]
   lazy val starService: StarService = wire[StarServiceImpl]

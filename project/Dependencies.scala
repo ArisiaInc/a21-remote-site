@@ -22,6 +22,8 @@ object Dependencies {
 
   val macwireVersion = "2.3.7"
 
+  val playBootstrapVersion = "1.6.1-P28-B4"
+
   val postgresDriverVersion = "42.2.18"
 
   val scalaTestVersion = "3.2.2"
@@ -45,6 +47,8 @@ object Dependencies {
 
   val macwireMacros = "com.softwaremill.macwire" %% "macros" % macwireVersion % "provided"
   val macwireUtil = "com.softwaremill.macwire" %% "util" % macwireVersion
+
+  val playBootstrap = "com.adrianhurt" %% "play-bootstrap" % playBootstrapVersion
 
   val scalactic = "org.scalactic" %% "scalactic" % scalaTestVersion
   val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion % "test"

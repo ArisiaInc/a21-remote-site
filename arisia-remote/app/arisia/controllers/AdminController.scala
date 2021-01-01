@@ -1,8 +1,8 @@
 package arisia.controllers
 
-import arisia.admin.AdminService
+import arisia.admin.{RoomService, AdminService}
 import arisia.auth.LoginService
-import arisia.models.{LoginName, LoginUser, Permissions, LoginId}
+import arisia.models.{LoginUser, LoginId, Permissions, ZoomRoom, LoginName}
 import arisia.zoom.ZoomService
 import play.api.Logging
 import play.api.mvc._
@@ -18,7 +18,8 @@ class AdminController (
   val controllerComponents: ControllerComponents,
   adminService: AdminService,
   loginService: LoginService,
-  zoomService: ZoomService
+  zoomService: ZoomService,
+  roomService: RoomService
 )(
   implicit ec: ExecutionContext
 ) extends BaseController
@@ -69,6 +70,8 @@ class AdminController (
     }
   }
 
+  def superAdminsOnly(f: AdminInfo => Result): EssentialAction = superAdminsOnlyAsync(info => Future.successful(f(info)))
+
   def home(): EssentialAction = adminsOnly { info =>
     Ok(arisia.views.html.adminHome(info.permissions))
   }
@@ -78,6 +81,69 @@ class AdminController (
       "username" -> nonEmptyText
     )(LoginId.apply)(LoginId.unapply)
   )
+
+  /* ********************
+   *
+   * Zoom Room CRUD
+   */
+
+  val roomForm = Form(
+    mapping(
+      "id" -> number,
+      "displayName" -> nonEmptyText,
+      "zoomId" -> nonEmptyText,
+      "zambiaName" -> nonEmptyText,
+      "isManual" -> boolean,
+      "isWebinar" -> boolean
+    )(ZoomRoom.apply)(ZoomRoom.unapply)
+  )
+
+  def manageZoomRooms(): EssentialAction = superAdminsOnlyAsync { info =>
+    implicit val request = info.request
+
+    roomService.getRooms().map { rooms =>
+      Ok(arisia.views.html.manageZoomRooms(rooms))
+    }
+  }
+
+  def createRoom(): EssentialAction = superAdminsOnly { info =>
+    implicit val request = info.request
+
+    Ok(arisia.views.html.editRoom(roomForm.fill(ZoomRoom.empty)))
+  }
+  def showEditRoom(id: Int): EssentialAction = superAdminsOnlyAsync { info =>
+    implicit val request = info.request
+
+    roomService.getRooms().map { rooms =>
+      rooms.find(_.id == id) match {
+        case Some(room) => Ok(arisia.views.html.editRoom(roomForm.fill(room)))
+        case _ => BadRequest(s"$id isn't a known Room!")
+      }
+    }
+  }
+
+  def roomModified(): EssentialAction = superAdminsOnlyAsync { info =>
+    implicit val request = info.request
+
+    roomForm.bindFromRequest().fold(
+      formWithErrors => {
+        // TODO: actually display the error!
+        Future.successful(BadRequest(arisia.views.html.editRoom(formWithErrors)))
+      },
+      room => {
+        val fut =
+          if (room.id == 0) {
+            roomService.addRoom(room)
+          } else {
+            roomService.editRoom(room)
+          }
+
+        fut.map { _ =>
+          Redirect(arisia.controllers.routes.AdminController.manageZoomRooms())
+        }
+      }
+    )
+  }
 
   /* ********************
    *
