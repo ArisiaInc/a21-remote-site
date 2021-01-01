@@ -175,6 +175,7 @@ class ScheduleQueueServiceImpl(
         _runningItemsQueue.getAndUpdate(_.tail)
         checkMeetingsToEnd(now)
       }
+      case _ => // Nothing running
     }
   }
 

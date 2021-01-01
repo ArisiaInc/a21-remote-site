@@ -290,4 +290,33 @@ class AdminController (
   def removeEarlyAccess(idStr: String): EssentialAction = adminsOnlyAsync {
     removePermission(idStr, _.removeEarlyAccess(_), routes.AdminController.manageEarlyAccess())
   }
+
+  /* ******************
+   *
+   * Tech staff permission
+   *
+   */
+
+  private def showManageTech()(implicit request: Request[AnyContent]) =
+    showPermissionMembers(
+      _.getTech(),
+      arisia.views.html.manageTech(_, usernameForm.fill(LoginId("")))
+    )
+
+  def manageTech(): EssentialAction = adminsOnlyAsync { info =>
+    implicit val request = info.request
+    showManageTech()
+  }
+
+  def addTech(): EssentialAction = adminsOnlyAsync {
+    addPermission(
+      _.addTech(_),
+      showManageTech()(_),
+      routes.AdminController.manageTech()
+    )
+  }
+
+  def removeTech(idStr: String): EssentialAction = adminsOnlyAsync {
+    removePermission(idStr, _.removeTech(_), routes.AdminController.manageTech())
+  }
 }

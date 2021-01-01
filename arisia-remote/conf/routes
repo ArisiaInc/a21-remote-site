@@ -49,8 +49,11 @@ DELETE  /admin/manageAdmins/:name    arisia.controllers.AdminController.removeAd
 GET     /admin/manageEarlyAccess          arisia.controllers.AdminController.manageEarlyAccess()
 POST    /admin/manageEarlyAccess          arisia.controllers.AdminController.addEarlyAccess()
 DELETE  /admin/manageEarlyAccess/:name    arisia.controllers.AdminController.removeEarlyAccess(name)
-GET     /admin/rooms                 arisia.controllers.AdminController.manageZoomRooms()
+GET     /admin/manageTech            arisia.controllers.AdminController.manageTech()
+POST    /admin/manageTech            arisia.controllers.AdminController.addTech()
+DELETE  /admin/manageTech/:name      arisia.controllers.AdminController.removeTech(name)
 
+GET     /admin/rooms                 arisia.controllers.AdminController.manageZoomRooms()
 GET     /admin/createRoom            arisia.controllers.AdminController.createRoom()
 GET     /admin/editRoom/:id          arisia.controllers.AdminController.showEditRoom(id: Int)
 POST    /admin/editRoom              arisia.controllers.AdminController.roomModified()

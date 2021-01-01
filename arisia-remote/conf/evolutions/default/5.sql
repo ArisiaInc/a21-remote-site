@@ -17,8 +17,12 @@ CREATE TABLE active_program_items (
   attendee_url text NOT NULL
 );
 
+ALTER TABLE permissions ADD COLUMN tech boolean DEFAULT FALSE NOT NULL;
+
 -- !Downs
 
 DROP TABLE zoom_rooms;
 
 DROP TABLE active_program_items;
+
+ALTER TABLE permissions DROP COLUMN tech;

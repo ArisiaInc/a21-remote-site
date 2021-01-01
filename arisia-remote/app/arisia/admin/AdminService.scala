@@ -30,6 +30,10 @@ trait AdminService {
   def getEarlyAccess(): Future[List[LoginId]]
   def addEarlyAccess(id: LoginId): Future[Int]
   def removeEarlyAccess(id: LoginId): Future[Int]
+
+  def getTech(): Future[List[LoginId]]
+  def addTech(id: LoginId): Future[Int]
+  def removeTech(id: LoginId): Future[Int]
 }
 
 class AdminServiceImpl(
@@ -99,4 +103,8 @@ class AdminServiceImpl(
   def addEarlyAccess(id: LoginId): Future[Int] = earlyAccess.addMember(id)
   def removeEarlyAccess(id: LoginId): Future[Int] = earlyAccess.removeMember(id)
 
+  lazy val tech = new PermissionColumn("tech")
+  def getTech(): Future[List[LoginId]] = tech.getMembers()
+  def addTech(id: LoginId): Future[Int] = tech.addMember(id)
+  def removeTech(id: LoginId): Future[Int] = tech.removeMember(id)
 }

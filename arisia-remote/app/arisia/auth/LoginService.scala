@@ -4,6 +4,8 @@ import arisia.db.DBService
 
 import scala.concurrent.duration._
 import arisia.models.{LoginUser, LoginId, BadgeNumber, Permissions, LoginName}
+import cats.data.OptionT
+import cats.implicits._
 import doobie.free.connection.ConnectionIO
 import play.api.libs.ws.WSClient
 import doobie._
@@ -16,7 +18,7 @@ trait LoginService {
   /**
    * Given credentials, says whether they match a known login.
    */
-  def checkLogin(id: String, password: String): Future[Option[LoginUser]]
+  def login(id: String, password: String): Future[Option[LoginUser]]
 
   /**
    * Fetch any additional permissions that this person might have.
@@ -44,6 +46,9 @@ class LoginServiceImpl(
   lazy val hardcodedAdmin: Seq[LoginId] =
     config.get[Seq[String]]("arisia.dev.admins").map(LoginId(_))
 
+  // We use OptionT to squish together Option and Future without making ourselves crazy:
+  type OptFutUser = OptionT[Future, LoginUser]
+
   /**
    * Check the passed-in login credentials.
    *
@@ -52,7 +57,8 @@ class LoginServiceImpl(
    * to CM's login page, and see if we get a success or error back. Conveniently for us, the next page includes the
    * member's badge name, so we pull that out at the same time.
    */
-  def checkLogin(id: String, password: String): Future[Option[LoginUser]] = {
+  private def checkLogin(id: String, password: String): OptFutUser = {
+    val result =
       // TODO: on principle, make this URL configurable
       ws.url("https://reg.arisia.org/kiosk/web_reg/index.php")
         // In case it gets antsy about XSS. Yes, we're lying to it, but it's our site, so it really isn't an issue:
@@ -96,10 +102,34 @@ class LoginServiceImpl(
           None
         }
       }
+
+    OptionT(result)
+  }
+
+  private def checkPermissions(initialUser: LoginUser): OptFutUser = {
+    val result: Future[Option[LoginUser]] = getPermissions(initialUser.id).map { perms =>
+      if (perms.tech)
+        Some(initialUser.copy(zoomHost = true))
+      else
+        Some(initialUser)
+    }
+    OptionT(result)
+  }
+
+  def login(idFromUser: String, password: String): Future[Option[LoginUser]] = {
+    // Normalize everything to lowercase:
+    val id = idFromUser.toLowerCase()
+    val result = for {
+      initialUser <- checkLogin(id, password)
+      withPermissions <- checkPermissions(initialUser)
+    }
+      yield withPermissions
+
+    result.value
   }
 
   def fetchPermissionsQuery(id: LoginId): ConnectionIO[Option[Permissions]] =
-    sql"""SELECT super_admin, admin, early_access
+    sql"""SELECT super_admin, admin, early_access, tech
          |FROM permissions
          |WHERE username = ${id.v}""".stripMargin
     .query[Permissions]
