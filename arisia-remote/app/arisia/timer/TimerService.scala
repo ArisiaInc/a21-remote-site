@@ -4,9 +4,12 @@ import java.time.Instant
 import java.util.concurrent.atomic.AtomicReference
 
 import akka.actor.Cancellable
+import arisia.general.{LifecycleItem, LifecycleService}
 import arisia.schedule.ScheduleService
+import arisia.util.Done
 import play.api.{Configuration, Logging}
 
+import scala.concurrent.Future
 import scala.concurrent.duration._
 
 /**
@@ -18,16 +21,14 @@ import scala.concurrent.duration._
  */
 trait TimerService {
   def register(name: String, interval: FiniteDuration)(cb: Instant => Unit): Unit
-
-  def init(): Unit
-  def shutdown(): Unit
 }
 
 class TimerServiceImpl(
   ticker: Ticker,
   time: TimeService,
-  config: Configuration
-) extends TimerService with Logging {
+  config: Configuration,
+  val lifecycleService: LifecycleService
+) extends TimerService with LifecycleItem with Logging {
 
   lazy val initialDelay = config.get[FiniteDuration]("arisia.timer.initial.delay")
   lazy val interval = config.get[FiniteDuration]("arisia.timer.interval")
@@ -61,9 +62,10 @@ class TimerServiceImpl(
     )
   }
 
-  def init(): Unit = {}
-
-  def shutdown(): Unit = {
+  val lifecycleName = "TimerService"
+  lifecycleService.register(this)
+  override def shutdown(): Future[Done] = {
     registry.get().map(_.cancel())
+    Future.successful(Done)
   }
 }

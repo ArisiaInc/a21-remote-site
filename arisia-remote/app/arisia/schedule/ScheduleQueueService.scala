@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.{AtomicLong, AtomicReference}
 
 import arisia.admin.RoomService
 import arisia.db.DBService
+import arisia.general.{LifecycleItem, LifecycleService}
 import arisia.models.{ProgramItem, ZoomRoom, Schedule, ProgramItemId, ProgramItemLoc}
 import arisia.timer.{TimerService, TimeService}
 import arisia.util.Done
@@ -31,18 +32,26 @@ class ScheduleQueueServiceImpl(
   timerService: TimerService,
   config: Configuration,
   roomService: RoomService,
-  zoomService: ZoomService
+  zoomService: ZoomService,
+  val lifecycleService: LifecycleService
 )(
   implicit ec: ExecutionContext
-) extends ScheduleQueueService with Logging
+) extends ScheduleQueueService with LifecycleItem with Logging
 {
   lazy val queueCheckInterval = config.get[FiniteDuration]("arisia.schedule.check.interval")
 
-  // On a regular basis, check whether we need to start/stop Zoom sessions
-  timerService.register("Schedule Queue Service", queueCheckInterval)(checkQueues)
+  val lifecycleName = "ScheduleQueueService"
+  lifecycleService.register(this)
+  override def init() = {
 
-  // TODO: at boot time, load the active_program_items table into the Running Items Queue, and shut down anything
-  // that needs it
+    // On a regular basis, check whether we need to start/stop Zoom sessions
+    timerService.register("Schedule Queue Service", queueCheckInterval)(checkQueues)
+
+    // TODO: at boot time, load the active_program_items table into the Running Items Queue, and shut down anything
+    // that needs it
+
+    Future.successful(Done)
+  }
 
   /**
    * The queue of Program Items yet to start.

@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference
 import scala.jdk.DurationConverters._
 import scala.concurrent.duration._
 import arisia.db.DBService
+import arisia.general.{LifecycleItem, LifecycleService}
 import arisia.models.{ProgramItemTime, ProgramItem, ProgramItemTimestamp, Schedule, ProgramItemId, ProgramItemTitle}
 import arisia.timer.TimerService
 import arisia.util.Done
@@ -29,10 +30,11 @@ class ScheduleServiceImpl(
   dbService: DBService,
   ws: WSClient,
   config: Configuration,
-  queueService: ScheduleQueueService
+  queueService: ScheduleQueueService,
+  val lifecycleService: LifecycleService
 )(
   implicit ec: ExecutionContext
-) extends ScheduleService with Logging {
+) extends ScheduleService with LifecycleItem with Logging {
 
   lazy val schedulePrepStart = config.get[FiniteDuration]("arisia.schedule.prep.start")
   lazy val schedulePrepStop = config.get[FiniteDuration]("arisia.schedule.prep.end")
@@ -44,8 +46,18 @@ class ScheduleServiceImpl(
   lazy val zambiaBadgeId = config.get[String]("arisia.zambia.badgeId")
   lazy val zambiaPassword = config.get[String]("arisia.zambia.password")
 
-  // At boot time, start refreshing from Zambia on a regular basis
-  timerService.register("Schedule Service", zambiaRefreshInterval)(refresh)
+  val lifecycleName = "ScheduleService"
+  lifecycleService.register(this)
+  override def init() = {
+    // Start refreshing from Zambia on a regular basis
+    timerService.register("Schedule Service", zambiaRefreshInterval)(refresh)
+
+    // Load the last-known version of the schedule:
+    dbService.run(loadInitialScheduleQuery).map { json =>
+      logger.info(s"Schedule loaded from DB -- size ${json.length}")
+      setSchedule(parseSchedule(json))
+    }.map { _ => Done }
+  }
 
   /**
    * The timezone that the Zambia data is assuming.
@@ -132,12 +144,6 @@ class ScheduleServiceImpl(
     sql"UPDATE text_files set value = $scheduleJson where name = $scheduleRowName"
     .update
     .run
-
-  // At boot time, load the last-known version of the schedule:
-  dbService.run(loadInitialScheduleQuery).map { json =>
-    logger.info(s"Schedule loaded from DB -- size ${json.length}")
-    setSchedule(parseSchedule(json))
-  }
 
   def logIntoZambia(): Future[Seq[WSCookie]] = {
     ws.url(zambiaLoginUrl)
