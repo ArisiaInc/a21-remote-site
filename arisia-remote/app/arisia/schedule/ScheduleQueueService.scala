@@ -40,6 +40,14 @@ class ScheduleQueueServiceImpl(
 {
   lazy val queueCheckInterval = config.get[FiniteDuration]("arisia.schedule.check.interval")
 
+  case class RunningItem(endAt: Instant, itemId: ProgramItemId, meeting: ZoomMeeting)
+  object RunningItem {
+    implicit val runningItemOrdering: Ordering[RunningItem] = (x: RunningItem, y: RunningItem) => {
+      val instantOrdering = implicitly[Ordering[Instant]]
+      instantOrdering.compare(x.endAt, y.endAt)
+    }
+  }
+
   val lifecycleName = "ScheduleQueueService"
   lifecycleService.register(this)
   override def init() = {
@@ -47,10 +55,26 @@ class ScheduleQueueServiceImpl(
     // On a regular basis, check whether we need to start/stop Zoom sessions
     timerService.register("Schedule Queue Service", queueCheckInterval)(checkQueues)
 
-    // TODO: at boot time, load the active_program_items table into the Running Items Queue, and shut down anything
-    // that needs it
-
-    Future.successful(Done)
+    dbService.run(
+      sql"""
+            SELECT end_at, program_item_id, zoom_meeting_id, host_url, attendee_url
+              FROM active_program_items
+           """
+        .query[(Long, String, Long, String, String)]
+        .to[List]
+    ).map { rawItems =>
+      val items = rawItems.map { case (endAt, itemId, zoomId, hostUrl, attendeeUrl) =>
+        RunningItem(
+          Instant.ofEpochMilli(endAt),
+          ProgramItemId(itemId),
+          ZoomMeeting(zoomId, hostUrl, attendeeUrl)
+        )
+      }
+      _runningItemsQueue.set(SortedSet(items:_*))
+      val itemMap = items.map(item => (item.itemId -> item)).toMap
+      _currentlyRunningItems.set(itemMap)
+      Done
+    }
   }
 
   /**
@@ -162,14 +186,6 @@ class ScheduleQueueServiceImpl(
       yield Done
   }
 
-
-  case class RunningItem(endAt: Instant, itemId: ProgramItemId, meeting: ZoomMeeting)
-  object RunningItem {
-    implicit val runningItemOrdering: Ordering[RunningItem] = (x: RunningItem, y: RunningItem) => {
-      val instantOrdering = implicitly[Ordering[Instant]]
-      instantOrdering.compare(x.endAt, y.endAt)
-    }
-  }
 
   // The Running Items Queue. Note that this is automatically sorted by the end time:
   val _runningItemsQueue: AtomicReference[SortedSet[RunningItem]] = new AtomicReference(SortedSet.empty)

@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicReference
 import arisia.util.Done
 import play.api.Logging
 
-import scala.concurrent.Future
+import scala.concurrent.{Future, ExecutionContext}
 
 trait LifecycleItem {
   def lifecycleService: LifecycleService
@@ -35,7 +35,8 @@ trait LifecycleService {
 }
 
 class LifecycleServiceImpl(
-
+)(
+  implicit ec: ExecutionContext
 ) extends LifecycleService with Logging {
 
   val _items: AtomicReference[Set[LifecycleItem]] = new AtomicReference(Set.empty)
@@ -49,12 +50,18 @@ class LifecycleServiceImpl(
     _items.get().foldLeft(Future.successful(Done)) { (_, item) =>
       logger.info(s"Initializing ${item.lifecycleName}")
       item.init()
+    }.map { _ =>
+      logger.info(s"Initialization complete")
+      Done
     }
   }
   def shutdown(): Future[Done] = {
     _items.get().foldLeft(Future.successful(Done)) { (_, item) =>
       logger.info(s"Shutting down ${item.lifecycleName}")
       item.shutdown()
+    }.map { _ =>
+      logger.info(s"Shutdown complete")
+      Done
     }
   }
 }
