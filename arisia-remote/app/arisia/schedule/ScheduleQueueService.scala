@@ -154,10 +154,11 @@ class ScheduleQueueServiceImpl(
       case Some(item) if (item.zoomStart.get.toLong < now.toEpochMilli) => {
         // Start this item:
         startProgramItem(item)
+        // Note that we intentially do *not* block subsequent items on this one, so that one failure doesn't
+        // bring down the whole works. This is sad, but probably correct.
         // Drop it from the head of the queue:
         _scheduleQueue.getAndUpdate(_.tail)
         // On to the next
-        // TODO: once we're confident it's all working right, mark this as @tailrec
         checkScheduleQueue(now)
       }
       // We're done:
@@ -165,9 +166,19 @@ class ScheduleQueueServiceImpl(
     }
   }
 
+  private def checkMeetingsToEnd(now: Instant): Unit = {
+    _runningItemsQueue.get().headOption match {
+      case Some(item) if (item.endAt.toEpochMilli < now.toEpochMilli) => {
+        endRunningItem(item)
+        _runningItemsQueue.getAndUpdate(_.tail)
+        checkMeetingsToEnd(now)
+      }
+    }
+  }
+
   private def checkQueues(now: Instant): Unit = {
     checkScheduleQueue(now)
-    // TODO: check the Running Items Queue
+    checkMeetingsToEnd(now)
   }
 
   private def startProgramItem(item: ProgramItem): Future[Done] = {
@@ -186,6 +197,21 @@ class ScheduleQueueServiceImpl(
       yield Done
   }
 
+  private def endRunningItem(item: RunningItem): Future[Done] = {
+    for {
+      _ <- zoomService.endMeeting(item.meeting.id)
+      _ = _currentlyRunningItems.getAndUpdate(_.tail)
+      _ <- dbService.run(
+        sql"""
+              DELETE FROM active_program_items
+               WHERE program_item_id = '${item.itemId.v}'
+             """
+          .update
+          .run
+      )
+    }
+      yield Done
+  }
 
   // The Running Items Queue. Note that this is automatically sorted by the end time:
   val _runningItemsQueue: AtomicReference[SortedSet[RunningItem]] = new AtomicReference(SortedSet.empty)
