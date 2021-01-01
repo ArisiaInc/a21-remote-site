@@ -32,6 +32,13 @@ trait ScheduleService {
    * Note that, since we require a LoginUser, we already know by type that this isn't anonymous.
    */
   def getAttendeeUrlFor(who: LoginUser, which: ProgramItemId): Option[String]
+
+  /**
+   * Similar to getAttendeeUrlFor, but provides the Host URL, which has lots of special powers.
+   *
+   * Only specially-designed users (broadly speaking, Tech and Safety) have access to this.
+   */
+  def getHostUrlFor(who: LoginUser, which: ProgramItemId): Option[String]
 }
 
 class ScheduleServiceImpl(
@@ -243,5 +250,18 @@ class ScheduleServiceImpl(
         false
       }
     }
+  }
+
+
+  def getHostUrlFor(who: LoginUser, which: ProgramItemId): Option[String] = {
+    for {
+      // Is this item real?
+      item <- _baseSchedule.get.byItemId.get(which)
+      // Is the meeting running?
+      meeting <- queueService.getRunningMeeting(which)
+      // Are they a potential host?
+      if (who.zoomHost)
+    }
+      yield meeting.start_url
   }
 }

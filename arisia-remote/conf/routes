@@ -38,6 +38,7 @@ DELETE  /api/schedule/stars/:which   arisia.controllers.ScheduleController.remov
 # Try to join a running Zoom room as an attendee
 # On success, this will redirect to the actual Zoom URL
 GET     /api/schedule/:id/zoom       arisia.controllers.ZoomController.enterItem(id)
+GET     /api/schedule/:id/zoomhost   arisia.controllers.ZoomController.enterItemAsHost(id)
 
 # Admin UI, separate from the attendee-facing site
 GET     /admin                       arisia.controllers.AdminController.home()
