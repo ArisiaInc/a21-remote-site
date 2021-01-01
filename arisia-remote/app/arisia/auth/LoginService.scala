@@ -3,7 +3,7 @@ package arisia.auth
 import arisia.db.DBService
 
 import scala.concurrent.duration._
-import arisia.models.{LoginName, LoginUser, Permissions, LoginId}
+import arisia.models.{LoginUser, LoginId, BadgeNumber, Permissions, LoginName}
 import doobie.free.connection.ConnectionIO
 import play.api.libs.ws.WSClient
 import doobie._
@@ -88,7 +88,9 @@ class LoginServiceImpl(
             }
           }
 
-          Some(LoginUser(LoginId(id), LoginName(badgeName)))
+          // TODO: once we've done the CM handshake, put the real badge number here:
+          // TODO: if they are Tech or Safety, mark them as potential Zoom hosts:
+          Some(LoginUser(LoginId(id), LoginName(badgeName), BadgeNumber("0"), false))
         } else {
           // TODO: this is an unexpected result. Put in an alarm!
           None

@@ -27,7 +27,11 @@ object ProgramItemPersonName extends StdStringUtils(new ProgramItemPersonName(_)
 case class ProgramItemPerson(
   id: ProgramPersonId,
   name: ProgramItemPersonName
-)
+) {
+  def matches(who: LoginUser): Boolean = {
+    id.matches(who.badgeNumber)
+  }
+}
 object ProgramItemPerson {
   implicit val fmt: Format[ProgramItemPerson] = Json.format
 }

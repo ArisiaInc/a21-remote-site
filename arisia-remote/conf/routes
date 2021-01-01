@@ -35,6 +35,9 @@ GET     /api/schedule/stars          arisia.controllers.ScheduleController.getSt
 PUT     /api/schedule/stars/:which   arisia.controllers.ScheduleController.addStar(which)
 # Remove the star for the specified program item ID
 DELETE  /api/schedule/stars/:which   arisia.controllers.ScheduleController.removeStar(which)
+# Try to join a running Zoom room as an attendee
+# On success, this will redirect to the actual Zoom URL
+GET     /api/schedule/:id/zoom       arisia.controllers.ZoomController.enterItem(id)
 
 # Admin UI, separate from the attendee-facing site
 GET     /admin                       arisia.controllers.AdminController.home()

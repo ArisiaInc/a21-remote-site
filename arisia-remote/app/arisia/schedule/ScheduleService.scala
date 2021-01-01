@@ -6,9 +6,9 @@ import java.util.concurrent.atomic.AtomicReference
 import scala.jdk.DurationConverters._
 import scala.concurrent.duration._
 import arisia.db.DBService
-import arisia.general.{LifecycleItem, LifecycleService}
-import arisia.models.{ProgramItemTime, ProgramItem, ProgramItemTimestamp, Schedule, ProgramItemId, ProgramItemTitle}
-import arisia.timer.TimerService
+import arisia.general.{LifecycleService, LifecycleItem}
+import arisia.models.{ProgramItemTime, LoginUser, ProgramItem, ProgramItemTimestamp, Schedule, ProgramItemId, ProgramItemTitle}
+import arisia.timer.{TimerService, TimeService}
 import arisia.util.Done
 import doobie._
 import doobie.implicits._
@@ -23,10 +23,20 @@ trait ScheduleService {
    * Returns the currently-cached Schedule.
    */
   def currentSchedule(): Schedule
+
+  /**
+   * Iff this ProgramItem is running, and this person is allowed to enter it, return the URL to join.
+   *
+   * This will return None if the prep session is running, but this person isn't allowed to enter.
+   *
+   * Note that, since we require a LoginUser, we already know by type that this isn't anonymous.
+   */
+  def getAttendeeUrlFor(who: LoginUser, which: ProgramItemId): Option[String]
 }
 
 class ScheduleServiceImpl(
   timerService: TimerService,
+  time: TimeService,
   dbService: DBService,
   ws: WSClient,
   config: Configuration,
@@ -39,6 +49,8 @@ class ScheduleServiceImpl(
   lazy val schedulePrepStart = config.get[FiniteDuration]("arisia.schedule.prep.start")
   lazy val schedulePrepStop = config.get[FiniteDuration]("arisia.schedule.prep.end")
   lazy val prepMins: Long = schedulePrepStart.toMinutes
+  // When, before the item's official start time, do we start letting people in the door?
+  lazy val entryTime: FiniteDuration = schedulePrepStart - schedulePrepStop
 
   lazy val zambiaRefreshInterval = config.get[FiniteDuration]("arisia.zambia.refresh.interval")
   lazy val zambiaUrl = config.get[String]("arisia.zambia.url")
@@ -199,5 +211,37 @@ class ScheduleServiceImpl(
 
   def currentSchedule(): Schedule = {
     _baseSchedule.get
+  }
+
+  def getAttendeeUrlFor(who: LoginUser, which: ProgramItemId): Option[String] = {
+    for {
+      // Is this item real?
+      item <- _baseSchedule.get.byItemId.get(which)
+      // Is the meeting running?
+      meeting <- queueService.getRunningMeeting(which)
+      // Are they allowed to join yet?
+      if (attendeeAllowedIn(who, item))
+    }
+      yield meeting.join_url
+  }
+
+  private def attendeeAllowedIn(who: LoginUser, item: ProgramItem): Boolean = {
+    // If we have gotten to this point, it's a valid item and the meeting has started. Are they allowed in?
+    if (time.now().isAfter(item.when.minus(entryTime.toJava))) {
+      // Yes -- the doors are open
+      true
+    } else {
+      // The doors aren't open yet -- are they allowed into the prep session?
+      if (who.zoomHost) {
+        // They're a potential Zoom host, so yes
+        true
+      } else if (item.people.exists(programPerson => programPerson.matches(who))) {
+        // They're in the program item, so yes
+        true
+      } else {
+        // Nope, the door is still closed to you
+        false
+      }
+    }
   }
 }

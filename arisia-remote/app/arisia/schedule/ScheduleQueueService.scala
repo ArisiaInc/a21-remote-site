@@ -25,6 +25,8 @@ import scala.concurrent.{Future, ExecutionContext}
  */
 trait ScheduleQueueService {
   def setSchedule(schedule: Schedule): Future[Done]
+
+  def getRunningMeeting(id: ProgramItemId): Option[ZoomMeeting]
 }
 
 class ScheduleQueueServiceImpl(
@@ -219,15 +221,21 @@ class ScheduleQueueServiceImpl(
   // The Currently Running Items Map, which we fetch meetings from when people want to enter them:
   val _currentlyRunningItems: AtomicReference[Map[ProgramItemId, RunningItem]] = new AtomicReference(Map.empty)
 
+  def getRunningMeeting(id: ProgramItemId): Option[ZoomMeeting] = {
+    _currentlyRunningItems.get.get(id).map(_.meeting)
+  }
+
   private def recordMeetingAsActive(item: ProgramItem, meeting: ZoomMeeting): Future[Int] = {
     // Add the meeting to the Running Items Queue, so we know to shut it down:
     val endAt = item.zoomEnd.get
-    val runningItem = RunningItem(item.zoomEnd.get.t, item.id, meeting)
+    // Note that what we record as running is the underlying item, not this prep item:
+    val actualItemId = item.prepFor.get
+    val runningItem = RunningItem(item.zoomEnd.get.t, actualItemId, meeting)
     _runningItemsQueue.accumulateAndGet(SortedSet(runningItem), _ ++ _)
 
     // Add the meeting to the Currently Running Items Map, so people can enter it:
     _currentlyRunningItems.accumulateAndGet(
-      Map((item.id -> runningItem)),
+      Map((actualItemId -> runningItem)),
       _ ++ _
     )
 
@@ -237,7 +245,7 @@ class ScheduleQueueServiceImpl(
            INSERT INTO active_program_items
            (end_at, program_item_id, zoom_meeting_id, host_url, attendee_url)
            VALUES
-           (${endAt.toLong}, ${item.id.v}, ${meeting.id}, ${meeting.start_url}, ${meeting.join_url})"""
+           (${endAt.toLong}, ${actualItemId.v}, ${meeting.id}, ${meeting.start_url}, ${meeting.join_url})"""
         .update
         .run
     )
