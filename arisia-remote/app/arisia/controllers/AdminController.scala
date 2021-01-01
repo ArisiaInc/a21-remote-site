@@ -98,12 +98,11 @@ class AdminController (
     )(ZoomRoom.apply)(ZoomRoom.unapply)
   )
 
-  def manageZoomRooms(): EssentialAction = superAdminsOnlyAsync { info =>
+  def manageZoomRooms(): EssentialAction = superAdminsOnly { info =>
     implicit val request = info.request
 
-    roomService.getRooms().map { rooms =>
-      Ok(arisia.views.html.manageZoomRooms(rooms))
-    }
+    val rooms = roomService.getRooms()
+    Ok(arisia.views.html.manageZoomRooms(rooms))
   }
 
   def createRoom(): EssentialAction = superAdminsOnly { info =>
@@ -111,14 +110,13 @@ class AdminController (
 
     Ok(arisia.views.html.editRoom(roomForm.fill(ZoomRoom.empty)))
   }
-  def showEditRoom(id: Int): EssentialAction = superAdminsOnlyAsync { info =>
+  def showEditRoom(id: Int): EssentialAction = superAdminsOnly { info =>
     implicit val request = info.request
 
-    roomService.getRooms().map { rooms =>
-      rooms.find(_.id == id) match {
-        case Some(room) => Ok(arisia.views.html.editRoom(roomForm.fill(room)))
-        case _ => BadRequest(s"$id isn't a known Room!")
-      }
+    val rooms = roomService.getRooms()
+    rooms.find(_.id == id) match {
+      case Some(room) => Ok(arisia.views.html.editRoom(roomForm.fill(room)))
+      case _ => BadRequest(s"$id isn't a known Room!")
     }
   }
 

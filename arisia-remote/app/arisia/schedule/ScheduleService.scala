@@ -3,11 +3,13 @@ package arisia.schedule
 import java.time.{LocalDateTime, Instant, ZoneId, LocalTime}
 import java.util.concurrent.atomic.AtomicReference
 
+import arisia.admin.RoomService
+
 import scala.jdk.DurationConverters._
 import scala.concurrent.duration._
 import arisia.db.DBService
 import arisia.general.{LifecycleService, LifecycleItem}
-import arisia.models.{ProgramItemTime, LoginUser, ProgramItem, ProgramItemTimestamp, Schedule, ProgramItemId, ProgramItemTitle}
+import arisia.models.{ProgramItemTime, LoginUser, ProgramItem, ProgramItemTimestamp, Schedule, ProgramItemId, ProgramItemLoc, ProgramItemTitle}
 import arisia.timer.{TimerService, TimeService}
 import arisia.util.Done
 import doobie._
@@ -23,6 +25,13 @@ trait ScheduleService {
    * Returns the currently-cached Schedule.
    */
   def currentSchedule(): Schedule
+
+  /**
+   * Returns the complete Schedule, including all prep sessions.
+   *
+   * This should only be presented to potential Zoom hosts, who have access to all sessions.
+   */
+  def fullSchedule(): Schedule
 
   /**
    * Iff this ProgramItem is running, and this person is allowed to enter it, return the URL to join.
@@ -48,7 +57,8 @@ class ScheduleServiceImpl(
   ws: WSClient,
   config: Configuration,
   queueService: ScheduleQueueService,
-  val lifecycleService: LifecycleService
+  val lifecycleService: LifecycleService,
+  roomService: RoomService
 )(
   implicit ec: ExecutionContext
 ) extends ScheduleService with LifecycleItem with Logging {
@@ -117,9 +127,16 @@ class ScheduleServiceImpl(
     new AtomicReference(Schedule.empty)
 
   def computeScheduleWithPrep(base: Schedule): Schedule = {
+    val relevantLocs = roomService.getRooms().map(room => ProgramItemLoc(room.zambiaName))
     val prepSessions =
       base.program
-        // TODO: filter so this only happens for the Zoom rooms
+        // Only set up prep sessions for items in Zambia locations that correspond to Zoom rooms:
+        .filter { item =>
+          item.loc.headOption match {
+            case Some(loc) if (relevantLocs.contains(loc)) => true
+            case _ => false
+          }
+        }
         .map { item =>
           val prepTitle = item.title.map(t => ProgramItemTitle(s"Prep - ${t.v}"))
           val itemStart = item.when
@@ -218,6 +235,10 @@ class ScheduleServiceImpl(
 
   def currentSchedule(): Schedule = {
     _baseSchedule.get
+  }
+
+  def fullSchedule(): Schedule = {
+    _scheduleWithPrep.get
   }
 
   def getAttendeeUrlFor(who: LoginUser, which: ProgramItemId): Option[String] = {

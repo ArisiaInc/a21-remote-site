@@ -8,7 +8,6 @@ import play.api.Logging
 import scala.concurrent.{Future, ExecutionContext}
 
 trait LifecycleItem {
-  def lifecycleService: LifecycleService
   def lifecycleName: String
   def init(): Future[Done] = { Future.successful(Done) }
   def shutdown(): Future[Done] = { Future.successful(Done) }
