@@ -20,6 +20,12 @@ import { ArtshowComponent } from './artshow/artshow.component';
 import { ArtistComponent } from './artshow/artist/artist.component';
 import { DealersComponent } from './dealers/dealers.component';
 import { DealerComponent } from './dealers/dealer/dealer.component';
+import { TabletopComponent } from './gaming/tabletop/tabletop.component';
+import { LarpComponent } from './gaming/larp/larp.component';
+import { VideoComponent } from './gaming/video/video.component';
+import { SpecialComponent } from './gaming/special/special.component';
+import { SignupComponent } from './gaming/signup/signup.component';
+import { DropinComponent } from './gaming/dropin/dropin.component';
 
 @NgModule({
   declarations: [
@@ -37,6 +43,12 @@ import { DealerComponent } from './dealers/dealer/dealer.component';
     ArtistComponent,
     DealersComponent,
     DealerComponent,
+    TabletopComponent,
+    LarpComponent,
+    VideoComponent,
+    SpecialComponent,
+    SignupComponent,
+    DropinComponent,
   ],
   imports: [
     BrowserModule,
