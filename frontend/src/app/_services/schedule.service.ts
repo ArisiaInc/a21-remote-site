@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, ReplaySubject, Observable, of, zip, OperatorFunction, timer } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, Observable, of, zip, OperatorFunction, timer, pipe } from 'rxjs';
 import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck, every, switchMap } from 'rxjs/operators';
 import { HttpClient, HttpResponse, HttpErrorResponse } from '@angular/common/http';
 
 import { ProgramItem, ProgramPerson, ProgramFilter, Room } from '@app/_models';
+import { SettingsService } from './settings.service';
 import { environment } from '@environments/environment';
 
 export enum ScheduleState {
@@ -20,6 +21,9 @@ export interface ScheduleStatus {
 }
 
 const tzoffset: number = new Date().getTimezoneOffset();
+
+let hour12: boolean = false;
+let hour12ConstSet$!: Observable<boolean>;
 
 export class ScheduleEvent {
   constructor (item: ProgramItem) {
@@ -51,19 +55,16 @@ export class ScheduleEvent {
   }
 
   getTimeString(): string {
-    if (!this.timeString) {
-      const localTime = this.start.toLocaleTimeString(undefined, {hour:'numeric', minute: 'numeric', hour12: true});
-      // Check only works when outside daylight savings time. We could
-      // change to always generate the EST time and compare the
-      // strings instead, but that would be slower.
-      if (tzoffset === 5 * 60) {
-        this.timeString = localTime;
-      } else {
-        const estTime = this.start.toLocaleTimeString(undefined, {hour: 'numeric', minute: 'numeric', hour12: true, timeZone: 'EST'});
-        this.timeString = `${localTime} (${estTime} EST)`
-      }
+    const localTime = this.start.toLocaleTimeString(undefined, {hour:'numeric', minute: 'numeric', hour12: hour12});
+    // Check only works when outside daylight savings time. We could
+    // change to always generate the EST time and compare the
+    // strings instead, but that would be slower.
+    if (tzoffset === 5 * 60) {
+      return localTime;
+    } else {
+      const estTime = this.start.toLocaleTimeString(undefined, {hour: 'numeric', minute: 'numeric', hour12: hour12, timeZone: 'EST'});
+      return `${localTime} (${estTime} EST)`;
     }
-    return this.timeString;
   }
 
   id: string;
@@ -76,7 +77,6 @@ export class ScheduleEvent {
   people: {person: SchedulePerson, isModerator: boolean}[];
 
   private dateString?: string;
-  private timeString?: string;
 
   private tempPeople?: {id: string, name: string}[];
 }
@@ -111,7 +111,7 @@ function buildStructuredEvents(sortedEvents: ScheduleEvent[]): StructuredEvents 
     if (!currentTime || !currentEventsAtTime || currentTime != event.start.getTime()) {
       currentTime = event.start.getTime();
       currentEventsAtTime = {
-        timeString: event.getTimeString(),
+        timeString: '',
         events: []
       };
       currentDayOfEvents.times.push(currentEventsAtTime);
@@ -119,6 +119,23 @@ function buildStructuredEvents(sortedEvents: ScheduleEvent[]): StructuredEvents 
     currentEventsAtTime.events.push(event);
   });
   return result;
+}
+
+function relabelStructuredEvents(events: StructuredEvents) {
+  events.forEach(dayOfEvents => dayOfEvents.times.forEach(eventsAtTime => eventsAtTime.timeString = eventsAtTime.events[0].getTimeString()));
+}
+
+function relabelStructuredEventsAsNeeded() {
+  return pipe(
+    switchMap((structuredEvents: StructuredEvents) => {
+      return hour12ConstSet$.pipe(
+        map(_ => {
+          relabelStructuredEvents(structuredEvents);
+          return structuredEvents;
+        }),
+      );
+    }),
+  );
 }
 
 export class SchedulePerson {
@@ -134,23 +151,27 @@ export class SchedulePerson {
     if (this.tempProg) {
       this.events_ = this.tempProg.
         map(id => eventMap[id]).
-        filter(event => event);
+        filter(event => event).
+        sort((a, b) => a.start.getTime() - b.start.getTime());
     }
   }
 
-  get events() {
-    if (!this.structuredEvents) {
-      this.events_.sort((a, b) => a.start.getTime() - b.start.getTime());
-      this.structuredEvents = buildStructuredEvents(this.events_);
+  get events$() {
+    if (!this.structuredEvents$) {
+      const structuredEvents = buildStructuredEvents(this.events_);
+      const structuredEvents$ = new BehaviorSubject<StructuredEvents>(structuredEvents);
+      this.structuredEvents$ = structuredEvents$.pipe(
+        relabelStructuredEventsAsNeeded(),
+      );
     }
-    return this.structuredEvents;
+    return this.structuredEvents$;
   }
   id: string;
   name: string;
   tags: string[];
   links?: object;
   bio?: string;
-  private structuredEvents?: StructuredEvents;
+  private structuredEvents$?: Observable<StructuredEvents>;
   private events_: ScheduleEvent[] = [];
   private tempProg?: string[];
 }
@@ -185,13 +206,18 @@ export class ScheduleService {
   locations$ = new ReplaySubject<string[]>(1);
 
   private schedule: StructuredEvents = [];
-  private schedule$ = new ReplaySubject<StructuredEvents>(1);
+  private scheduleWithoutRelabeling$ = new ReplaySubject<StructuredEvents>(1);
+  private schedule$: Observable<StructuredEvents>;
 
   private status: ScheduleStatus = {state: ScheduleState.IDLE};
   status$ = new BehaviorSubject<ScheduleStatus>(this.status);
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private settingsService: SettingsService) {
     this.init();
+    hour12ConstSet$ = settingsService.hour12$.pipe(tap(value => hour12 = value));
+    hour12ConstSet$.subscribe();
+
+    this.schedule$ = this.scheduleWithoutRelabeling$.pipe(relabelStructuredEventsAsNeeded());
   }
 
   private reload(): void {
@@ -260,7 +286,7 @@ export class ScheduleService {
     this.people$.next(this.people);
     this.peopleMap$.next(this.peopleMap);
     this.locations$.next(this.locations);
-    this.schedule$.next(this.schedule);
+    this.scheduleWithoutRelabeling$.next(this.schedule);
 
     this.status.state = ScheduleState.READY;
     this.status.lastUpdate = new Date();
@@ -339,6 +365,7 @@ export class ScheduleService {
         }
         return buildStructuredEvents(dateFilteredEvents.filter((event) => munged_filters.every(filter => filter(event))));
       }),
+      relabelStructuredEventsAsNeeded(),
     );
   }
 
