@@ -32,7 +32,7 @@ class LoginController (
 
   def login(): EssentialAction = Action.async(controllerComponents.parsers.tolerantJson[LoginRequest]) { implicit request =>
     val req = request.body
-    loginService.checkLogin(req.id, req.password).flatMap {
+    loginService.login(req.id, req.password).flatMap {
       _ match {
         case Some(user) => {
           loginService.getPermissions(user.id).map { permissions =>

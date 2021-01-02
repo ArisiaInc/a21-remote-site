@@ -17,9 +17,16 @@ class ScheduleController(
   extends BaseController with LoginControllerFuncs
 {
   def getSchedule(): EssentialAction = Action { implicit request =>
+    val userOpt = LoginController.loggedInUser()
     // Note: we explicitly assume that this fetch is synchronous and fast. It is up to the ScheduleService to
     // ensure that.
-    val schedule = scheduleService.currentSchedule()
+    val schedule = userOpt match {
+      // Potential Zoom hosts see everything, including all prep sessions:
+      case Some(user) if (user.zoomHost) => scheduleService.fullSchedule()
+      // TODO: check if this person is a program participant; if so, give them a filtered version of the
+      // full schedule:
+      case _ => scheduleService.currentSchedule()
+    }
     // The HTTP standard says that the hash should be in double-quotes in both directions:
     //   https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
     val hashStr = s""""${schedule.hash}""""

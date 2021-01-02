@@ -18,7 +18,7 @@ import scala.util.Random
 trait ZoomService {
   def getUsers(): Future[List[ZoomUser]]
 
-  def startMeeting(topic: String): Future[Either[String, ZoomMeeting]]
+  def startMeeting(topic: String, zoomUserId: String): Future[Either[String, ZoomMeeting]]
   def endMeeting(meetingId: Long): Future[Done]
 }
 
@@ -42,7 +42,7 @@ class ZoomServiceImpl(
 {
 
   lazy val baseUrl: String = config.get[String]("arisia.zoom.api.baseUrl")
-  lazy val zoomUserId: String = config.get[String]("arisia.zoom.api.userId")
+//  lazy val zoomUserId: String = config.get[String]("arisia.zoom.api.userId")
 
   def urlWithJwt(url: String): WSRequest = {
     val jwt = jwtService.getJwtToken()
@@ -62,7 +62,8 @@ class ZoomServiceImpl(
       }
   }
 
-  def startMeeting(topic: String): Future[Either[String, ZoomMeeting]] = {
+  def startMeeting(topic: String, zoomUserId: String): Future[Either[String, ZoomMeeting]] = {
+    logger.info(s"Starting meeting $topic")
     // Generate a random password for this meeting:
     val password = Random.alphanumeric.take(10).mkString
     val params = ZoomMeetingParams(
@@ -74,8 +75,7 @@ class ZoomServiceImpl(
       .post(Json.toJson(params))
       .map { response =>
         if (response.status == Status.CREATED) {
-          // TODO: remove the logging here:
-          logger.info(s"The response from Zoom is $response, body ${response.body}")
+          logger.info(s"Meeting $topic started")
           Right(Json.parse(response.body).as[ZoomMeeting])
         } else {
           val error = s"Failure in trying to start a meeting: ${response.status}"
@@ -100,6 +100,6 @@ class ZoomServiceImpl(
 
 class DisabledZoomService() extends ZoomService {
   def getUsers(): Future[List[ZoomUser]] = ???
-  def startMeeting(topic: String): Future[Either[String, ZoomMeeting]] = ???
+  def startMeeting(topic: String, zoomUserId: String): Future[Either[String, ZoomMeeting]] = ???
   def endMeeting(meetingId: Long): Future[Done] = ???
 }

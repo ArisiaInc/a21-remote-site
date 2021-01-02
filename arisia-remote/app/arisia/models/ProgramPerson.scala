@@ -5,7 +5,11 @@ import arisia.util._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-case class ProgramPersonId(v: String) extends StdString
+case class ProgramPersonId(v: String) extends StdString {
+  def matches(badgeNumber: BadgeNumber): Boolean = {
+    v == badgeNumber.v
+  }
+}
 object ProgramPersonId extends StdStringUtils(new ProgramPersonId(_))
 
 /**
