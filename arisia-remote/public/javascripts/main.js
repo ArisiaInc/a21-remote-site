@@ -22,3 +22,8 @@ $('#remove-button').click(function(event) {
     }
   });
 });
+
+// Set up DataTables, if this page is using it:
+$(document).ready( function () {
+    $('.dataTable').DataTable();
+} );
