@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 export class BreadcrumbComponent implements OnInit {
   crumbs!: {path: string, label: string}[];
   @Input() lobby = true;
+  @Input() lastCrumbText?: string;
 
   constructor(private router: Router) { }
 
@@ -19,7 +20,9 @@ export class BreadcrumbComponent implements OnInit {
     if (this.lobby) {
       this.crumbs.unshift({path: '/map', label: 'Lobby'})
     }
-    console.log("crumbs", this.crumbs)
+    if (this.lastCrumbText) {
+      this.crumbs[this.crumbs.length - 1].label = this.lastCrumbText;
+    }
   }
 
   crumbToText(path: string) {

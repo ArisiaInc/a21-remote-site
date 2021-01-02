@@ -6,6 +6,10 @@ import { AuthGuard } from './_helpers';
 import { ProgrammingComponent } from './programming/programming.component';
 import { GamingComponent } from './gaming/gaming.component';
 import { RoomComponent } from './programming/room/room.component';
+import { ArtshowComponent } from './artshow/artshow.component';
+import { ArtistComponent } from './artshow/artist/artist.component';
+import { DealersComponent } from './dealers/dealers.component';
+import { DealerComponent } from './dealers/dealer/dealer.component';
 
 const accountModule = () => import('./account/account.module').then(x => x.AccountModule);
 const scheduleModule = () => import('./schedule/schedule.module').then(x => x.ScheduleModule);
@@ -19,6 +23,10 @@ const routes: Routes = [
   {path: 'programming', component: ProgrammingComponent, canActivate: [AuthGuard]},
   {path: 'programming/:id', component: RoomComponent, canActivate: [AuthGuard]},
   {path: 'gaming', component: GamingComponent, canActivate: [AuthGuard]},
+  {path: 'artshow', component: ArtshowComponent},
+  {path: 'artshow/:id', component: ArtistComponent},
+  {path: 'dealers', component: DealersComponent},
+  {path: 'dealers/:id', component: DealerComponent},
 
   //redirect home
   {path: '**', redirectTo: '/map'}
