@@ -35,6 +35,10 @@ export class SettingsService {
     return offset ? new Date(new Date().getTime() + offset) : new Date();
   }
 
+  set currentTime(value: Date) {
+    this.timeOffset = value.getTime() - new Date().getTime();
+  }
+
   constructor() {
     this.hour12$.next(this.hour12);
     this.timeOffset$.next(this.timeOffset);

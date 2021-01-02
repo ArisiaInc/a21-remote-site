@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { ButtonComponent } from './button/button.component';
 import { BreadcrumbComponent } from './breadcrumb/breadcrumb.component';
@@ -17,6 +18,7 @@ import { SettingsComponent } from './settings/settings.component';
   imports: [
     CommonModule,
     FormsModule,
+    NgbModule,
   ],
   exports: [
     ButtonComponent,
