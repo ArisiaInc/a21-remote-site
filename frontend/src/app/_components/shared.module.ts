@@ -35,7 +35,7 @@ import { SettingsComponent } from './settings/settings.component';
     CreatorCardComponent,
     CreatorListComponent,
     CreatorPageComponent,
-    CalloutBoxComponent
+    CalloutBoxComponent,
     SettingsComponent,
   ]
 })
