@@ -1,5 +1,14 @@
-.filter_item {
-    cursor: pointer;
-    padding-top: 5px;
-    padding-bottom: 5px;
+.filter-pill {
+    margin-left: 0.5rem;
+    display: inline-block;
+}
+
+.header {
+    line-height: 1.8rem;
+    font-weight: bold;
+}
+
+:host {
+    margin-bottom: 1rem;
+    display:block;
 }

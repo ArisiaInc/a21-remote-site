@@ -11,6 +11,7 @@ import { PeopleComponent } from './people/people.component';
 import { FiltersComponent } from './filters/filters.component';
 import { ItemListComponent } from './item-list/item-list.component';
 import { PipesModule } from '../pipes/pipes.module';
+import { SharedModule } from '../_components';
 
 
 @NgModule({
@@ -20,6 +21,7 @@ import { PipesModule } from '../pipes/pipes.module';
     CommonModule,
     ScheduleRoutingModule,
     PipesModule,
+    SharedModule,
   ]
 })
 export class ScheduleModule { }
