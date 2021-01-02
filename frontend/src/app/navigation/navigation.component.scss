@@ -3,7 +3,9 @@
 @import "node_modules/bootstrap/scss/mixins/_breakpoints";
 
 :host {
+    display: block;
     background: #74ABF4;
+    width: 100%;
 }
 @include media-breakpoint-up(md) {
     :host {

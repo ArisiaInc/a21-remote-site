@@ -6,6 +6,6 @@ export interface ProgramPerson {
     tags?: string[];
     links?: object;
     bio?: string;
-    prog: string[];
+    prog?: string[];
     items?: {[_:string]: {[_:string]: ProgramItem[]}};
 }

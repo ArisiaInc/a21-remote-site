@@ -6,3 +6,7 @@
 body {
     background: #FFFAEA;
 }
+
+ngb-carousel>div, ngb-carousel>div>div {
+    height: 100%;
+}

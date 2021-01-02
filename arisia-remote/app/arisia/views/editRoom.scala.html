@@ -1,0 +1,26 @@
+@(
+  roomForm: Form[arisia.models.ZoomRoom]
+)(
+  implicit request: RequestHeader, messagesProvider: MessagesProvider
+)
+
+@title = @{
+  if (roomForm.get.id == 0)
+    "Create Zoom Room"
+  else
+    s"Edit Zoom Room ${roomForm.get.displayName}"
+}
+
+@main(title) {
+  <h1>@title</h1>
+
+  @b4.horizontal.form(arisia.controllers.routes.AdminController.roomModified(), "col-md-2", "col-md-10") { implicit hfc =>
+    @b4.text(roomForm("id"), Symbol("_label") -> "ID", Symbol("readonly") -> true)
+    @b4.text(roomForm("displayName"), Symbol("_label") -> "Display Name")
+    @b4.text(roomForm("zoomId"), Symbol("_label") -> "Zoom User ID")
+    @b4.text(roomForm("zambiaName"), Symbol("_label") -> "Zambia Room Name")
+    @b4.checkbox(roomForm("isManual"), Symbol("_label") -> "Non-Scheduled Room")
+    @b4.checkbox(roomForm("isWebinar"), Symbol("_label") -> "Zoom Webinar")
+    @b4.submit(Symbol("class") -> "btn btn-primary"){ Submit }
+  }
+}

@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { ProgramItem } from '@app/_models';
+import { ScheduleEvent } from '@app/_services';
 
 @Component({
   selector: 'app-item',
@@ -7,7 +7,7 @@ import { ProgramItem } from '@app/_models';
   styleUrls: ['./item.component.scss']
 })
 export class ItemComponent implements OnInit {
-  @Input() item!: ProgramItem;
+  @Input() event!: ScheduleEvent;
   expanded: boolean = false;
   track!: string;
   type!: string;
@@ -15,8 +15,8 @@ export class ItemComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    this.track = this.item.tags.filter(s => s.startsWith('track'))[0].split(':')[1];
-    this.type = this.item.tags.filter(s => s.startsWith('type'))[0].split(':')[1];
+    this.track = this.event.tags.filter(s => s.startsWith('track'))[0].split(':')[1];
+    this.type = this.event.tags.filter(s => s.startsWith('type'))[0].split(':')[1];
   }
 
   toggleExpand() {

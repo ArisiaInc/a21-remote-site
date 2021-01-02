@@ -1,5 +1,5 @@
 <ul>
-    <li *ngFor="let person of people$ | async">
+    <li *ngFor="let person of scheduleService.people$ | async">
         <a routerLink="/schedule/people/{{person.id}}">{{person.name}}</a>
     </li>
 </ul>
