@@ -4,9 +4,14 @@
             <h6 class="card-header">Day</h6>
             <ul class="list-group list-group-flush">
               <li *ngFor="let day of days"
-                  (click)="onChangeDate($event, day)"
+                  (click)="onDate(day)"
                   class="list-group-item list-group-item-action filter_item"
+                  [class.active]="dateFilters.includes(day)"
                   >{{dayWeekday[day]}}</li>
+              <li (click)="onNow()"
+                  class="list-group-item list-group-item-action filter_item"
+                  [class.active]="nowFilter"
+                  >Now</li>
             </ul>
         </div>
     </div>

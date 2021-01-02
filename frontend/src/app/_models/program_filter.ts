@@ -1,6 +1,12 @@
+export interface DateRange {
+  start: Date;
+  end: Date;
+  inclusive?: boolean;
+}
+
 export interface ProgramFilter {
   loc?: string[];
-  date?: {start: Date, end: Date}[];
+  date?: DateRange[];
   tags?: string[];
   id?: string[];
 }
