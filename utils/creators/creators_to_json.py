@@ -106,6 +106,8 @@ def main(*args):
             if 'description' in row and 'alt' not in row:
                 # use description as alt text
                 row['alt'] = row['description']
+            if 'alt' not in row:
+                row['alt'] = "TODO MISSING ALT TEXT"
             # check for required fields
             if not image_has_required_fields(row):
                 print('Image {} is missing one or more of the required fields: {}'.format(row['image_id'], ', '.join(image_required_fields)))
