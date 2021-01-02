@@ -3,7 +3,7 @@ import { BehaviorSubject, ReplaySubject, Observable, of, zip, OperatorFunction, 
 import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck, every, switchMap } from 'rxjs/operators';
 import { HttpClient, HttpResponse, HttpErrorResponse } from '@angular/common/http';
 
-import { ProgramItem, ProgramPerson, ProgramFilter, Room } from '@app/_models';
+import { ProgramItem, ProgramPerson, ProgramFilter, Room, DateRange } from '@app/_models';
 import { SettingsService } from './settings.service';
 import { environment } from '@environments/environment';
 
@@ -289,7 +289,7 @@ export class ScheduleService {
     this.scheduleWithoutRelabeling$.next(this.schedule);
 
     this.status.state = ScheduleState.READY;
-    this.status.lastUpdate = new Date();
+    this.status.lastUpdate = this.settingsService.currentTime;
     this.status.error = undefined;
     this.status$.next(this.status);
 
@@ -300,7 +300,7 @@ export class ScheduleService {
   private handleError(error?: HttpErrorResponse): void {
     if (error && !(error.error instanceof ErrorEvent) && error.status === 304) {
       this.status.state = ScheduleState.READY;
-      this.status.lastUpdate = new Date();
+      this.status.lastUpdate = this.settingsService.currentTime;
       this.status.error = undefined;
       this.status$.next(this.status);
     } else {
@@ -324,7 +324,7 @@ export class ScheduleService {
       return this.schedule$;
     }
 
-    let dateRanges: {start: Date, end: Date}[] | undefined;
+    let dateRanges: DateRange[] | undefined;
 
     const munged_filters: ((scheduleEvent: ScheduleEvent) => boolean)[] = [];
     if (filters.tags && filters.tags.length > 0) {
@@ -357,7 +357,11 @@ export class ScheduleService {
           const eventCount = events.length;
           dateFilteredEvents = [];
           dateRanges.forEach(dateRange => {
-            for (; i < eventCount && events[i].start < dateRange.start; i++) {}
+            for (; i < eventCount && events[i].start < dateRange.start; i++) {
+              if (dateRange.inclusive && events[i].start.getTime() + events[i].mins * 60 * 1000 >= dateRange.start.getTime()) {
+                dateFilteredEvents.push(events[i]);
+              }
+            }
             for (; i < eventCount && events[i].start < dateRange.end; i++) {
               dateFilteredEvents.push(events[i]);
             }
