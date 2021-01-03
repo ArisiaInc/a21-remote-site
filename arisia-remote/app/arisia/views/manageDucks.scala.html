@@ -1,0 +1,37 @@
+@(
+  ducks: List[arisia.fun.Duck]
+)(
+  implicit request: RequestHeader, messagesProvider: MessagesProvider
+)
+
+@main("Manage Ducks") {
+  <h1>Manage Ducks</h1>
+
+
+  <table id="duckTable" class="display dataTable" style="width: 100%">
+      <thead>
+        <tr>
+            <th>ID</th>
+            <th>Image Url</th>
+            <th>Alt Text</th>
+            <th>Link</th>
+            <th>Hint</th>
+            <th>Requesting URL</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(duck <- ducks) {
+          <tr>
+              <td>@{duck.id}</td>
+              <td>@{duck.imageUrl}</td>
+              <td>@{duck.altText}</td>
+              <td>@{duck.link}</td>
+              <td>@{duck.hint}</td>
+              <td>@{duck.requestingUrl}</td>
+          </tr>
+        }
+      </tbody>
+  </table>
+
+  <a class="btn btn-primary" href="/admin/createDuck">Add another Duck</a>
+}
