@@ -25,12 +25,21 @@ class DuckController(
   }
 
   def assignDuck(id: Int): EssentialAction = Action.async { implicit request =>
-    // TODO: Gail's spec says something about the request coming from the specific requesting URL, but I'm not
-    // sure precisely what that means, so that bit needs to be enhanced here
     LoginController.loggedInUser() match {
       case Some(user) => {
-        duckService.assignDuck(user.id, id).map { _ =>
-          Created("")
+        // Where did this come from?
+        request.headers.get("Referer") match {
+          case Some(referer) => {
+            duckService.assignDuck(user.id, id, referer).map { _ =>
+              Created("")
+            }.recover {
+              case ex: Exception => BadRequest("")
+            }
+          }
+          case _ => {
+            // No referer, so we can't validate the duck claim
+            Future.successful(BadRequest(""))
+          }
         }
       }
       case _ => {

@@ -7,14 +7,25 @@ import arisia.models.LoginId
 import play.api.Logging
 import doobie._
 import doobie.implicits._
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
 import scala.concurrent.{Future, ExecutionContext}
 
-case class Duck(id: Int, imageUrl: String, altText: String, link: String, hint: Option[String], requestingUrl: Option[String])
+case class Duck(id: Int, imageUrl: String, altText: String, link: String, hint: Option[String], requestingUrl: String)
 object Duck {
-  implicit val fmt: Format[Duck] = Json.format
-  def empty = Duck(0, "", "", "", None, None)
+  // We shouldn't be sending the requestingUrl field publicly, so we need to hand-craft the serializer instead
+  // of just using the Json.writes macro here:
+  implicit val writes: Writes[Duck] = (d: Duck) =>
+    JsObject(Map(
+      "id" -> JsNumber(d.id),
+      "imageUrl" -> JsString(d.imageUrl),
+      "altText" -> JsString(d.altText),
+      "link" -> JsString(d.link),
+      "hint" -> JsString(d.hint.getOrElse(""))
+    ))
+
+  def empty = Duck(0, "", "", "", None, "")
 }
 
 /**
@@ -24,7 +35,7 @@ trait DuckService {
   // API endpoints
   def getDucks(): List[Duck]
   def getDuck(id: Int): Option[Duck]
-  def assignDuck(who: LoginId, duck: Int): Future[Int]
+  def assignDuck(who: LoginId, duck: Int, from: String): Future[Int]
   def dropDuck(who: LoginId, duck: Int): Future[Int]
 
   // CRUD endpoints
@@ -62,16 +73,34 @@ class DuckServiceImpl(
     _duckCache.get().find(_.id == id)
   }
 
-  def assignDuck(who: LoginId, duck: Int): Future[Int] = {
-    dbService.run(
-      sql"""
+  def assignDuck(who: LoginId, duckId: Int, from: String): Future[Int] = {
+    // Need to validate that the request is coming from the right URL:
+    getDuck(duckId) match {
+      case Some(duck) => {
+        if (duck.requestingUrl == from) {
+          // All looks good:
+          dbService.run(
+            sql"""
            INSERT INTO member_ducks
            (username, duck_id)
            VALUES
-           (${who.v}, $duck)"""
-        .update
-        .run
-    )
+           (${who.v}, $duckId)"""
+              .update
+              .run
+          )
+        } else {
+          // Somehow got a request from the wrong place, which seems hinky:
+          val error = s"Got a request for Duck $duckId from incorrect location $from!"
+          logger.warn(error)
+          Future.failed(new Exception(error))
+        }
+      }
+      case None => {
+        val error = s"Somehow got a claim for unknown Duck $duckId, from $from!"
+        logger.error(error)
+        Future.failed(new Exception(error))
+      }
+    }
   }
   def dropDuck(who: LoginId, duck: Int): Future[Int] = {
     dbService.run(

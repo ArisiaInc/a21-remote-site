@@ -161,7 +161,7 @@ class AdminController (
       "altText" -> nonEmptyText,
       "link" -> nonEmptyText,
       "hint" -> optional(text),
-      "requestingUrl" -> optional(text)
+      "requestingUrl" -> text
     )(Duck.apply)(Duck.unapply)
   )
 

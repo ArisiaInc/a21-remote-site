@@ -6,7 +6,7 @@ CREATE TABLE ducks (
   alt text NOT NULL,
   link text NOT NULL,
   hint text,
-  requesting_url text
+  requesting_url text NOT NULL
 );
 
 CREATE TABLE member_ducks (
