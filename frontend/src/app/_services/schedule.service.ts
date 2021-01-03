@@ -192,6 +192,10 @@ export class SchedulePerson {
     this.tempProg = person.prog;
   }
 
+  static compare(a: SchedulePerson, b: SchedulePerson) {
+    return a.name.localeCompare(b.name);
+  }
+
   link(eventMap: {[_: string]: ScheduleEvent}): void {
     if (this.tempProg) {
       this.events_ = this.tempProg.
@@ -330,7 +334,7 @@ export class ScheduleService {
     this.events.sort((a, b) => a.start.getTime() - b.start.getTime());
 
     this.people = program.people.map((item) => new SchedulePerson(item));
-    this.people.sort((a, b) => (a.name.localeCompare(b.name)));
+    this.people.sort(SchedulePerson.compare);
     this.people.forEach(person => {
       this.peopleMap[person.id] = person;
       const lower = person.name[0].toLowerCase();
@@ -480,10 +484,27 @@ export class ScheduleService {
     );
   }
 
-  getPerson(id:string): Observable<SchedulePerson | undefined> {
+  getPerson(id: string): Observable<SchedulePerson | undefined> {
     return this.peopleMap$.pipe(
       map(peopleMap => peopleMap[id]),
     );
+  }
+
+  getPeople(search: string): Observable<SchedulePerson[]> {
+    if (search === 'goh') {
+      return this.peopleMap$.pipe(
+        // Sort in place is okay since map creates a new array.
+        map(peopleMap => ['7116', '106213', '112042'].
+          map(id => peopleMap[id]).
+          filter(person => person).
+          sort(SchedulePerson.compare)),
+      );
+    } else {
+      const regexp = new RegExp('^'+search, 'i');
+      return this.people$.pipe(
+        map(people => people.filter(person => person.name.match(regexp))),
+      );
+    }
   }
 
   getStarredEvents(filters?: ProgramFilter): Observable<StructuredEvents> {
