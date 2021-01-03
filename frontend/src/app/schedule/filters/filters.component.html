@@ -1,4 +1,4 @@
-<div>
+<div class="filter-section">
   <span class="header">Filter by Day:</span>
   <app-button (click)="onNow()"
               [active]="nowFilter"
@@ -15,4 +15,26 @@
               [small]="true"
               class="filter-pill"
               >{{dayWeekday[day]}}</app-button>
+</div>
+<div class="filter-section">
+  <span class="header">Filter by Track:</span>
+  <app-button *ngFor="let track of scheduleService.tracks$ | async"
+              (click)="onTrack(track)"
+              [active]="trackFilters.includes(track)"
+              [toggle]="true"
+              [primary]="true"
+              [small]="true"
+              class="filter-pill"
+              >{{track}}</app-button>
+</div>
+<div class="filter-section">
+  <span class="header">Filter by Type:</span>
+  <app-button *ngFor="let type of scheduleService.types$ | async"
+              (click)="onType(type)"
+              [active]="typeFilters.includes(type)"
+              [toggle]="true"
+              [primary]="true"
+              [small]="true"
+              class="filter-pill"
+              >{{type}}</app-button>
 </div>

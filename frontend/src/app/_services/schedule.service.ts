@@ -14,6 +14,9 @@ export enum ScheduleState {
   ERROR,
 }
 
+const TRACK_TAG = 'track:';
+const TYPE_TAG = 'type:';
+
 export interface ScheduleStatus {
   state: ScheduleState;
   error?: HttpErrorResponse;
@@ -202,8 +205,11 @@ export class ScheduleService {
   private peopleMap: {[id: string]: SchedulePerson} = {};
   peopleMap$ = new ReplaySubject<{[id: string]: SchedulePerson}>(1);
 
-  private locations: string[] = [];
-  locations$ = new ReplaySubject<string[]>(1);
+  private tracks: string[] = [];
+  tracks$ = new ReplaySubject<string[]>(1);
+
+  private types: string[] = [];
+  types$ = new ReplaySubject<string[]>(1);
 
   private schedule: StructuredEvents = [];
   private scheduleWithoutRelabeling$ = new ReplaySubject<StructuredEvents>(1);
@@ -266,26 +272,38 @@ export class ScheduleService {
     });
     this.people.sort((a, b) => (a.name.localeCompare(b.name)));
 
-    const locations: {[_:string]: string} = {};
+    const tracks = new Set<string>();
+    const types = new Set<string>();
 
     this.events.forEach((event) => {
       event.link(this.peopleMap);
-      event.location.forEach(location => locations[location] = location);
+      event.tags.forEach(tag => {
+        if (tag.startsWith(TRACK_TAG)) {
+          tracks.add(tag.substring(TRACK_TAG.length));
+        }
+        if (tag.startsWith(TYPE_TAG)) {
+          types.add(tag.substring(TYPE_TAG.length));
+        }
+      });
     });
 
     this.people.forEach((person) => {
       person.link(eventMap);
     });
 
-    this.locations = Object.values(locations);
-    this.locations.sort();
+    this.tracks = [...tracks];
+    this.tracks.sort();
+
+    this.types = [...types];
+    this.types.sort();
 
     this.schedule = buildStructuredEvents(this.events);
 
     this.events$.next(this.events);
     this.people$.next(this.people);
     this.peopleMap$.next(this.peopleMap);
-    this.locations$.next(this.locations);
+    this.tracks$.next(this.tracks);
+    this.types$.next(this.types);
     this.scheduleWithoutRelabeling$.next(this.schedule);
 
     this.status.state = ScheduleState.READY;
@@ -329,15 +347,22 @@ export class ScheduleService {
     const munged_filters: ((scheduleEvent: ScheduleEvent) => boolean)[] = [];
     if (filters.tags && filters.tags.length > 0) {
       const tags = filters.tags;
-      munged_filters.push(scheduleEvent => tags.some(filterString => scheduleEvent.tags.includes(filterString)))
+      munged_filters.push(
+        scheduleEvent => tags.every(
+          category => category.length === 0 || category.some(
+            filterString => scheduleEvent.tags.includes(filterString))))
     }
     if (filters.loc && filters.loc.length > 0) {
       const loc = filters.loc;
-      munged_filters.push(scheduleEvent => loc.some(filterString => scheduleEvent.location.includes(filterString)))
+      munged_filters.push(
+        scheduleEvent => loc.some(
+          filterString => scheduleEvent.location.includes(filterString)))
     }
     if (filters.id && filters.id.length > 0) {
       const id = filters.id;
-      munged_filters.push(scheduleEvent => id.some(filterString => scheduleEvent.location.includes(filterString)))
+      munged_filters.push(
+        scheduleEvent => id.some(
+          filterString => scheduleEvent.id === filterString))
     }
 
     if (filters.date && filters.date.length > 0) {
@@ -382,7 +407,7 @@ export class ScheduleService {
   get_featured_events(): Observable<StructuredEvents> {
     // for testing:
     // return this.getSchedule({id: ['23', '45', '17']});
-    return this.getSchedule({tags: ['featured']});
+    return this.getSchedule({tags: [['featured']]});
   }
 
   get_rooms(): Observable<Room[]> {

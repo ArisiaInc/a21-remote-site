@@ -7,6 +7,8 @@ enum Property {
 };
 
 const NOW_HOURS = 12;
+const TRACK_TAG = 'track:';
+const TYPE_TAG = 'type:'
 
 @Component({
   selector: 'app-filters',
@@ -15,6 +17,8 @@ const NOW_HOURS = 12;
 })
 export class FiltersComponent implements OnInit {
   filters: ProgramFilter = {};
+  trackFilters: string[] = [];
+  typeFilters: string[] = [];
   dateFilters: number[] = [];
   nowFilter = false;
 
@@ -44,25 +48,26 @@ export class FiltersComponent implements OnInit {
     }
   }
 
-  onChange(event:MouseEvent, prop:Property, value:string): void {
-    let propList;
-    switch (prop) {
-      case Property.LOC:
-        this.filters.loc = this.filters.loc || [];
-        propList = this.filters.loc;
-        break;
-    }
-    const target = (event.target as Element);
-    const index = propList.indexOf(value);
+  onTrack(value:string): void {
+    const index = this.trackFilters.indexOf(value);
     if(index > -1) {
-      propList.splice(index, 1);
-      target.classList.remove('active');
+      this.trackFilters.splice(index, 1);
     } else {
-      propList.push(value);
-      target.classList.add('active');
+      this.trackFilters.push(value);
     }
-    this.filtersChanged.emit(this.filters);
+    this.updateTagFilters();
   }
+
+  onType(value:string): void {
+    const index = this.typeFilters.indexOf(value);
+    if(index > -1) {
+      this.typeFilters.splice(index, 1);
+    } else {
+      this.typeFilters.push(value);
+    }
+    this.updateTagFilters();
+  }
+
   onDate(value: number): void {
     this.dateFilters = this.dateFilters || [];
     const index = this.dateFilters.indexOf(value);
@@ -88,6 +93,11 @@ export class FiltersComponent implements OnInit {
     } else {
       this.filters.date = this.dateFilters.map(date => ({start: new Date(2021, 0, date), end: new Date(2021, 0, date + 1)}));
     }
+    this.filtersChanged.emit(this.filters);
+  }
+
+  updateTagFilters(): void {
+    this.filters.tags = [this.trackFilters.map (track => TRACK_TAG + track), this.typeFilters.map (typ => TYPE_TAG + typ)];
     this.filtersChanged.emit(this.filters);
   }
 
