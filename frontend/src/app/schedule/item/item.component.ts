@@ -23,4 +23,9 @@ export class ItemComponent implements OnInit {
     this.expanded = !this.expanded;
   }
 
+  onStarClick(event: Event) {
+    this.event.starred = !this.event.starred
+    event.stopPropagation();
+  }
+
 }

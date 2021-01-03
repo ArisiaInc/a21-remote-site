@@ -4,15 +4,17 @@ import { ProgramComponent } from './program/program.component';
 import { PersonComponent } from './person/person.component';
 import { LayoutComponent } from './layout/layout.component';
 import { PeopleComponent } from './people/people.component';
+import { StarredComponent } from './starred/starred.component';
 
 const routes: Routes = [
   {path: '', component: LayoutComponent,
-  children: [
-    {path: 'people/:id', component: PersonComponent},
-    {path: 'people', component: PeopleComponent},
-    {path: 'program', component: ProgramComponent}
-  ]
-},
+   children: [
+     {path: 'starred', component: StarredComponent},
+     {path: 'people/:id', component: PersonComponent},
+     {path: 'people', component: PeopleComponent},
+     {path: 'program', component: ProgramComponent}
+   ]
+  },
 ];
 
 @NgModule({

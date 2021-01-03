@@ -1,5 +1,31 @@
-.filter_item {
-    cursor: pointer;
-    padding-top: 5px;
-    padding-bottom: 5px;
+.pill {
+    margin-left: 0.5rem;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+}
+
+.pills {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+}
+
+.header {
+    line-height: 1.8rem;
+    font-weight: bold;
+}
+
+:host {
+    display:block;
+    white-space: nowrap;
+}
+
+.filter-section {
+    margin-bottom: 0.5rem;
+    display: flex;
+}
+
+.clear-filter {
+    font-size: 0.625rem;
+    margin-left: 0.875rem;
 }

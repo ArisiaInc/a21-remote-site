@@ -11,15 +11,18 @@ import { PeopleComponent } from './people/people.component';
 import { FiltersComponent } from './filters/filters.component';
 import { ItemListComponent } from './item-list/item-list.component';
 import { PipesModule } from '../pipes/pipes.module';
+import { SharedModule } from '../_components';
+import { StarredComponent } from './starred/starred.component';
 
 
 @NgModule({
-  declarations: [ProgramComponent, PersonComponent, ItemComponent, LayoutComponent, MenuComponent, PeopleComponent, FiltersComponent, ItemListComponent],
+  declarations: [ProgramComponent, PersonComponent, ItemComponent, LayoutComponent, MenuComponent, PeopleComponent, FiltersComponent, ItemListComponent, StarredComponent],
   providers: [],
   imports: [
     CommonModule,
     ScheduleRoutingModule,
     PipesModule,
+    SharedModule,
   ]
 })
 export class ScheduleModule { }

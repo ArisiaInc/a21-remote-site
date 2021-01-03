@@ -1,1 +1,3 @@
-<button class="btn" [ngClass]="{'btn-primary': primary}" (click)="onClick()"><ng-content></ng-content></button>
+<button class="btn" [ngClass]="{'btn-primary': primary && (!toggle || active), 'btn-outline-primary': primary && (toggle && !active), 'inactive': toggle && !active, 'btn-sm': small }" (click)="clicked.emit('clicked')">
+  <ng-content></ng-content>
+</button>

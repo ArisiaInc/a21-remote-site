@@ -12,6 +12,7 @@ import { RouterModule } from '@angular/router';
 import { CreatorPageComponent } from './creator-page/creator-page.component';
 import { CalloutBoxComponent } from './callout-box/callout-box.component';
 import { SettingsComponent } from './settings/settings.component';
+import { StarComponent } from './star/star.component';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { SettingsComponent } from './settings/settings.component';
     CreatorPageComponent,
     CalloutBoxComponent,
     SettingsComponent,
+    StarComponent,
   ],
   imports: [
     CommonModule,
@@ -39,6 +41,7 @@ import { SettingsComponent } from './settings/settings.component';
     CreatorPageComponent,
     CalloutBoxComponent,
     SettingsComponent,
+    StarComponent,
   ]
 })
 export class SharedModule { }

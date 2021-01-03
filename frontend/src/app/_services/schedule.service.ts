@@ -5,6 +5,7 @@ import { HttpClient, HttpResponse, HttpErrorResponse } from '@angular/common/htt
 
 import { ProgramItem, ProgramPerson, ProgramFilter, Room, DateRange } from '@app/_models';
 import { SettingsService } from './settings.service';
+import { StarsService } from './stars.service';
 import { environment } from '@environments/environment';
 
 export enum ScheduleState {
@@ -13,6 +14,9 @@ export enum ScheduleState {
   READY,
   ERROR,
 }
+
+const TRACK_TAG = 'track:';
+const TYPE_TAG = 'type:';
 
 export interface ScheduleStatus {
   state: ScheduleState;
@@ -26,7 +30,7 @@ let hour12: boolean = false;
 let hour12ConstSet$!: Observable<boolean>;
 
 export class ScheduleEvent {
-  constructor (item: ProgramItem) {
+  constructor (item: ProgramItem, private starsService: StarsService) {
     this.id = item.id;
     this.title = item.title;
     this.description = item.desc;
@@ -36,6 +40,7 @@ export class ScheduleEvent {
     this.location = item.loc;
     this.people = [];
     this.tempPeople = item.people;
+    this.starCache = this.starsService.has(this.id);
   }
 
   link(peopleMap: {[_: string]: SchedulePerson}): void {
@@ -75,6 +80,29 @@ export class ScheduleEvent {
   mins: number;
   location: string[];
   people: {person: SchedulePerson, isModerator: boolean}[];
+
+  get starred(): boolean {
+    return this.starCache;
+  }
+
+  set starred(value: boolean) {
+    const serviceValue = this.starsService.has(this.id);
+    if (value === serviceValue) {
+      this.starCache = serviceValue;
+    } else if (value) {
+      this.starsService.add(this.id);
+      this.starCache = value;
+    } else {
+      this.starsService.delete(this.id);
+      this.starCache = value;
+    }
+  }
+
+  updateStar(): void {
+    this.starCache = this.starsService.has(this.id);
+  }
+
+  private starCache: boolean;
 
   private dateString?: string;
 
@@ -138,6 +166,23 @@ function relabelStructuredEventsAsNeeded() {
   );
 }
 
+function restarStructuredEvents(events: StructuredEvents) {
+  events.forEach(dayOfEvents => dayOfEvents.times.forEach(eventsAtTime => eventsAtTime.events.forEach(event => event.updateStar())));
+}
+
+function restarStructuredEventsAsNeeded() {
+  return pipe(
+    switchMap((structuredEvents: StructuredEvents) => {
+      return hour12ConstSet$.pipe(
+        map(_ => {
+          restarStructuredEvents(structuredEvents);
+          return structuredEvents;
+        }),
+      );
+    }),
+  );
+}
+
 export class SchedulePerson {
   constructor (person: ProgramPerson) {
     this.id = person.id;
@@ -162,6 +207,7 @@ export class SchedulePerson {
       const structuredEvents$ = new BehaviorSubject<StructuredEvents>(structuredEvents);
       this.structuredEvents$ = structuredEvents$.pipe(
         relabelStructuredEventsAsNeeded(),
+        restarStructuredEventsAsNeeded(),
       );
     }
     return this.structuredEvents$;
@@ -201,14 +247,20 @@ export class ScheduleService {
   private events: ScheduleEvent[] = [];
   events$ = new ReplaySubject<ScheduleEvent[]>(1);
 
+  private eventsMap: {[id: string]: ScheduleEvent} = {};
+  eventsMap$ = new ReplaySubject<{[id: string]: ScheduleEvent}>(1);
+
   private people: SchedulePerson[] = [];
   people$ = new ReplaySubject<SchedulePerson[]>(1);
 
   private peopleMap: {[id: string]: SchedulePerson} = {};
   peopleMap$ = new ReplaySubject<{[id: string]: SchedulePerson}>(1);
 
-  private locations: string[] = [];
-  locations$ = new ReplaySubject<string[]>(1);
+  private tracks: string[] = [];
+  tracks$ = new ReplaySubject<string[]>(1);
+
+  private types: string[] = [];
+  types$ = new ReplaySubject<string[]>(1);
 
   private schedule: StructuredEvents = [];
   private scheduleWithoutRelabeling$ = new ReplaySubject<StructuredEvents>(1);
@@ -217,12 +269,17 @@ export class ScheduleService {
   private status: ScheduleStatus = {state: ScheduleState.IDLE};
   status$ = new BehaviorSubject<ScheduleStatus>(this.status);
 
-  constructor(private http: HttpClient, private settingsService: SettingsService) {
+  constructor(private http: HttpClient,
+              private settingsService: SettingsService,
+              private starsService: StarsService,) {
     this.init();
     hour12ConstSet$ = settingsService.hour12$.pipe(tap(value => hour12 = value));
     hour12ConstSet$.subscribe();
 
-    this.schedule$ = this.scheduleWithoutRelabeling$.pipe(relabelStructuredEventsAsNeeded());
+    this.schedule$ = this.scheduleWithoutRelabeling$.pipe(
+      relabelStructuredEventsAsNeeded(),
+      restarStructuredEventsAsNeeded(),
+    );
   }
 
   private reload(): void {
@@ -255,11 +312,11 @@ export class ScheduleService {
     const program = response.body;
 
     this.peopleMap = {};
-    const eventMap: {[_: string]: ScheduleEvent} = {};
+    this.eventsMap = {};
 
     this.events = program.program.map((item) => {
-      const event = new ScheduleEvent(item);
-      eventMap[event.id] = event;
+      const event = new ScheduleEvent(item, this.starsService);
+      this.eventsMap[event.id] = event;
       return event;
     });
     this.events.sort((a, b) => a.start.getTime() - b.start.getTime());
@@ -271,26 +328,39 @@ export class ScheduleService {
     });
     this.people.sort((a, b) => (a.name.localeCompare(b.name)));
 
-    const locations: {[_:string]: string} = {};
+    const tracks = new Set<string>();
+    const types = new Set<string>();
 
     this.events.forEach((event) => {
       event.link(this.peopleMap);
-      event.location.forEach(location => locations[location] = location);
+      event.tags.forEach(tag => {
+        if (tag.startsWith(TRACK_TAG)) {
+          tracks.add(tag.substring(TRACK_TAG.length));
+        }
+        if (tag.startsWith(TYPE_TAG)) {
+          types.add(tag.substring(TYPE_TAG.length));
+        }
+      });
     });
 
     this.people.forEach((person) => {
-      person.link(eventMap);
+      person.link(this.eventsMap);
     });
 
-    this.locations = Object.values(locations);
-    this.locations.sort();
+    this.tracks = [...tracks];
+    this.tracks.sort();
+
+    this.types = [...types];
+    this.types.sort();
 
     this.schedule = buildStructuredEvents(this.events);
 
     this.events$.next(this.events);
+    this.eventsMap$.next(this.eventsMap);
     this.people$.next(this.people);
     this.peopleMap$.next(this.peopleMap);
-    this.locations$.next(this.locations);
+    this.tracks$.next(this.tracks);
+    this.types$.next(this.types);
     this.scheduleWithoutRelabeling$.next(this.schedule);
 
     this.status.state = ScheduleState.READY;
@@ -334,15 +404,16 @@ export class ScheduleService {
     const munged_filters: ((scheduleEvent: ScheduleEvent) => boolean)[] = [];
     if (filters.tags && filters.tags.length > 0) {
       const tags = filters.tags;
-      munged_filters.push(scheduleEvent => tags.some(filterString => scheduleEvent.tags.includes(filterString)))
+      munged_filters.push(
+        scheduleEvent => tags.every(
+          category => category.length === 0 || category.some(
+            filterString => scheduleEvent.tags.includes(filterString))))
     }
     if (filters.loc && filters.loc.length > 0) {
       const loc = filters.loc;
-      munged_filters.push(scheduleEvent => loc.some(filterString => scheduleEvent.location.includes(filterString)))
-    }
-    if (filters.id && filters.id.length > 0) {
-      const id = filters.id;
-      munged_filters.push(scheduleEvent => id.some(filterString => scheduleEvent.location.includes(filterString)))
+      munged_filters.push(
+        scheduleEvent => loc.some(
+          filterString => scheduleEvent.location.includes(filterString)))
     }
 
     if (filters.date && filters.date.length > 0) {
@@ -350,11 +421,26 @@ export class ScheduleService {
         sort((a, b) => a.start.getTime()-b.start.getTime());
     }
 
-    if (munged_filters.length === 0 && (!dateRanges || dateRanges.length === 0)) {
+    if (munged_filters.length === 0 && (!dateRanges || dateRanges.length === 0) && (!filters.id || filters.id.length === 0)) {
       return this.schedule$;
     }
 
-    return this.events$.pipe(
+    let eventsObservable;
+
+    if (filters.id && filters.id.length > 0) {
+      const id = filters.id;
+      eventsObservable = this.eventsMap$.pipe(
+        // It's okay to sort in place since filters.id.map() has created a new array.
+        map(eventsMap => id.
+          map(id => eventsMap[id]).
+          filter(event => event).
+          sort((a, b) => a.start.getTime()-b.start.getTime())),
+      );
+    } else {
+      eventsObservable = this.events$;
+    }
+
+    return eventsObservable.pipe(
       map(events => {
         let dateFilteredEvents = events;
         if (dateRanges) {
@@ -375,6 +461,7 @@ export class ScheduleService {
         return buildStructuredEvents(dateFilteredEvents.filter((event) => munged_filters.every(filter => filter(event))));
       }),
       relabelStructuredEventsAsNeeded(),
+      restarStructuredEventsAsNeeded(),
     );
   }
 
@@ -384,10 +471,24 @@ export class ScheduleService {
     );
   }
 
+  getStarredEvents(filters?: ProgramFilter): Observable<StructuredEvents> {
+    return this.starsService.observable$.pipe(
+      switchMap(starsService => {
+        const scheduleFilters: ProgramFilter = {id: [...starsService]};
+        if (filters) {
+          scheduleFilters.loc = filters.loc;
+          scheduleFilters.date = filters.date;
+          scheduleFilters.tags = filters.tags
+        }
+        return this.getSchedule(scheduleFilters)
+      }),
+    );
+  }
+
   get_featured_events(): Observable<StructuredEvents> {
     // for testing:
     // return this.getSchedule({id: ['23', '45', '17']});
-    return this.getSchedule({tags: ['featured']});
+    return this.getSchedule({tags: [['featured']]});
   }
 
 
