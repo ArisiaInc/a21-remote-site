@@ -1,12 +1,12 @@
 app-link {
-    height: 200px;
+    height: 12.5rem;
     font-size: 1.5rem;
 
-    &[routerLink="/gaming/larp"] {
-        left: -100px;
+    &.pull-left {
+        left: -6.25rem;
     }
 }
 
 .dice-box {
-    height: 800px;
+    height: 50rem;
 }
