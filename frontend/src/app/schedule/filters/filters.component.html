@@ -1,40 +1,49 @@
 <div class="filter-section">
   <span class="header">Filter by Day:</span>
-  <app-button (click)="onNow()"
-              [active]="nowFilter"
-              [toggle]="true"
-              [primary]="true"
-              [small]="true"
-              class="filter-pill"
-              >Now</app-button>
-  <app-button *ngFor="let day of days"
-              (click)="onDate(day)"
-              [active]="dateFilters.includes(day)"
-              [toggle]="true"
-              [primary]="true"
-              [small]="true"
-              class="filter-pill"
-              >{{dayWeekday[day]}}</app-button>
+  <div class="pills">
+    <app-button (click)="onNow()"
+                [active]="nowFilter"
+                [toggle]="true"
+                [primary]="true"
+                [small]="true"
+                class="pill"
+                >Now</app-button>
+    <app-button *ngFor="let day of days"
+                (click)="onDate(day)"
+                [active]="dateFilters.includes(day)"
+                [toggle]="true"
+                [primary]="true"
+                [small]="true"
+                class="pill"
+                >{{dayWeekday[day]}}</app-button>
+    <a *ngIf="nowFilter || dateFilters.length > 0" class="clear-filter" (click)="clearDate()">x clear filter</a>
+  </div>
 </div>
 <div class="filter-section">
   <span class="header">Filter by Track:</span>
-  <app-button *ngFor="let track of scheduleService.tracks$ | async"
-              (click)="onTrack(track)"
-              [active]="trackFilters.includes(track)"
-              [toggle]="true"
-              [primary]="true"
-              [small]="true"
-              class="filter-pill"
-              >{{track}}</app-button>
+  <div class="pills">
+    <app-button *ngFor="let track of scheduleService.tracks$ | async"
+                (click)="onTrack(track)"
+                [active]="trackFilters.includes(track)"
+                [toggle]="true"
+                [primary]="true"
+                [small]="true"
+                class="pill"
+                >{{track}}</app-button>
+    <a *ngIf="trackFilters.length > 0" class="clear-filter" (click)="clearTrack()">x clear filter</a>
+  </div>
 </div>
 <div class="filter-section">
   <span class="header">Filter by Type:</span>
-  <app-button *ngFor="let type of scheduleService.types$ | async"
-              (click)="onType(type)"
-              [active]="typeFilters.includes(type)"
-              [toggle]="true"
-              [primary]="true"
-              [small]="true"
-              class="filter-pill"
-              >{{type}}</app-button>
+  <div class="pills">
+    <app-button *ngFor="let type of scheduleService.types$ | async"
+                (click)="onType(type)"
+                [active]="typeFilters.includes(type)"
+                [toggle]="true"
+                [primary]="true"
+                [small]="true"
+                class="pill"
+                >{{type}}</app-button>
+    <a *ngIf="typeFilters.length > 0" class="clear-filter" (click)="clearType()">x clear filter</a>
+  </div>
 </div>

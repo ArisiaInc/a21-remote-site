@@ -1,6 +1,13 @@
-.filter-pill {
+.pill {
     margin-left: 0.5rem;
     display: inline-block;
+    margin-bottom: 0.5rem;
+}
+
+.pills {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
 }
 
 .header {
@@ -10,8 +17,15 @@
 
 :host {
     display:block;
+    white-space: nowrap;
 }
 
 .filter-section {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+}
+
+.clear-filter {
+    font-size: 0.625rem;
+    margin-left: 0.875rem;
 }

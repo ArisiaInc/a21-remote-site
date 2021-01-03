@@ -58,6 +58,11 @@ export class FiltersComponent implements OnInit {
     this.updateTagFilters();
   }
 
+  clearTrack(): void {
+    this.trackFilters.length = 0;
+    this.updateTagFilters();
+  }
+
   onType(value:string): void {
     const index = this.typeFilters.indexOf(value);
     if(index > -1) {
@@ -65,6 +70,11 @@ export class FiltersComponent implements OnInit {
     } else {
       this.typeFilters.push(value);
     }
+    this.updateTagFilters();
+  }
+
+  clearType(): void {
+    this.typeFilters.length = 0;
     this.updateTagFilters();
   }
 
@@ -83,6 +93,12 @@ export class FiltersComponent implements OnInit {
   onNow(): void {
     this.dateFilters.length = 0;
     this.nowFilter = !this.nowFilter;
+    this.updateDateFilters();
+  }
+
+  clearDate(): void {
+    this.dateFilters.length = 0;
+    this.nowFilter = false;
     this.updateDateFilters();
   }
 
