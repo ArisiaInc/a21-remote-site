@@ -466,6 +466,20 @@ export class ScheduleService {
     );
   }
 
+  getStarredEvents(filters?: ProgramFilter): Observable<StructuredEvents> {
+    return this.starsService.observable$.pipe(
+      switchMap(starsService => {
+        const scheduleFilters: ProgramFilter = {id: [...starsService]};
+        if (filters) {
+          scheduleFilters.loc = filters.loc;
+          scheduleFilters.date = filters.date;
+          scheduleFilters.tags = filters.tags
+        }
+        return this.getSchedule(scheduleFilters)
+      }),
+    );
+  }
+
   get_featured_events(): Observable<StructuredEvents> {
     // for testing:
     // return this.getSchedule({id: ['23', '45', '17']});
