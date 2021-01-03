@@ -1,0 +1,4 @@
+<div>
+    <app-filters (filtersChanged)="updateItems($event)"></app-filters>
+    <app-item-list [events]="events$ | async"></app-item-list>
+</div>
