@@ -242,6 +242,9 @@ export class ScheduleService {
   private events: ScheduleEvent[] = [];
   events$ = new ReplaySubject<ScheduleEvent[]>(1);
 
+  private eventsMap: {[id: string]: ScheduleEvent} = {};
+  eventsMap$ = new ReplaySubject<{[id: string]: ScheduleEvent}>(1);
+
   private people: SchedulePerson[] = [];
   people$ = new ReplaySubject<SchedulePerson[]>(1);
 
@@ -304,11 +307,11 @@ export class ScheduleService {
     const program = response.body;
 
     this.peopleMap = {};
-    const eventMap: {[_: string]: ScheduleEvent} = {};
+    this.eventsMap = {};
 
     this.events = program.program.map((item) => {
       const event = new ScheduleEvent(item, this.starsService);
-      eventMap[event.id] = event;
+      this.eventsMap[event.id] = event;
       return event;
     });
     this.events.sort((a, b) => a.start.getTime() - b.start.getTime());
@@ -336,7 +339,7 @@ export class ScheduleService {
     });
 
     this.people.forEach((person) => {
-      person.link(eventMap);
+      person.link(this.eventsMap);
     });
 
     this.tracks = [...tracks];
@@ -348,6 +351,7 @@ export class ScheduleService {
     this.schedule = buildStructuredEvents(this.events);
 
     this.events$.next(this.events);
+    this.eventsMap$.next(this.eventsMap);
     this.people$.next(this.people);
     this.peopleMap$.next(this.peopleMap);
     this.tracks$.next(this.tracks);
@@ -406,23 +410,32 @@ export class ScheduleService {
         scheduleEvent => loc.some(
           filterString => scheduleEvent.location.includes(filterString)))
     }
-    if (filters.id && filters.id.length > 0) {
-      const id = filters.id;
-      munged_filters.push(
-        scheduleEvent => id.some(
-          filterString => scheduleEvent.id === filterString))
-    }
 
     if (filters.date && filters.date.length > 0) {
       dateRanges = [...filters.date].
         sort((a, b) => a.start.getTime()-b.start.getTime());
     }
 
-    if (munged_filters.length === 0 && (!dateRanges || dateRanges.length === 0)) {
+    if (munged_filters.length === 0 && (!dateRanges || dateRanges.length === 0) && (!filters.id || filters.id.length === 0)) {
       return this.schedule$;
     }
 
-    return this.events$.pipe(
+    let eventsObservable;
+
+    if (filters.id && filters.id.length > 0) {
+      const id = filters.id;
+      eventsObservable = this.eventsMap$.pipe(
+        // It's okay to sort in place since filters.id.map() has created a new array.
+        map(eventsMap => id.
+          map(id => eventsMap[id]).
+          filter(event => event).
+          sort((a, b) => a.start.getTime()-b.start.getTime())),
+      );
+    } else {
+      eventsObservable = this.events$;
+    }
+
+    return eventsObservable.pipe(
       map(events => {
         let dateFilteredEvents = events;
         if (dateRanges) {
