@@ -1,17 +1,21 @@
 <div class="item_frame" (click)="toggleExpand()" [ngClass]="{'expanded': expanded}">
     <div class="item_base">
-        <h6 class="title" [ngClass]="{'font-weight-bold': expanded}">{{item.title}}</h6>
-        <div class="loc text-muted">Location: <span>{{item.loc}}</span></div>
+        <h6 class="title" [ngClass]="{'font-weight-bold': expanded}">{{event.title}}</h6>
+        <div class="loc text-muted">Location: <span>{{event.location}}</span></div>
     </div>
     <span class="item_star"></span>
     <div class="extra" *ngIf="expanded">
         <div class="item_tag text-muted">Track: <span>{{track}}</span></div>
         <div class="item_tag text-muted">Type: <span>{{type}}</span></div>
         <div class="item-people mt-2">
-            <a *ngFor="let person of item.people; last as isLast" href="/schedule/people/{{person.id}}">
-                {{person.name}}<span *ngIf="!isLast">,&nbsp;</span>
+          <ng-container *ngFor="let person of event.people; last as isLast">
+            <a href="/schedule/people/{{person.person.id}}"
+               >{{person.person.name}}<ng-container *ngIf="person.isModerator"
+                                                    > (moderator)</ng-container>
             </a>
+            <ng-container *ngIf="!isLast">,&nbsp;</ng-container>
+          </ng-container>
         </div>
-        <p class="mt-2" [innerHTML]="item.desc | sanitizeHtml | linkify"></p>
+        <p class="mt-2" [innerHTML]="event.description | sanitizeHtml | linkify"></p>
     </div>
 </div>

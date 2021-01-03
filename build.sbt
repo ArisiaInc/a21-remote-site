@@ -110,6 +110,7 @@ lazy val backend = (project in file("arisia-remote"))
       jwtPlay,
       macwireMacros,
       macwireUtil,
+      playBootstrap,
       scalactic,
       scalaTest,
       scalatestPlusPlay,

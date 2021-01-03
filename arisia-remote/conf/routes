@@ -35,6 +35,10 @@ GET     /api/schedule/stars          arisia.controllers.ScheduleController.getSt
 PUT     /api/schedule/stars/:which   arisia.controllers.ScheduleController.addStar(which)
 # Remove the star for the specified program item ID
 DELETE  /api/schedule/stars/:which   arisia.controllers.ScheduleController.removeStar(which)
+# Try to join a running Zoom room as an attendee
+# On success, this will redirect to the actual Zoom URL
+GET     /api/schedule/:id/zoom       arisia.controllers.ZoomController.enterItem(id)
+GET     /api/schedule/:id/zoomhost   arisia.controllers.ZoomController.enterItemAsHost(id)
 
 # Admin UI, separate from the attendee-facing site
 GET     /admin                       arisia.controllers.AdminController.home()
@@ -45,8 +49,18 @@ DELETE  /admin/manageAdmins/:name    arisia.controllers.AdminController.removeAd
 GET     /admin/manageEarlyAccess          arisia.controllers.AdminController.manageEarlyAccess()
 POST    /admin/manageEarlyAccess          arisia.controllers.AdminController.addEarlyAccess()
 DELETE  /admin/manageEarlyAccess/:name    arisia.controllers.AdminController.removeEarlyAccess(name)
+GET     /admin/manageTech            arisia.controllers.AdminController.manageTech()
+POST    /admin/manageTech            arisia.controllers.AdminController.addTech()
+DELETE  /admin/manageTech/:name      arisia.controllers.AdminController.removeTech(name)
+
+GET     /admin/rooms                 arisia.controllers.AdminController.manageZoomRooms()
+GET     /admin/createRoom            arisia.controllers.AdminController.createRoom()
+GET     /admin/editRoom/:id          arisia.controllers.AdminController.showEditRoom(id: Int)
+POST    /admin/editRoom              arisia.controllers.AdminController.roomModified()
+
 # This is mainly internal, for testing; we might add a UI if we find a use for it, but don't do that casually:
-POST    /admin/startAdHocMeeting     arisia.controllers.AdminController.startMeeting()
+POST    /admin/meeting               arisia.controllers.AdminController.startMeeting()
+DELETE  /admin/meeting/:meetingId    arisia.controllers.AdminController.endMeeting(meetingId)
 # Note the non-standard path, which is configured in application.conf, so that frontend
 # can own /assets
 GET     /admin/assets/*file          controllers.Assets.versioned(path="/public", file: Asset)

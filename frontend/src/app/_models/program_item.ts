@@ -4,8 +4,9 @@ export interface ProgramItem {
     tags: string[];
     date: string;
     time: string;
+    timestamp: string;
     mins: string;
     loc: string[];
-    people: object[];
+    people: {id: string, name: string}[];
     desc: string;
 }

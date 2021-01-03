@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { ProgramFilter, ProgramItem } from '@app/_models';
-import { ScheduleService, StructuredScheduleItems } from '@app/_services/schedule.service';
+import { ScheduleService, StructuredEvents } from '@app/_services/schedule.service';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -9,18 +9,18 @@ import { Observable } from 'rxjs';
   styleUrls: ['./program.component.scss']
 })
 export class ProgramComponent implements OnInit {
-  items$!: Observable<StructuredScheduleItems>;
+  events$!: Observable<StructuredEvents>;
 
   constructor(private scheduleService: ScheduleService) { }
 
   // TODO allow filtering by url params
   ngOnInit(): void {
-    this.items$ = this.scheduleService.get_schedule();
+    this.events$ = this.scheduleService.getSchedule();
   }
 
   updateItems(filters: ProgramFilter) {
     console.log('updating')
-    this.items$ = this.scheduleService.get_schedule(filters);
+    this.events$ = this.scheduleService.getSchedule(filters);
   }
 
 }

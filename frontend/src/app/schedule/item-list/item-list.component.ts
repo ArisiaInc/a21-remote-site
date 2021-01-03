@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { ProgramItem } from '@app/_models';
+import { StructuredEvents } from '@app/_services/schedule.service';
 
 @Component({
   selector: 'app-item-list',
@@ -7,7 +7,7 @@ import { ProgramItem } from '@app/_models';
   styleUrls: ['./item-list.component.scss']
 })
 export class ItemListComponent implements OnInit {
-  @Input() items: {[_:string]: {[_:string]: ProgramItem[]}} = {};
+  @Input() events: StructuredEvents = [];
 
   constructor() { }
 

@@ -13,6 +13,9 @@ case class Schedule(program: List[ProgramItem], people: List[ProgramPerson]) {
   // well-enough-distributed to make hash collisions unlikely. So MD5 should suffice -- we don't need to waste
   // extra cycles on SHA256 or BCrypt:
   lazy val hash: String = json.md5.hex
+  // Map of items by ID, for quicker lookup:
+  lazy val byItemId: Map[ProgramItemId, ProgramItem] =
+    program.map(item => (item.id) -> item).toMap
 }
 
 object Schedule {

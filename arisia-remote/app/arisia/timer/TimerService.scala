@@ -1,9 +1,15 @@
 package arisia.timer
 
-import akka.actor.Cancellable
-import arisia.schedule.ScheduleService
-import play.api.Logging
+import java.time.Instant
+import java.util.concurrent.atomic.AtomicReference
 
+import akka.actor.Cancellable
+import arisia.general.{LifecycleItem, LifecycleService}
+import arisia.schedule.ScheduleService
+import arisia.util.Done
+import play.api.{Configuration, Logging}
+
+import scala.concurrent.Future
 import scala.concurrent.duration._
 
 /**
@@ -14,31 +20,52 @@ import scala.concurrent.duration._
  * refactor all of this better later. (Possibly with a more sophisticated DI solution.)
  */
 trait TimerService {
-  def init(): Unit
-  def shutdown(): Unit
+  def register(name: String, interval: FiniteDuration)(cb: Instant => Unit): Unit
 }
 
 class TimerServiceImpl(
   ticker: Ticker,
-  scheduleService: ScheduleService
-) extends TimerService with Logging {
+  time: TimeService,
+  config: Configuration,
+  val lifecycleService: LifecycleService
+) extends TimerService with LifecycleItem with Logging {
 
-  class Runner() extends Runnable {
-    // This is called on every "tick":
+  lazy val initialDelay = config.get[FiniteDuration]("arisia.timer.initial.delay")
+  lazy val interval = config.get[FiniteDuration]("arisia.timer.interval")
+
+  case class TimerEntry(
+    name: String,
+    interval: FiniteDuration,
+    cancellable: Option[Cancellable],
+    cb: Instant => Unit
+  ) extends Runnable {
     def run(): Unit = {
-      logger.info("Tick: running events")
-      scheduleService.refresh()
+      logger.info(s"Tick: running $name")
+      cb(time.now())
     }
+
+    def start(): TimerEntry = {
+      copy(
+        cancellable = Some(ticker.scheduleAtFixedRate(initialDelay, interval)(this))
+      )
+    }
+
+    def cancel(): Unit = cancellable.map(_.cancel())
   }
 
-  var _cancellable: Option[Cancellable] = None
+  val registry: AtomicReference[List[TimerEntry]] = new AtomicReference(List.empty)
 
-  def init(): Unit = {
-    // TODO: make the durations configurable
-    _cancellable = Some(ticker.scheduleAtFixedRate(10.seconds, 5.minutes)(new Runner()))
+  def register(name: String, interval: FiniteDuration)(cb: Instant => Unit): Unit = {
+    registry.accumulateAndGet(
+      List(TimerEntry(name, interval, None, cb).start()),
+      _ ++ _
+    )
   }
 
-  def shutdown(): Unit = {
-    _cancellable.map(_.cancel())
+  val lifecycleName = "TimerService"
+  lifecycleService.register(this)
+  override def shutdown(): Future[Done] = {
+    registry.get().map(_.cancel())
+    Future.successful(Done)
   }
 }

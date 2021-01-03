@@ -6,15 +6,13 @@ import play.api.libs.json.{Format, Json}
  * The information we get back from Zoom when we create a Meeting.
  *
  * This is not the full data structure: we are only bothering to deserialize fields that we might possibly
- * care about.
+ * care about. This is intentionally minimal, so that we can easily store this record in the DB and
+ * restore it in memory.
  */
 case class ZoomMeeting(
   id: Long,
-  topic: String,
-  created_at: String,
   start_url: String,
-  join_url: String,
-  password: String
+  join_url: String
 )
 object ZoomMeeting {
   implicit val fmt: Format[ZoomMeeting] = Json.format
