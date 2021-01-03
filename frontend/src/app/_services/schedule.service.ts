@@ -5,6 +5,7 @@ import { HttpClient, HttpResponse, HttpErrorResponse } from '@angular/common/htt
 
 import { ProgramItem, ProgramPerson, ProgramFilter, Room, DateRange } from '@app/_models';
 import { SettingsService } from './settings.service';
+import { StarsService } from './stars.service';
 import { environment } from '@environments/environment';
 
 export enum ScheduleState {
@@ -29,7 +30,7 @@ let hour12: boolean = false;
 let hour12ConstSet$!: Observable<boolean>;
 
 export class ScheduleEvent {
-  constructor (item: ProgramItem) {
+  constructor (item: ProgramItem, private starsService: StarsService) {
     this.id = item.id;
     this.title = item.title;
     this.description = item.desc;
@@ -39,6 +40,7 @@ export class ScheduleEvent {
     this.location = item.loc;
     this.people = [];
     this.tempPeople = item.people;
+    this.starCache = this.starsService.has(this.id);
   }
 
   link(peopleMap: {[_: string]: SchedulePerson}): void {
@@ -78,6 +80,29 @@ export class ScheduleEvent {
   mins: number;
   location: string[];
   people: {person: SchedulePerson, isModerator: boolean}[];
+
+  get starred(): boolean {
+    return this.starCache;
+  }
+
+  set starred(value: boolean) {
+    const serviceValue = this.starsService.has(this.id);
+    if (value === serviceValue) {
+      this.starCache = serviceValue;
+    } else if (value) {
+      this.starsService.add(this.id);
+      this.starCache = value;
+    } else {
+      this.starsService.delete(this.id);
+      this.starCache = value;
+    }
+  }
+
+  updateStar(): void {
+    this.starCache = this.starsService.has(this.id);
+  }
+
+  private starCache: boolean;
 
   private dateString?: string;
 
@@ -141,6 +166,23 @@ function relabelStructuredEventsAsNeeded() {
   );
 }
 
+function restarStructuredEvents(events: StructuredEvents) {
+  events.forEach(dayOfEvents => dayOfEvents.times.forEach(eventsAtTime => eventsAtTime.events.forEach(event => event.updateStar())));
+}
+
+function restarStructuredEventsAsNeeded() {
+  return pipe(
+    switchMap((structuredEvents: StructuredEvents) => {
+      return hour12ConstSet$.pipe(
+        map(_ => {
+          restarStructuredEvents(structuredEvents);
+          return structuredEvents;
+        }),
+      );
+    }),
+  );
+}
+
 export class SchedulePerson {
   constructor (person: ProgramPerson) {
     this.id = person.id;
@@ -165,6 +207,7 @@ export class SchedulePerson {
       const structuredEvents$ = new BehaviorSubject<StructuredEvents>(structuredEvents);
       this.structuredEvents$ = structuredEvents$.pipe(
         relabelStructuredEventsAsNeeded(),
+        restarStructuredEventsAsNeeded(),
       );
     }
     return this.structuredEvents$;
@@ -218,12 +261,17 @@ export class ScheduleService {
   private status: ScheduleStatus = {state: ScheduleState.IDLE};
   status$ = new BehaviorSubject<ScheduleStatus>(this.status);
 
-  constructor(private http: HttpClient, private settingsService: SettingsService) {
+  constructor(private http: HttpClient,
+              private settingsService: SettingsService,
+              private starsService: StarsService,) {
     this.init();
     hour12ConstSet$ = settingsService.hour12$.pipe(tap(value => hour12 = value));
     hour12ConstSet$.subscribe();
 
-    this.schedule$ = this.scheduleWithoutRelabeling$.pipe(relabelStructuredEventsAsNeeded());
+    this.schedule$ = this.scheduleWithoutRelabeling$.pipe(
+      relabelStructuredEventsAsNeeded(),
+      restarStructuredEventsAsNeeded(),
+    );
   }
 
   private reload(): void {
@@ -259,7 +307,7 @@ export class ScheduleService {
     const eventMap: {[_: string]: ScheduleEvent} = {};
 
     this.events = program.program.map((item) => {
-      const event = new ScheduleEvent(item);
+      const event = new ScheduleEvent(item, this.starsService);
       eventMap[event.id] = event;
       return event;
     });
@@ -395,6 +443,7 @@ export class ScheduleService {
         return buildStructuredEvents(dateFilteredEvents.filter((event) => munged_filters.every(filter => filter(event))));
       }),
       relabelStructuredEventsAsNeeded(),
+      restarStructuredEventsAsNeeded(),
     );
   }
 
