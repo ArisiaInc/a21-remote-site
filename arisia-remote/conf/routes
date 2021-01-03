@@ -40,6 +40,10 @@ DELETE  /api/schedule/stars/:which   arisia.controllers.ScheduleController.remov
 GET     /api/schedule/:id/zoom       arisia.controllers.ZoomController.enterItem(id)
 GET     /api/schedule/:id/zoomhost   arisia.controllers.ZoomController.enterItemAsHost(id)
 
+GET     /api/ducks                   arisia.controllers.DuckController.getDucks()
+GET     /api/ducks/:id               arisia.controllers.DuckController.getDuck(id: Int)
+POST    /api/ducks/:id               arisia.controllers.DuckController.assignDuck(id: Int)
+
 # Admin UI, separate from the attendee-facing site
 GET     /admin                       arisia.controllers.AdminController.home()
 GET     /admin/                      arisia.controllers.AdminController.home()
@@ -57,6 +61,11 @@ GET     /admin/rooms                 arisia.controllers.AdminController.manageZo
 GET     /admin/createRoom            arisia.controllers.AdminController.createRoom()
 GET     /admin/editRoom/:id          arisia.controllers.AdminController.showEditRoom(id: Int)
 POST    /admin/editRoom              arisia.controllers.AdminController.roomModified()
+
+GET     /admin/ducks                 arisia.controllers.AdminController.manageDucks()
+GET     /admin/createDuck            arisia.controllers.AdminController.createDuck()
+GET     /admin/editDuck/:id          arisia.controllers.AdminController.showEditDuck(id: Int)
+POST    /admin/editDuck              arisia.controllers.AdminController.duckModified()
 
 # This is mainly internal, for testing; we might add a UI if we find a use for it, but don't do that casually:
 POST    /admin/meeting               arisia.controllers.AdminController.startMeeting()

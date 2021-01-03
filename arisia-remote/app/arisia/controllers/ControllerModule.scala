@@ -19,10 +19,11 @@ trait ControllerModule extends GeneralModule with ZoomModule {
   def httpErrorHandler: HttpErrorHandler
   def configuration: Configuration
 
+  lazy val adminController: AdminController = wire[AdminController]
+  lazy val duckController: DuckController = wire[DuckController]
+  lazy val frontendController: FrontendController = wire[FrontendController]
   lazy val loginController: LoginController = wire[LoginController]
   lazy val scheduleController: ScheduleController = wire[ScheduleController]
-  lazy val frontendController: FrontendController = wire[FrontendController]
-  lazy val adminController: AdminController = wire[AdminController]
   lazy val zoomController: ZoomController = wire[ZoomController]
 
   lazy val fakeZambiaController: FakeZambiaController = wire[FakeZambiaController]

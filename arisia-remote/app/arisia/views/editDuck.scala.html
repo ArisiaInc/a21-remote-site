@@ -1,0 +1,26 @@
+@(
+  duckForm: Form[arisia.fun.Duck]
+)(
+  implicit request: RequestHeader, messagesProvider: MessagesProvider
+)
+
+@title = @{
+  if (duckForm.get.id == 0)
+    "Create Duck"
+  else
+    s"Edit Duck ${duckForm.get.id}"
+}
+
+@main(title) {
+  <h1>@title</h1>
+
+  @b4.horizontal.form(arisia.controllers.routes.AdminController.duckModified(), "col-md-2", "col-md-10") { implicit hfc =>
+    @b4.text(duckForm("id"), Symbol("_label") -> "ID", Symbol("readonly") -> true)
+    @b4.text(duckForm("imageUrl"), Symbol("_label") -> "Image URL")
+    @b4.text(duckForm("altText"), Symbol("_label") -> "Alt Text")
+    @b4.text(duckForm("link"), Symbol("_label") -> "Link")
+    @b4.text(duckForm("hint"), Symbol("_label") -> "Hint")
+    @b4.text(duckForm("requestingUrl"), Symbol("_label") -> "Requesting URL")
+    @b4.submit(Symbol("class") -> "btn btn-primary"){ Submit }
+  }
+}
