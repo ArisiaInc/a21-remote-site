@@ -1,4 +1,4 @@
-<div class="item_frame" (click)="toggleExpand()" [ngClass]="{'expanded': expanded}">
+<div class="item_frame" (click)="toggleExpand($event)" [ngClass]="{'expanded': expanded}">
   <app-star [active]="event.starred" (click)="onStarClick($event)"></app-star>
   <div class="content">
     <div class="item_base">
