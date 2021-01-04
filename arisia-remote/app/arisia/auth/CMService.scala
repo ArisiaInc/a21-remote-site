@@ -174,9 +174,9 @@ class CMServiceImpl(
         |SELECT registrant_kiosk_login.uid, account_active, events_attended.event_id, current_membership_type,
         |       registrant_agreements.agreementID, registrant_agreements.versionID
         |FROM registrant_kiosk_login
-        |JOIN agreements ON agreements.agreementID=$arisiaEventId
+        |JOIN agreements ON agreements.agreementID=$codeOfConductId
         |LEFT JOIN events_attended ON events_attended.uid = registrant_kiosk_login.uid
-        |                          AND events_attended.event_id=$codeOfConductId
+        |                          AND events_attended.event_id='$arisiaEventId'
         |LEFT JOIN registrant_agreements ON registrant_agreements.uid=registrant_kiosk_login.uid
         |                                AND registrant_agreements.versionID=agreements.versionID
         |WHERE registrant_kiosk_login.username='${username.v}';
