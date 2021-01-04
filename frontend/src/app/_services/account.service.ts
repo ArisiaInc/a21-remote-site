@@ -1,38 +1,47 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '@environments/environment';
 import { tap, map } from 'rxjs/operators';
+import { of, Observable, BehaviorSubject } from 'rxjs';
+
+import { environment } from '@environments/environment';
 import { User } from '@app/_models';
-import { of, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AccountService {
-  public user?: User;
+  private user?: User = undefined;
+  readonly user$ = new BehaviorSubject<User | undefined>(this.user);
+  readonly loggedIn$!: Observable<boolean>;
 
-  constructor( private http: HttpClient,) { }
-
-  loggedIn() {
-    if (this.user) {
-      return of(true);
-    }
-    return this.http.get<User>(`${environment.backend}/me`, {withCredentials: true}).pipe(
-      tap(u => this.user = u),
-      map(u => u.id ? true : false)
+  constructor( private http: HttpClient,) {
+    this.http.get<User>(`${environment.backend}/me`, {withCredentials: true}).pipe(
+      tap(user => {
+        this.user = user;
+        this.user$.next(this.user);
+      }),
+    );
+    this.loggedIn$ =this.user$.pipe(
+      map(user => !!user),
     );
   }
 
-  // todo stop sending password in plain text
+  // TODO: stop sending password in plain text
   login(id: string, password: string) {
     return this.http.post<User>(`${environment.backend}/login`, {id, password}, {withCredentials: true}).pipe(
-      tap(u => this.user = u),
+      tap(user => {
+        this.user = user;
+        this.user$.next(this.user);
+      }),
     );
   }
 
   logout() {
     return this.http.post(`${environment.backend}/logout`, {}, {withCredentials: true}).pipe(
-      tap(d => this.user = undefined)
+      tap(_ => {
+        this.user = undefined;
+        this.user$.next(this.user);
+      }),
     );
   }
 

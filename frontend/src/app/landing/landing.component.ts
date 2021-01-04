@@ -9,15 +9,13 @@ import { User } from '@app/_models';
   styleUrls: ['./landing.component.scss']
 })
 export class LandingComponent implements OnInit {
-  public user?: User;
 
   constructor(
-    private accountService: AccountService,
+    public accountService: AccountService,
     private router: Router
   ) { }
 
   ngOnInit(): void {
-    this.user = this.accountService.user
   }
 
   logout() {
