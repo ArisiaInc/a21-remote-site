@@ -31,4 +31,14 @@ export class NavigationComponent implements OnDestroy {
   ngOnDestroy() {
     this.subscription.unsubscribe;
   }
+
+  onLogout() {
+    this.accountService.logout().subscribe( _ => {
+      this.router.navigateByUrl('/account/login?loggedOut=1');
+      this.isMenuCollapsed = true;
+    }, error => {
+      // TODO show something to the user here about 401s?
+      console.error(error);
+    });
+  }
 }
