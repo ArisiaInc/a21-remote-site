@@ -3,13 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '@environments/environment';
 import { tap, map } from 'rxjs/operators';
 import { User } from '@app/_models';
-import { of } from 'rxjs';
+import { of, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AccountService {
-  public user: User;
+  public user?: User;
 
   constructor( private http: HttpClient,) { }
 

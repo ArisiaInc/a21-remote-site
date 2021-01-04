@@ -7,7 +7,14 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "start:fromback": "ng serve --open --proxy-config src/proxy.conf.js --host 0.0.0.0",
+    "test:fromback": "ng test --watch",
+    "test:ci": "ng test --watch=false --browsers ChromeHeadless",
+    "test:coverage": "ng test --watch=true --code-coverage=true",
+    "test:coverage:ci": "ng test --watch=false --code-coverage=true --browsers ChromeHeadless",
+    "build:dev": "ng build --progress --output-path ../arisia-remote/public/frontend --watch -c=joint",
+    "build:prod": "ng build --progress --prod --output-path ../arisia-remote/public/frontend"
   },
   "private": true,
   "dependencies": {
@@ -22,6 +29,7 @@
     "@angular/router": "~10.2.0",
     "@ng-bootstrap/ng-bootstrap": "^8.0.0",
     "bootstrap": "^4.5.0",
+    "jquery": "^3.5.1",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
     "zone.js": "~0.10.2"

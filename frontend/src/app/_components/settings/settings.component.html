@@ -1,0 +1,19 @@
+<div class="flex-item">
+  <input type="checkbox" id="hour12" [(ngModel)]="settingsService.hour12" [ngModelOptions]="{standalone: true}">
+  <label for="hour12">12 Hour Time</label>
+</div>
+<div class="flex-item">
+  <input type="text" id="timeOffset" [(ngModel)]="settingsService.timeOffset" [ngModelOptions]="{standalone: true}">
+  <label for="hour12">Time Offset(ms)</label>
+</div>
+<div class="flex-item">
+  <input placeholder="yyyy-mm-dd" name="dp" [(ngModel)]="dateModel" ngbDatepicker #d="ngbDatepicker">
+  <button class="btn btn-outline-secondary calendar" (click)="d.toggle()" type="button">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-event" viewBox="0 0 16 16">
+      <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/>
+      <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+    </svg>
+  </button>
+</div>
+<div class="flex-item"><ngb-timepicker [(ngModel)]="timeModel"></ngb-timepicker>
+</div>

@@ -12,7 +12,7 @@ import { AccountService } from '@app/_services';
   styleUrls: ['./user.component.scss']
 })
 export class UserComponent implements OnInit {
-  user$: Observable<User|undefined>;
+  user$!: Observable<User|undefined>;
 
   constructor(private route : ActivatedRoute,
     private accountService: AccountService) { }
@@ -22,9 +22,5 @@ export class UserComponent implements OnInit {
       pluck('id'),
       switchMap(id => this.accountService.getUser(id)),
     );
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
   }
 }

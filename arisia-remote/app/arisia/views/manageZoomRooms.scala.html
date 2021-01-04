@@ -1,0 +1,35 @@
+@(
+  rooms: List[arisia.models.ZoomRoom]
+)(
+  implicit request: RequestHeader, messagesProvider: MessagesProvider
+)
+
+@main("Manage Zoom Rooms") {
+  <h1>Manage Zoom Rooms</h1>
+
+
+  <table id="roomTable" class="display dataTable" style="width: 100%">
+      <thead>
+        <tr>
+            <th>Display Name</th>
+            <th>Zoom User ID</th>
+            <th>Zambia Room Name</th>
+            <th>Manual</th>
+            <th>Webinar</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(room <- rooms) {
+          <tr>
+              <td>@{room.displayName}</td>
+              <td>@{room.zoomId}</td>
+              <td>@{room.zambiaName}</td>
+              <td>@{room.isManual}</td>
+              <td>@{room.isWebinar}</td>
+          </tr>
+        }
+      </tbody>
+  </table>
+
+  <a class="btn btn-primary" href="/admin/createRoom">Add another Zoom Room</a>
+}

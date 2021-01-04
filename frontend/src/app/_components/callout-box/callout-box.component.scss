@@ -1,0 +1,20 @@
+.callout-box {
+    background: rgba(116, 171, 244, 0.4);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+
+    .callout-box-title {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 600;
+    }
+
+    .callout-box-body {
+        font-size: 1rem;
+    }
+
+    .callout-box-links {
+        font-size: 1.5rem;
+        font-weight: 400;
+    }
+}

@@ -1,0 +1,36 @@
+<app-breadcrumb></app-breadcrumb>
+<div class="row">
+    <div class="col-12">
+        <h1>Welcome to the Art Show!</h1>
+    </div>
+    <div class="col-md-4 col-12">
+        <app-callout-box>
+            <div class="callout-box-title">
+                Art Show Tours
+            </div>
+            <div class="callout-box-body">
+                <p>Guest of Honor Tour: Day/Time, link</p>
+                <p>Descriptive Tour: Day/Time, link</p>
+            </div>
+            <div class="callout-box-title">
+                Chat with Artists!
+            </div>
+            <div class="callout-box-body">
+                <p>Schedule: link</p>
+                <p>Zoom: link</p>
+            </div>
+        </app-callout-box>
+    </div>
+    <div class="col-md-8 col-12">
+        <div class="row">
+            <div class="col-12">
+                <p>Click on an artist to view their Art Show gallery.
+                    (Please be aware that the art displayed may already have been sold.)</p>
+                <p>You can also use the link below each artist's name to jump directly to 
+                    their preferred web presence.</p>
+            </div>
+        </div>
+        <p><strong>TODO ToC component</strong></p>
+    </div>
+</div>
+<app-creator-list [creators]="artists$ | async"></app-creator-list>

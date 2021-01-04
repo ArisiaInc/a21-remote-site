@@ -1,3 +1,56 @@
-.active {
-    font-weight: bold;
+$border-color: #88eac9;
+$border-width: 0.25rem;
+
+:host {
+    position: sticky;
+    top: 4.375rem;
+    height: calc(100vh - 4.375rem);
+    display: block;
+    margin-left: -15px;
+    margin-right: -15px;
+}
+
+.link.active {
+    border: $border-width solid $border-color;
+    border-right: none;
+    padding: 0;
+    padding-left: 1rem;
+    padding-right: $border-width;
+}
+
+.link {
+    padding: $border-width;
+    padding-left: $border-width + 1rem;
+    padding-right: 0;
+    border-right: $border-width solid $border-color;
+    display: block;
+    width: 100%;
+    font-size: 1.125rem;
+    height: 3.3125rem;
+    cursor: pointer;
+}
+
+.top {
+    height: 8.5rem;
+}
+
+.bottom {
+    height: 0.75rem;
+}
+
+.spacer {
+    border-right: $border-width solid $border-color;
+}
+
+.link-text {
+    position: relative;
+    top: 50%;
+    transform: translate(0, -50%);
+}
+
+.logo {
+    position: absolute;
+    bottom: 1rem;
+    width: 12.125rem;
+    height: 8.875rem;
 }

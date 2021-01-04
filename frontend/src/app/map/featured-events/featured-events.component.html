@@ -1,0 +1,10 @@
+<div>
+  <ng-template *ngFor="let day of events$ | async">
+    <ng-template *ngFor="let time of day.times" class="mb-4">
+      <div class="card item" *ngFor="let event of time.events">
+        <h5 class="card-title">{{event.title}}</h5>
+        <div class="card-body">Some stuff here</div>
+      </div>
+    </ng-template>
+  </ng-template>
+</div>

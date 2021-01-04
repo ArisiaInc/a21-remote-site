@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ProgramPerson } from '@app/_models';
-import { ScheduleService } from '../_services/schedule.service';
+import { ScheduleService } from '@app/_services';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-people',
@@ -8,14 +10,12 @@ import { ScheduleService } from '../_services/schedule.service';
   styleUrls: ['./people.component.scss']
 })
 export class PeopleComponent implements OnInit {
-  people: ProgramPerson[];
+  people$!: Observable<ProgramPerson[]>;
 
   constructor(
-    private scheduleService: ScheduleService
+    public scheduleService: ScheduleService
   ) { }
 
-  ngOnInit(): void {
-    this.scheduleService.get_people().subscribe(people => this.people = people.sort((a, b)=> (Array.isArray(a.name) ? a.name.join(' ') : a.name).localeCompare(Array.isArray(b.name) ? b.name.join(' ') : b.name)))
-  }
+  ngOnInit(): void {}
 
 }

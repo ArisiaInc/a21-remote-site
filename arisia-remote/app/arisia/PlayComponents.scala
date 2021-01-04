@@ -4,13 +4,17 @@ import play.api.ApplicationLoader.Context
 import play.api._
 import com.softwaremill.macwire._
 import _root_.controllers.AssetsComponents
-import arisia.auth.AuthModule
 import arisia.controllers.ControllerModule
-import arisia.schedule.ScheduleModule
+import arisia.zoom.ZoomModule
+import play.api.db.{DBComponents, HikariCPComponents}
+import play.api.db.evolutions.EvolutionsComponents
 import play.api.i18n.I18nComponents
+import play.api.libs.ws.ahc.AhcWSComponents
 import play.api.mvc.EssentialFilter
 import play.filters.cors.{CORSConfig, CORSFilter}
 import router.Routes
+
+import scala.concurrent.Future
 
 /**
  * This is the master definition of the components in the application.
@@ -26,10 +30,18 @@ class PlayComponents(context: Context)
   with BuiltInComponents
   with I18nComponents
   with AssetsComponents
+  with EvolutionsComponents
+  with DBComponents
+  with HikariCPComponents
+  with AhcWSComponents
   with ControllerModule
-  with AuthModule
-  with ScheduleModule
+  with GeneralModule
+  with ZoomModule
+  with Logging
 {
+  // When starting the application, run database evolutions and apply changes if needed:
+  applicationEvolutions
+
   lazy val httpFilters: Seq[EssentialFilter] = Seq(
     CORSFilter(
       CORSConfig.fromConfiguration(context.initialConfiguration)
@@ -39,5 +51,16 @@ class PlayComponents(context: Context)
   lazy val router: Routes = {
     val prefix: String = "/"
     wire[Routes]
+  }
+
+  // We need to force the router into existence first -- this will force the controllers into existence, which
+  // forces the services into existence...
+  router
+  // ... after all of that is done, *then* we initialize anything that needs it:
+  logger.info(s"Initializing the lifecycle")
+  lifecycleService.init()
+
+  applicationLifecycle.addStopHook { () =>
+    lifecycleService.shutdown()
   }
 }

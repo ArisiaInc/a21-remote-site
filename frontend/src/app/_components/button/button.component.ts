@@ -9,16 +9,13 @@ export class ButtonComponent implements OnInit {
   @Output()
   clicked = new EventEmitter<string>();
   @Input() primary: boolean = false;
+  @Input() toggle: boolean = false;
+  @Input() active: boolean = false;
+  @Input() small: boolean = false;
 
 
   constructor() { }
 
-  ngOnInit(): void {
-    console.log("button", this)
-  }
-
-  onClick() {
-    this.clicked.emit('clicked');
-  }
+  ngOnInit(): void {}
 
 }

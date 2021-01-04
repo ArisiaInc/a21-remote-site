@@ -1,0 +1,41 @@
+@import "node_modules/bootstrap/scss/functions";
+@import "node_modules/bootstrap/scss/variables";
+@import "node_modules/bootstrap/scss/mixins/_breakpoints";
+@include media-breakpoint-up(md) {
+    :host {
+        font-size: 1.5rem;
+        line-height: 1.5rem;
+        padding-top: 1.25rem;
+        flex-basis: 0;
+        flex-grow: 1;
+        text-align: center;
+    }
+
+
+    .item {
+        position: relative;
+    }
+
+    .nav-link.active::after {
+        background-color: white;
+        height: 0.125rem;
+        content: "";
+        position: absolute;
+        left: 0px;
+        display: block;
+        width: 100%;
+        bottom: -0.5rem;
+    }
+
+}
+
+@include media-breakpoint-down(sm) {
+    .item {
+        display: inline-block;
+    }
+
+    .nav-link.active {
+        border-bottom: white solid 0.125rem;
+        margin-bottom: -0.125rem;
+    }
+}
