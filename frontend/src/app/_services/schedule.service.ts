@@ -231,11 +231,18 @@ interface ProgramData {
   people: ProgramPerson[]
 }
 
+
 export interface Initial {
   lower: string;
   upper: string;
   active: boolean;
 }
+
+export interface GamingMeta {
+    id: string;
+    loc: string[];
+  }
+
 
 const RELOAD_TIMER = 10 * 1000;
 const USE_FAKE_DATA = false;
@@ -525,6 +532,15 @@ export class ScheduleService {
     // for testing:
     // return this.getSchedule({id: ['23', '45', '17']});
     return this.getSchedule({tags: [['featured']]});
+  }
+
+
+  // TODO merge this in with the program data from the db ?
+  get_gaming_meta(local: false): Observable<GamingMeta[]> {
+    if (local) {
+      return this.http.get<GamingMeta[]>('assets/data/gaming_11_1.json');
+    }
+    return this.http.get<GamingMeta[]>(`${environment.backend}/schedule/gamingmeta`);
   }
 
   get_rooms(): Observable<Room[]> {

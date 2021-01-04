@@ -10,10 +10,10 @@ package arisia.models
  * @param admin Permits access to the Admin pages
  * @param earlyAccess Allows this user to log into the site before we open it to all current members
  */
-case class Permissions(superAdmin: Boolean, admin: Boolean, earlyAccess: Boolean) {
-  lazy val hasEarlyAccess = superAdmin || admin || earlyAccess
+case class Permissions(superAdmin: Boolean, admin: Boolean, earlyAccess: Boolean, tech: Boolean) {
+  lazy val hasEarlyAccess = superAdmin || admin || earlyAccess || tech
 }
 
 object Permissions {
-  val empty = Permissions(false, false, false)
+  val empty = Permissions(false, false, false, false)
 }

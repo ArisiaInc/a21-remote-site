@@ -2,6 +2,7 @@ package arisia.controllers
 
 import arisia.admin.{RoomService, AdminService}
 import arisia.auth.LoginService
+import arisia.fun.{Duck, DuckService}
 import arisia.models.{LoginUser, LoginId, Permissions, ZoomRoom, LoginName}
 import arisia.zoom.ZoomService
 import play.api.Logging
@@ -19,7 +20,8 @@ class AdminController (
   adminService: AdminService,
   loginService: LoginService,
   zoomService: ZoomService,
-  roomService: RoomService
+  roomService: RoomService,
+  duckService: DuckService
 )(
   implicit ec: ExecutionContext
 ) extends BaseController
@@ -98,12 +100,11 @@ class AdminController (
     )(ZoomRoom.apply)(ZoomRoom.unapply)
   )
 
-  def manageZoomRooms(): EssentialAction = superAdminsOnlyAsync { info =>
+  def manageZoomRooms(): EssentialAction = superAdminsOnly { info =>
     implicit val request = info.request
 
-    roomService.getRooms().map { rooms =>
-      Ok(arisia.views.html.manageZoomRooms(rooms))
-    }
+    val rooms = roomService.getRooms()
+    Ok(arisia.views.html.manageZoomRooms(rooms))
   }
 
   def createRoom(): EssentialAction = superAdminsOnly { info =>
@@ -111,14 +112,13 @@ class AdminController (
 
     Ok(arisia.views.html.editRoom(roomForm.fill(ZoomRoom.empty)))
   }
-  def showEditRoom(id: Int): EssentialAction = superAdminsOnlyAsync { info =>
+  def showEditRoom(id: Int): EssentialAction = superAdminsOnly { info =>
     implicit val request = info.request
 
-    roomService.getRooms().map { rooms =>
-      rooms.find(_.id == id) match {
-        case Some(room) => Ok(arisia.views.html.editRoom(roomForm.fill(room)))
-        case _ => BadRequest(s"$id isn't a known Room!")
-      }
+    val rooms = roomService.getRooms()
+    rooms.find(_.id == id) match {
+      case Some(room) => Ok(arisia.views.html.editRoom(roomForm.fill(room)))
+      case _ => BadRequest(s"$id isn't a known Room!")
     }
   }
 
@@ -145,6 +145,75 @@ class AdminController (
     )
   }
 
+
+  ///////////////////////////////
+  //
+  // Duck CRUD
+  //
+  // TODO: this is finally getting to be the straw that breaks the camel's back. We should lift up an
+  // AdminControllerBase class, and put these little CRUDs in their own controllers.
+  //
+
+  val duckForm = Form(
+    mapping(
+      "id" -> number,
+      "imageUrl" -> nonEmptyText,
+      "altText" -> nonEmptyText,
+      "link" -> nonEmptyText,
+      "hint" -> optional(text),
+      "requestingUrl" -> text
+    )(Duck.apply)(Duck.unapply)
+  )
+
+  def manageDucks(): EssentialAction = adminsOnly { info =>
+    implicit val request = info.request
+
+    logger.info("In manageDucks")
+
+    val ducks = duckService.getDucks()
+    logger.info("Got the ducks")
+    Ok(arisia.views.html.manageDucks(ducks))
+  }
+
+  def createDuck(): EssentialAction = adminsOnly { info =>
+    implicit val request = info.request
+
+    Ok(arisia.views.html.editDuck(duckForm.fill(Duck.empty)))
+  }
+  def showEditDuck(id: Int): EssentialAction = adminsOnly { info =>
+    implicit val request = info.request
+
+    val ducks = duckService.getDucks()
+    ducks.find(_.id == id) match {
+      case Some(duck) => Ok(arisia.views.html.editDuck(duckForm.fill(duck)))
+      case _ => BadRequest(s"$id isn't a known Duck!")
+    }
+  }
+
+  def duckModified(): EssentialAction = adminsOnlyAsync { info =>
+    implicit val request = info.request
+
+    duckForm.bindFromRequest().fold(
+      formWithErrors => {
+        // TODO: actually display the error!
+        Future.successful(BadRequest(arisia.views.html.editDuck(formWithErrors)))
+      },
+      duck => {
+        val fut =
+          if (duck.id == 0) {
+            duckService.addDuck(duck)
+          } else {
+            duckService.editDuck(duck)
+          }
+
+        fut.map { _ =>
+          Redirect(arisia.controllers.routes.AdminController.manageDucks())
+        }
+      }
+    )
+  }
+
+
   /* ********************
    *
    * Other ad-hoc functions
@@ -155,12 +224,15 @@ class AdminController (
    * For now, this is internal-only, for testing, and can only be accessed from Swagger.
    */
   def startMeeting(): EssentialAction = adminsOnlyAsync { info =>
-    zoomService.startMeeting("Ad hoc meeting").map { errorOrMeeting =>
-      errorOrMeeting match {
-        case Right(meeting) => Ok(Json.toJson(meeting).toString())
-        case Left(error) => InternalServerError(error)
-      }
-    }
+    // The below code no longer works, since we need the user Id. For now, just commenting it out, since it
+    // isn't being used:
+    ???
+//    zoomService.startMeeting("Ad hoc meeting").map { errorOrMeeting =>
+//      errorOrMeeting match {
+//        case Right(meeting) => Ok(Json.toJson(meeting).toString())
+//        case Left(error) => InternalServerError(error)
+//      }
+//    }
   }
 
   def endMeeting(meetingIdStr: String): EssentialAction = adminsOnlyAsync { info =>
@@ -286,5 +358,34 @@ class AdminController (
 
   def removeEarlyAccess(idStr: String): EssentialAction = adminsOnlyAsync {
     removePermission(idStr, _.removeEarlyAccess(_), routes.AdminController.manageEarlyAccess())
+  }
+
+  /* ******************
+   *
+   * Tech staff permission
+   *
+   */
+
+  private def showManageTech()(implicit request: Request[AnyContent]) =
+    showPermissionMembers(
+      _.getTech(),
+      arisia.views.html.manageTech(_, usernameForm.fill(LoginId("")))
+    )
+
+  def manageTech(): EssentialAction = adminsOnlyAsync { info =>
+    implicit val request = info.request
+    showManageTech()
+  }
+
+  def addTech(): EssentialAction = adminsOnlyAsync {
+    addPermission(
+      _.addTech(_),
+      showManageTech()(_),
+      routes.AdminController.manageTech()
+    )
+  }
+
+  def removeTech(idStr: String): EssentialAction = adminsOnlyAsync {
+    removePermission(idStr, _.removeTech(_), routes.AdminController.manageTech())
   }
 }

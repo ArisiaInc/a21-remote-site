@@ -10,14 +10,19 @@ CREATE TABLE zoom_rooms (
 );
 
 CREATE TABLE active_program_items (
+  end_at bigint NOT NULL,
   program_item_id text NOT NULL,
   zoom_meeting_id bigint NOT NULL,
   host_url text NOT NULL,
   attendee_url text NOT NULL
 );
 
+ALTER TABLE permissions ADD COLUMN tech boolean DEFAULT FALSE NOT NULL;
+
 -- !Downs
 
 DROP TABLE zoom_rooms;
 
 DROP TABLE active_program_items;
+
+ALTER TABLE permissions DROP COLUMN tech;

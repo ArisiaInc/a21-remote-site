@@ -1,7 +1,9 @@
 package arisia.controllers
 
+import arisia.models.{LoginUser, ProgramItemId}
+import arisia.schedule.ScheduleService
 import arisia.zoom.ZoomService
-import play.api.mvc.{BaseController, EssentialAction, ControllerComponents}
+import play.api.mvc.{BaseController, ControllerComponents, EssentialAction}
 
 import scala.concurrent.ExecutionContext
 
@@ -10,7 +12,8 @@ import scala.concurrent.ExecutionContext
  */
 class ZoomController(
   val controllerComponents: ControllerComponents,
-  zoomService: ZoomService
+  zoomService: ZoomService,
+  scheduleService: ScheduleService
 )(
   implicit ec: ExecutionContext
 ) extends BaseController {
@@ -21,5 +24,33 @@ class ZoomController(
     zoomService.getUsers().map { _ =>
       Ok("Got it!")
     }
+  }
+
+  def enterItem(itemStr: String): EssentialAction = Action { implicit request =>
+    val redirectOpt = for {
+      // Only logged in users are allowed to join meetings:
+      user <- LoginController.loggedInUser()
+      attendeeUrl <- scheduleService.getAttendeeUrlFor(user, ProgramItemId(itemStr))
+      // If we get here, they're allowed in:
+    }
+      yield Found(attendeeUrl)
+
+    // TODO: what should we return if this fails? This is effectively a system error: it shouldn't be possible for them
+    // to get into this state, but we should probably provide a better error.
+    redirectOpt.getOrElse(NotFound("""{"success":false, "message":"That isn't a currently-running panel"}"""))
+  }
+
+  def enterItemAsHost(itemStr: String): EssentialAction = Action { implicit request =>
+    val redirectOpt = for {
+      // Only logged in users are allowed to join meetings:
+      user <- LoginController.loggedInUser()
+      hostUrl <- scheduleService.getHostUrlFor(user, ProgramItemId(itemStr))
+      // If we get here, they're allowed in:
+    }
+      yield Found(hostUrl)
+
+    // TODO: what should we return if this fails? This is effectively a system error: it shouldn't be possible for them
+    // to get into this state, but we should probably provide a better error.
+    redirectOpt.getOrElse(NotFound("""{"success":false, "message":"That isn't a currently-running panel"}"""))
   }
 }

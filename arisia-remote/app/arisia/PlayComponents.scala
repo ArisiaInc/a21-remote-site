@@ -37,11 +37,10 @@ class PlayComponents(context: Context)
   with ControllerModule
   with GeneralModule
   with ZoomModule
+  with Logging
 {
   // When starting the application, run database evolutions and apply changes if needed:
   applicationEvolutions
-
-  timerService.init()
 
   lazy val httpFilters: Seq[EssentialFilter] = Seq(
     CORSFilter(
@@ -54,8 +53,14 @@ class PlayComponents(context: Context)
     wire[Routes]
   }
 
+  // We need to force the router into existence first -- this will force the controllers into existence, which
+  // forces the services into existence...
+  router
+  // ... after all of that is done, *then* we initialize anything that needs it:
+  logger.info(s"Initializing the lifecycle")
+  lifecycleService.init()
+
   applicationLifecycle.addStopHook { () =>
-    timerService.shutdown()
-    Future.successful(())
+    lifecycleService.shutdown()
   }
 }

@@ -1,0 +1,14 @@
+@(people: List[arisia.models.LoginId], newPersonForm: Form[arisia.models.LoginId])(implicit request: RequestHeader, messagesProvider: MessagesProvider)
+
+@import helper._
+
+@managePermissionTemplate(
+  people,
+  newPersonForm,
+  "Tech Staff",
+  "/admin/manageTech/"
+) {
+  @b4.horizontal.form(arisia.controllers.routes.AdminController.addTech(), "col-md-2", "col-md-10") { implicit hfc =>
+    @b4.text(newPersonForm("username"), Symbol("_label") -> "Username", Symbol("placeholder") -> "Login username from Registration")
+  }
+}
