@@ -13,6 +13,7 @@ import { CreatorPageComponent } from './creator-page/creator-page.component';
 import { CalloutBoxComponent } from './callout-box/callout-box.component';
 import { SettingsComponent } from './settings/settings.component';
 import { StarComponent } from './star/star.component';
+import { CarouselComponent } from './carousel/carousel.component';
 
 @NgModule({
   declarations: [
@@ -25,6 +26,7 @@ import { StarComponent } from './star/star.component';
     CalloutBoxComponent,
     SettingsComponent,
     StarComponent,
+    CarouselComponent,
   ],
   imports: [
     CommonModule,
@@ -42,6 +44,7 @@ import { StarComponent } from './star/star.component';
     CalloutBoxComponent,
     SettingsComponent,
     StarComponent,
+    CarouselComponent,
   ]
 })
 export class SharedModule { }
