@@ -23,8 +23,8 @@ const mapModule = () => import('./map/map.module').then(x => x.MapModule);
 const routes: Routes = [
   {path: '', component: LandingComponent, canActivate: [AuthGuard]},
   {path: 'account', loadChildren: accountModule},
-  {path: 'schedule', loadChildren: scheduleModule, canActivate: [AuthGuard]},
-  {path: 'map', loadChildren: mapModule, canActivate: [AuthGuard]},
+  {path: 'schedule', loadChildren: scheduleModule},
+  {path: 'map', loadChildren: mapModule},
   {path: 'programming', component: ProgrammingComponent, canActivate: [AuthGuard]},
   {path: 'programming/:id', component: RoomComponent, canActivate: [AuthGuard]},
   {path: 'gaming', component: GamingComponent, canActivate: [AuthGuard]},
