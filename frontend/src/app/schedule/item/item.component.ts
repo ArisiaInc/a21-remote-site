@@ -8,6 +8,7 @@ import { ScheduleEvent } from '@app/_services';
 })
 export class ItemComponent implements OnInit {
   @Input() event!: ScheduleEvent;
+  @Input() showStar = false;
   expanded: boolean = false;
   track!: string;
   type!: string;

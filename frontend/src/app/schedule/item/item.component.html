@@ -1,5 +1,5 @@
 <div class="item_frame" (click)="toggleExpand($event)" [ngClass]="{'expanded': expanded}">
-  <app-star [active]="event.starred" (click)="onStarClick($event)"></app-star>
+  <app-star *ngIf="showStar" [active]="event.starred" (click)="onStarClick($event)"></app-star>
   <div class="content">
     <div class="item_base">
         <h6 class="title" [ngClass]="{'font-weight-bold': expanded}">{{event.title}}</h6>
