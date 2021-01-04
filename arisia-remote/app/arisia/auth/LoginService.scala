@@ -64,7 +64,8 @@ class LoginServiceImpl(
     val id = idFromUser.toLowerCase()
     val result = for {
       (id, badgeName) <- OptionT(cmService.checkLogin(id, password))
-      initialUser = LoginUser(id, badgeName, BadgeNumber("0"), false)
+      details <- OptionT(cmService.fetchDetails(id))
+      initialUser = LoginUser(id, badgeName, details.badgeNumber, false, details.membershipType)
       withPermissions <- checkPermissions(initialUser)
     }
       yield withPermissions

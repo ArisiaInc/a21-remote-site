@@ -209,10 +209,10 @@ class CMServiceImpl(
     } else if (username.v == cmNotRegistered) {
       Some(CMDetails(cmTestBadgeNumber, true, MembershipType.NoMembership, false))
     } else if (username.v == cmNoCoC) {
-      Some(CMDetails(cmTestBadgeNumber, true, MembershipType.Adult, false))
+      Some(CMDetails(cmTestBadgeNumber, true, MembershipType.AdultStandard, false))
     } else {
       // Everyone except the test users gets through with everything clear:
-      Some(CMDetails(cmTestBadgeNumber, true, MembershipType.Adult, true))
+      Some(CMDetails(cmTestBadgeNumber, true, MembershipType.AdultStandard, true))
     }
   }
 }
