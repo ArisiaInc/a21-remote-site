@@ -2,9 +2,9 @@ package arisia
 
 import akka.actor.ActorSystem
 import arisia.admin.{RoomServiceImpl, RoomService, AdminServiceImpl, AdminService}
-import arisia.auth.{LoginService, LoginServiceImpl}
+import arisia.auth.{CMService, CMServiceImpl, LoginService, LoginServiceImpl}
 import arisia.db.{DBServiceImpl, DBService}
-import arisia.fun.{DuckService, DuckServiceImpl}
+import arisia.fun.{DuckServiceImpl, DuckService}
 import arisia.general.{LifecycleServiceImpl, LifecycleService}
 import com.softwaremill.macwire.wire
 import arisia.schedule.{ScheduleService, ScheduleQueueService, ScheduleServiceImpl, StarService, StarServiceImpl, ScheduleQueueServiceImpl}
@@ -25,6 +25,7 @@ trait GeneralModule extends ZoomModule {
   def actorSystem: ActorSystem
 
   lazy val adminService: AdminService = wire[AdminServiceImpl]
+  lazy val cmService: CMService = wire[CMServiceImpl]
   lazy val dbService: DBService = wire[DBServiceImpl]
   lazy val duckService: DuckService = wire[DuckServiceImpl]
   lazy val lifecycleService: LifecycleService = wire[LifecycleServiceImpl]
