@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
+import { pluck, switchMap } from 'rxjs/operators';
+
 import { User } from '@app/_models';
 import { AccountService } from '@app/_services';
 
@@ -10,27 +12,19 @@ import { AccountService } from '@app/_services';
   styleUrls: ['./user.component.scss']
 })
 export class UserComponent implements OnInit {
-  id: string;
-  subscription: Subscription;
-  user: User;
-  badgeNum: number;
+  user$: Observable<User|undefined>;
 
   constructor(private route : ActivatedRoute,
     private accountService: AccountService) { }
 
   ngOnInit(): void {
-    this.subscription = this.route.params.subscribe( params => {
-      this.id = params.id;
-      this.accountService.getUser(this.id).subscribe( user => this.user = user );
-    })
+    this.user$ = this.route.params.pipe(
+      pluck('id'),
+      switchMap(id => this.accountService.getUser(id)),
+    );
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
-
-  giveBadge() {
-    this.accountService.giveBadge(this.id, this.badgeNum).subscribe( user => this.user = user);
-  }
-
 }

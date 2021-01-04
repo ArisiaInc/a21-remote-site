@@ -9,7 +9,7 @@ import { SharedModule } from '@app/_components';
 @NgModule({
   declarations: [
     LoginComponent, 
-    LayoutComponent,
+    LayoutComponent
   ],
   imports: [
     CommonModule,
