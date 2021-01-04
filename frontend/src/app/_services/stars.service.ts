@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
-import { ReplaySubject } from 'rxjs';
 import { HttpClient, HttpResponse, HttpErrorResponse } from '@angular/common/http';
+import { Observable, ReplaySubject } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 import { environment } from '@environments/environment';
+import { AccountService } from './account.service';
 
 // The upstream API looks something like the following. The get method returns a list of strings.
 // GET     /api/schedule/stars          arisia.controllers.ScheduleController.getStars()
@@ -15,8 +17,21 @@ type StarData = string[];
   providedIn: 'root'
 })
 export class StarsService implements Iterable<string> {
-  constructor(private http: HttpClient) {
-    this.load();
+  readonly active$: Observable<boolean>;
+
+  constructor(private http: HttpClient, private accountService: AccountService) {
+    this.active$ = this.accountService.loggedIn$;
+    this.active$.pipe(
+      tap(active => {
+        if (active) {
+          this.starredIds.clear();
+          this.load();
+        } else {
+          this.starredIds.clear();
+        }
+        this.observable$.next(this);
+      }),
+    ).subscribe();
   }
 
   private starredIds = new Set<string>();
