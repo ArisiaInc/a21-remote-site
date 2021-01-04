@@ -183,7 +183,8 @@ class CMServiceImpl(
         """.stripMargin
     run(
       query
-        .query[RawCMResults]
+        // TODO: remove this log handler!
+        .queryWithLogHandler[RawCMResults](LogHandler.jdkLogHandler)
         .option
     ).map { rawOpt =>
       rawOpt.map { raw =>
