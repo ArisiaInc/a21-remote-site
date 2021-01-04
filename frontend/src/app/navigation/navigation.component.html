@@ -7,13 +7,16 @@
             (click)="isMenuCollapsed = !isMenuCollapsed">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div [ngbCollapse]="isMenuCollapsed" class="collapse navbar-collapse" id="navbarContent">
+    <div [ngbCollapse]="isMenuCollapsed" class="collapse navbar-collapse" id="navbarContent" *ngFor="let loggedIn of [accountService.loggedIn$ | async]">
       <ul ngbNav [activeId]="route.fragment | async" class="navbar-nav me-auto mb-2 mb-md-0 list">
         <app-navigation-link (activated)="isMenuCollapsed=true" title="Map" link="/map"></app-navigation-link>
         <app-navigation-link (activated)="isMenuCollapsed=true" title="Schedule" link="/schedule"></app-navigation-link>
         <app-navigation-link (activated)="isMenuCollapsed=true" title="Profile" link="/profile"></app-navigation-link>
         <app-navigation-link (activated)="isMenuCollapsed=true" title="Help" link="/help"></app-navigation-link>
-        <app-navigation-link (activated)="isMenuCollapsed=true" title="Log Out" link="/logout"></app-navigation-link>
+        <app-navigation-link *ngIf="accountService.loggedIn$ | async; else login" (activated)="isMenuCollapsed=true" title="Log Out" link="/logout"></app-navigation-link>
+        <ng-template #login>
+          <app-navigation-link (activated)="isMenuCollapsed=true" title="Log In" link="/account/login" [returnUrl]="currentRoute"></app-navigation-link>
+        </ng-template>
       </ul>
     </div>
   </div>
