@@ -204,22 +204,22 @@ class CMServiceImpl(
   private def fetchRealDetails(username: LoginId): Future[Option[CMDetails]] = {
     // We do a pretty serious join here, to fetch all of the key information in one decently reliable query
     // This *should* always return one row -- it is weird if it doesn't.
+    val usernameStr = username.v
     val query =
       sql"""
         |SELECT registrant_kiosk_login.uid, account_active, events_attended.event_id, current_membership_type,
         |       registrant_agreements.agreementID, registrant_agreements.versionID
         |FROM registrant_kiosk_login
-        |JOIN agreements ON agreements.agreementID=$codeOfConductId
+        |JOIN agreements ON agreements.agreementID=31
         |LEFT JOIN events_attended ON events_attended.uid = registrant_kiosk_login.uid
-        |                          AND events_attended.event_id='$arisiaEventId'
+        |                          AND events_attended.event_id='32'
         |LEFT JOIN registrant_agreements ON registrant_agreements.uid=registrant_kiosk_login.uid
         |                                AND registrant_agreements.versionID=agreements.versionID
-        |WHERE registrant_kiosk_login.username='${username.v}';
+        |WHERE registrant_kiosk_login.username='$usernameStr';
         """.stripMargin
     run(
       query
-        // TODO: remove this log handler!
-        .queryWithLogHandler[RawCMResults](logHandler)
+        .query[RawCMResults]
         .option
     ).map { rawOpt =>
       rawOpt.map { raw =>
