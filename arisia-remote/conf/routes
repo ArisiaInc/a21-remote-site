@@ -44,6 +44,11 @@ GET     /api/ducks                   arisia.controllers.DuckController.getDucks(
 GET     /api/ducks/:id               arisia.controllers.DuckController.getDuck(id: Int)
 POST    /api/ducks/:id               arisia.controllers.DuckController.assignDuck(id: Int)
 
+GET     /admin/ducks                 arisia.controllers.DuckController.manageDucks()
+GET     /admin/createDuck            arisia.controllers.DuckController.createDuck()
+GET     /admin/editDuck/:id          arisia.controllers.DuckController.showEditDuck(id: Int)
+POST    /admin/editDuck              arisia.controllers.DuckController.duckModified()
+
 # Admin UI, separate from the attendee-facing site
 GET     /admin                       arisia.controllers.AdminController.home()
 GET     /admin/                      arisia.controllers.AdminController.home()
@@ -61,11 +66,6 @@ GET     /admin/rooms                 arisia.controllers.ZoomController.manageZoo
 GET     /admin/createRoom            arisia.controllers.ZoomController.createRoom()
 GET     /admin/editRoom/:id          arisia.controllers.ZoomController.showEditRoom(id: Int)
 POST    /admin/editRoom              arisia.controllers.ZoomController.roomModified()
-
-GET     /admin/ducks                 arisia.controllers.AdminController.manageDucks()
-GET     /admin/createDuck            arisia.controllers.AdminController.createDuck()
-GET     /admin/editDuck/:id          arisia.controllers.AdminController.showEditDuck(id: Int)
-POST    /admin/editDuck              arisia.controllers.AdminController.duckModified()
 
 # This is mainly internal, for testing; we might add a UI if we find a use for it, but don't do that casually:
 POST    /admin/meeting               arisia.controllers.AdminController.startMeeting()
