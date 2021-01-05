@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap, map } from 'rxjs/operators';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { of, Observable, BehaviorSubject } from 'rxjs';
 
 import { environment } from '@environments/environment';
 import { User } from '@app/_models';
@@ -43,5 +43,16 @@ export class AccountService {
         this.user$.next(this.user);
       }),
     );
+  }
+
+  getUser(badgeNumber: string) : Observable<User> {
+    if (this.user?.badgeNumber === badgeNumber) {
+      return of(this.user);
+    } else {
+      // This is for testing.
+      return of({id: 'joe', name: 'Joe', badgeNumber: badgeNumber, zoomHost: false});
+      // below is the real one
+      // this.http.get<User>(`${environment.backend}/user/${id}`, {withCredentials: true})
+    }
   }
 }

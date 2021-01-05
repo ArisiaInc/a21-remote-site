@@ -26,6 +26,7 @@ import { VideoComponent } from './gaming/video/video.component';
 import { SpecialComponent } from './gaming/special/special.component';
 import { SignupComponent } from './gaming/signup/signup.component';
 import { DropinComponent } from './gaming/dropin/dropin.component';
+import { UserComponent } from './user/user.component';
 
 @NgModule({
   declarations: [
@@ -49,6 +50,7 @@ import { DropinComponent } from './gaming/dropin/dropin.component';
     SpecialComponent,
     SignupComponent,
     DropinComponent,
+    UserComponent
   ],
   imports: [
     BrowserModule,
