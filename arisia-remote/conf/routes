@@ -57,10 +57,10 @@ GET     /admin/manageTech            arisia.controllers.AdminController.manageTe
 POST    /admin/manageTech            arisia.controllers.AdminController.addTech()
 DELETE  /admin/manageTech/:name      arisia.controllers.AdminController.removeTech(name)
 
-GET     /admin/rooms                 arisia.controllers.AdminController.manageZoomRooms()
-GET     /admin/createRoom            arisia.controllers.AdminController.createRoom()
-GET     /admin/editRoom/:id          arisia.controllers.AdminController.showEditRoom(id: Int)
-POST    /admin/editRoom              arisia.controllers.AdminController.roomModified()
+GET     /admin/rooms                 arisia.controllers.ZoomController.manageZoomRooms()
+GET     /admin/createRoom            arisia.controllers.ZoomController.createRoom()
+GET     /admin/editRoom/:id          arisia.controllers.ZoomController.showEditRoom(id: Int)
+POST    /admin/editRoom              arisia.controllers.ZoomController.roomModified()
 
 GET     /admin/ducks                 arisia.controllers.AdminController.manageDucks()
 GET     /admin/createDuck            arisia.controllers.AdminController.createDuck()
