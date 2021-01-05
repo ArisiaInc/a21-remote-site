@@ -215,7 +215,7 @@ class CMServiceImpl(
         |                          AND events_attended.event_id='32'
         |LEFT JOIN registrant_agreements ON registrant_agreements.uid=registrant_kiosk_login.uid
         |                                AND registrant_agreements.versionID=agreements.versionID
-        |WHERE registrant_kiosk_login.username='$usernameStr';
+        |WHERE registrant_kiosk_login.username=$usernameStr;
         """.stripMargin
     run(
       query
