@@ -47,7 +47,7 @@ export class AccountService {
 
   getUser(id: string) : Observable<User> {
     // this is for testing
-    return of({id: 'joe', name: 'Joe'});
+    return of({id: 'joe', name: 'Joe', badgeNumber: id, zoomHost: false});
     // below is the real one
     //return this.http.get<User>(`${environment.backend}/user/${id}`, {withCredentials: true});
   }

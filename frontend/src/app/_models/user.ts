@@ -1,3 +1,6 @@
-export class User {
-    constructor(public id: string, public name: string) {}
+export interface User {
+  id: string;
+  name: string;
+  badgeNumber: string;
+  zoomHost: boolean;
 }

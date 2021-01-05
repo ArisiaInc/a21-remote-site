@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
 import { LandingComponent } from './landing/landing.component';
-import { AuthGuard } from './_helpers';
+import { AuthGuard, UserPageRedirectGuard } from './_helpers';
 import { ProgrammingComponent } from './programming/programming.component';
 import { GamingComponent } from './gaming/gaming.component';
 import { RoomComponent } from './programming/room/room.component';
@@ -36,6 +36,7 @@ const routes: Routes = [
   {path: 'artshow/:id', component: ArtistComponent},
   {path: 'dealers', component: DealersComponent},
   {path: 'dealers/:id', component: DealerComponent},
+  {path: 'user', component: UserComponent, canActivate: [AuthGuard, UserPageRedirectGuard]},
   {path: 'user/:id', component: UserComponent, canActivate: [AuthGuard]},
 
   //redirect home
