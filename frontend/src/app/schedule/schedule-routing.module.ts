@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+
+import { AuthGuard } from '@app/_helpers';
 import { ProgramComponent } from './program/program.component';
 import { PersonComponent } from './person/person.component';
 import { LayoutComponent } from './layout/layout.component';
@@ -9,10 +11,11 @@ import { StarredComponent } from './starred/starred.component';
 const routes: Routes = [
   {path: '', component: LayoutComponent,
    children: [
-     {path: 'starred', component: StarredComponent},
-     {path: 'people/:id', component: PersonComponent},
-     {path: 'people', component: PeopleComponent},
-     {path: 'program', component: ProgramComponent}
+     { path: '', redirectTo: 'program', pathMatch: 'full' },
+     { path: 'starred', component: StarredComponent, canActivate: [AuthGuard] },
+     { path: 'people/:search', component: PeopleComponent },
+     { path: 'people', component: PeopleComponent },
+     { path: 'program', component: ProgramComponent },
    ]
   },
 ];

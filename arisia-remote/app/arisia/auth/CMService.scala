@@ -166,20 +166,56 @@ class CMServiceImpl(
     versionId: Option[Int]
   )
 
+  val logHandler: LogHandler = {
+    LogHandler {
+
+      case doobie.util.log.Success(s, a, e1, e2) =>
+        logger.info(s"""Successful Statement Execution:
+                          |
+                          |  ${s.linesIterator.dropWhile(_.trim.isEmpty).mkString("\n  ")}
+                          |
+                          | arguments = [${a.mkString(", ")}]
+                          |   elapsed = ${e1.toMillis.toString} ms exec + ${e2.toMillis.toString} ms processing (${(e1 + e2).toMillis.toString} ms total)
+          """.stripMargin)
+
+      case doobie.util.log.ProcessingFailure(s, a, e1, e2, t) =>
+        logger.error(s"""Failed Resultset Processing:
+                            |
+                            |  ${s.linesIterator.dropWhile(_.trim.isEmpty).mkString("\n  ")}
+                            |
+                            | arguments = [${a.mkString(", ")}]
+                            |   elapsed = ${e1.toMillis.toString} ms exec + ${e2.toMillis.toString} ms processing (failed) (${(e1 + e2).toMillis.toString} ms total)
+                            |   failure = ${t.getMessage}
+          """.stripMargin)
+
+      case doobie.util.log.ExecFailure(s, a, e1, t) =>
+        logger.error(s"""Failed Statement Execution:
+                            |
+                            |  ${s.linesIterator.dropWhile(_.trim.isEmpty).mkString("\n  ")}
+                            |
+                            | arguments = [${a.mkString(", ")}]
+                            |   elapsed = ${e1.toMillis.toString} ms exec (failed)
+                            |   failure = ${t.getMessage}
+          """.stripMargin)
+
+    }
+  }
+
   private def fetchRealDetails(username: LoginId): Future[Option[CMDetails]] = {
     // We do a pretty serious join here, to fetch all of the key information in one decently reliable query
     // This *should* always return one row -- it is weird if it doesn't.
+    val usernameStr = username.v
     val query =
       sql"""
         |SELECT registrant_kiosk_login.uid, account_active, events_attended.event_id, current_membership_type,
         |       registrant_agreements.agreementID, registrant_agreements.versionID
         |FROM registrant_kiosk_login
-        |JOIN agreements ON agreements.agreementID=$arisiaEventId
+        |JOIN agreements ON agreements.agreementID=31
         |LEFT JOIN events_attended ON events_attended.uid = registrant_kiosk_login.uid
-        |                          AND events_attended.event_id=$codeOfConductId
+        |                          AND events_attended.event_id='32'
         |LEFT JOIN registrant_agreements ON registrant_agreements.uid=registrant_kiosk_login.uid
         |                                AND registrant_agreements.versionID=agreements.versionID
-        |WHERE registrant_kiosk_login.username='${username.v}';
+        |WHERE registrant_kiosk_login.username=$usernameStr;
         """.stripMargin
     run(
       query

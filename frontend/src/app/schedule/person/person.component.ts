@@ -10,16 +10,12 @@ import { Observable } from 'rxjs';
   styleUrls: ['./person.component.scss']
 })
 export class PersonComponent implements OnInit {
-  person$!: Observable<SchedulePerson | undefined>;
+  @Input() person!: SchedulePerson;
+  expanded = false;
 
-  constructor(private route: ActivatedRoute,
-    private scheduleService: ScheduleService) { }
+  constructor() { }
 
   ngOnInit(): void {
-    this.person$ = this.route.params.pipe(
-      pluck('id'),
-      flatMap(id => this.scheduleService.getPerson(id)),
-    );
   }
 
 }

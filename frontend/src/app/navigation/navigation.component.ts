@@ -1,5 +1,9 @@
-import { ActivatedRoute } from '@angular/router';
-import { Component, OnInit, HostBinding } from '@angular/core';
+import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
+import { Component, OnDestroy, HostBinding } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
+
+import { AccountService } from '@app/_services';
 
 
 @Component({
@@ -7,13 +11,34 @@ import { Component, OnInit, HostBinding } from '@angular/core';
   templateUrl: './navigation.component.html',
   styleUrls: ['./navigation.component.scss']
 })
-export class NavigationComponent implements OnInit {
+export class NavigationComponent implements OnDestroy {
   @HostBinding('class') class = 'sticky-top';
+  currentRoute: string = '';
+  subscription: Subscription;
+
   public isMenuCollapsed = true;
 
-  constructor(public route: ActivatedRoute) { }
+  constructor(public route: ActivatedRoute,
+              private router: Router,
+              public accountService: AccountService) {
 
-  ngOnInit(): void {
+    this.subscription =
+      router.events.pipe(
+        filter(event => event instanceof NavigationEnd),
+      ).subscribe(event => this.currentRoute = (event as NavigationEnd).url);
   }
 
+  ngOnDestroy() {
+    this.subscription.unsubscribe;
+  }
+
+  onLogout() {
+    this.accountService.logout().subscribe( _ => {
+      this.router.navigateByUrl('/account/login?loggedOut=1');
+      this.isMenuCollapsed = true;
+    }, error => {
+      // TODO show something to the user here about 401s?
+      console.error(error);
+    });
+  }
 }
