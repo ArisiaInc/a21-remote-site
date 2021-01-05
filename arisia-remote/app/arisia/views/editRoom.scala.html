@@ -14,7 +14,7 @@
 @main(title) {
   <h1>@title</h1>
 
-  @b4.horizontal.form(arisia.controllers.routes.AdminController.roomModified(), "col-md-2", "col-md-10") { implicit hfc =>
+  @b4.horizontal.form(arisia.controllers.routes.ZoomController.roomModified(), "col-md-2", "col-md-10") { implicit hfc =>
     @b4.text(roomForm("id"), Symbol("_label") -> "ID", Symbol("readonly") -> true)
     @b4.text(roomForm("displayName"), Symbol("_label") -> "Display Name")
     @b4.text(roomForm("zoomId"), Symbol("_label") -> "Zoom User ID")

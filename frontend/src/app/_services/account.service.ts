@@ -10,7 +10,7 @@ import { User } from '@app/_models';
   providedIn: 'root'
 })
 export class AccountService {
-  private user?: User = undefined;
+  user?: User = undefined;
   readonly user$ = new BehaviorSubject<User | undefined>(this.user);
   readonly loggedIn$!: Observable<boolean>;
 
@@ -44,5 +44,4 @@ export class AccountService {
       }),
     );
   }
-
 }
