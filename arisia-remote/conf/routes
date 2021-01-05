@@ -49,6 +49,10 @@ GET     /admin/createDuck            arisia.controllers.DuckController.createDuc
 GET     /admin/editDuck/:id          arisia.controllers.DuckController.showEditDuck(id: Int)
 POST    /admin/editDuck              arisia.controllers.DuckController.duckModified()
 
+GET     /api/settings                arisia.controllers.SettingsController.getSettings()
+POST    /api/settings                arisia.controllers.SettingsController.addSettings()
+DELETE  /api/settings/:key           arisia.controllers.SettingsController.dropSetting(key)
+
 # Admin UI, separate from the attendee-facing site
 GET     /admin                       arisia.controllers.AdminController.home()
 GET     /admin/                      arisia.controllers.AdminController.home()
