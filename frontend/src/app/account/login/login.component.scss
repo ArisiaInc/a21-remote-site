@@ -1,3 +1,61 @@
-.btn-primary {
+.login {
     font-size: 2rem;
+    background: white;
+}
+
+.login-group {
+    padding-top: 2rem;
+}
+
+.forgot {
+    font-size: .8125rem;
+}
+
+:host {
+    background: linear-gradient(270deg, #DFDAD0 0%, white 59.08%);
+    display: block;
+    height: 43.75rem;
+    position: relative;
+    width: 100%;
+}
+
+.art {
+    height: 43.75rem;
+    left: 0;
+    position: absolute;
+    top: 0;
+}
+
+.title {
+    font-size: 2.25rem;
+    padding-bottom: 3.25rem;
+    padding-top: 7.5rem;
+    padding-left: 29.5rem;
+    padding-right: .75rem;
+    text-align: center;
+    width: 100%;
+}
+
+.content, .footer {
+    padding-left: 33.5rem;
+    padding-right: 4.75rem;
+}
+
+.footer {
+    font-size: 1.125rem;
+    left: 0;
+    line-height: 2rem;
+    position: absolute;
+    text-align: center;
+    top: 50%;
+    transform: translate(0, -50%);
+    width: 100%;
+}
+
+.footer-container {
+    bottom: 0;
+    height: 5.25rem;
+    left: 0;
+    position: absolute;
+    width: 100%;
 }

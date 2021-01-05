@@ -1,0 +1,65 @@
+<div class="modal-header" [ngSwitch]="style">
+  <h4 class="modal-title" *ngSwitchCase="'programming'">Door dragon says: please log in to access Arisia programming and events</h4>
+  <h4 class="modal-title" *ngSwitchCase="'social'">Door dragon says: please log in to join social spaces</h4>
+  <h4 class="modal-title" *ngSwitchCase="'discord'">Door dragon says: you might need to connect your Discord account</h4>
+  <h4 class="modal-title" *ngSwitchCase="'reset'">Door dragon says: you will be re-directed to Registration to re-set your password</h4>
+  <h4 class="modal-title" *ngSwitchDefault>Someone forgot to set a door dragon style. This is a bug.</h4>
+</div>
+<div class="modal-body py-0">
+  <div class="directions" [ngSwitch]="style">
+    <div *ngSwitchCase="'social'">
+      To access Arisia social spaces, you need to be logged into the
+      site so that we know you have a badge and have signed the Code
+      of Conduct. If you still need to
+      register, <a href="https://reg.arisia.org/kiosk/web_reg/"
+      target="_blank">you can do so here</a>.
+    </div>
+    <div *ngSwitchCase="'programming'">
+      To access Arisia programs and events, you need to be logged into
+      the site so that we know you have a badge and have signed the
+      Code of Conduct. If you still need to
+      register, <a href="https://reg.arisia.org/kiosk/web_reg/"
+      target="_blank">you can do so here</a>.
+    </div>
+    <div *ngSwitch="'discord'">
+      To access the Arisia Discord server, you need to verify your
+      Arisia membership with Discord. Go to your profile page and
+      enter your Discord name (including the # and four numbers). If
+      you need help, the Info Desk is available on Zoom here!
+    </div>
+    <div *ngSwitch="'reset'">
+      The username and password for the arisia virtual site is the
+      same username and password you used for registration. This
+      window will show you the login screen for reg.arisia.org -
+      please click the Reset Password button to continue.
+    </div>
+  </div>
+  <div class="comments-dragon" [ngSwitch]="style">
+    <div class="comments" *ngSwitchCase="'social'">
+      If you already have a badge and need help, the Info Desk is
+      available on Zoom here!
+    </div>
+    <div class="comments" *ngSwitchCase="'programming'">
+      If you already have a badge and need help, the Info Desk is
+      available on Zoom here!
+    </div>
+    <div class="comments" *ngSwitch="'discord'">
+      Don’t have a Discord account? Head over to Discord using this
+      link, and click the “create new account” option. Since you are
+      coming from the Arisia site, membership verification will happen
+      automatically.
+    </div>
+    <div class="comments" *ngSwitch="'reset'">
+      If you need help, please contact Registration here.
+    </div>
+    <img src="assets/images/door-dragon.png" class="dragon">
+  </div>
+</div>
+<div class="modal-footer justify-content-between">
+  <button type="button" class="btn btn-outline-dark" (click)="activate()">
+    {{linkText}}
+  </button>
+  <button type="button" class="btn btn-outline-dark" aria-label="Close" (click)="activeModal.dismiss('Close click')">
+    Close
+  </button>
+</div>

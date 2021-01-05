@@ -13,6 +13,7 @@ export class LoginComponent implements OnInit {
   form!: FormGroup;
   loading = false;
   submitted = false;
+  justLoggedOut = false;
 
   constructor(
     private accountService: AccountService,
@@ -26,7 +27,8 @@ export class LoginComponent implements OnInit {
       username: ['', Validators.required],
       password: ['', Validators.required]
     })
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/map';
+    this.justLoggedOut = !!this.route.snapshot.queryParams['loggedOut'];
   }
 
   get f() { return this.form.controls; }
