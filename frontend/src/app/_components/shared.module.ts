@@ -13,6 +13,7 @@ import { CreatorPageComponent } from './creator-page/creator-page.component';
 import { CalloutBoxComponent } from './callout-box/callout-box.component';
 import { SettingsComponent } from './settings/settings.component';
 import { StarComponent } from './star/star.component';
+import { CarouselComponent } from './carousel/carousel.component';
 import { LoginGuardedLinkDirective } from './login-guarded-link.directive';
 import { DoorDragonComponent } from './door-dragon/door-dragon.component';
 
@@ -27,6 +28,7 @@ import { DoorDragonComponent } from './door-dragon/door-dragon.component';
     CalloutBoxComponent,
     SettingsComponent,
     StarComponent,
+    CarouselComponent,
     LoginGuardedLinkDirective,
     DoorDragonComponent,
   ],
@@ -46,7 +48,9 @@ import { DoorDragonComponent } from './door-dragon/door-dragon.component';
     CalloutBoxComponent,
     SettingsComponent,
     StarComponent,
+    CarouselComponent,
     LoginGuardedLinkDirective,
+    DoorDragonComponent,
   ]
 })
 export class SharedModule { }
