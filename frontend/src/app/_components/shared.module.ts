@@ -47,6 +47,7 @@ import { DoorDragonComponent } from './door-dragon/door-dragon.component';
     SettingsComponent,
     StarComponent,
     LoginGuardedLinkDirective,
+    DoorDragonComponent,
   ]
 })
 export class SharedModule { }
