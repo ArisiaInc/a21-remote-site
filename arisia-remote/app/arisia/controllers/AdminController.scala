@@ -18,61 +18,17 @@ import scala.concurrent.{Future, ExecutionContext}
 class AdminController (
   val controllerComponents: ControllerComponents,
   adminService: AdminService,
-  loginService: LoginService,
+  val loginService: LoginService,
   zoomService: ZoomService,
   roomService: RoomService,
   duckService: DuckService
 )(
-  implicit ec: ExecutionContext
+  implicit val ec: ExecutionContext
 ) extends BaseController
+  with AdminControllerFuncs
   with I18nSupport
   with Logging
 {
-  case class AdminInfo(request: Request[AnyContent], user: LoginUser, permissions: Permissions)
-
-  /**
-   * Standard wrapper -- the provided function will only be used iff the user is a logged-in Admin.
-   *
-   * All entry points in this Controller need to make use of this, to ensure consistency and safety.
-   *
-   * Note that this only ensures basic admin access; some functions may demand higher-level clearance.
-   *
-   * @param f function that actually does something.
-   */
-  def adminsOnlyAsync(f: AdminInfo => Future[Result]): EssentialAction = Action.async { implicit request =>
-    LoginController.loggedInUser() match {
-      case Some(user) => {
-        loginService.getPermissions(user.id).flatMap { permissions =>
-          if (permissions.admin) {
-            // Okay, this is a person who is allowed to use the Admin UI
-            val info = AdminInfo(request, user, permissions)
-            f(info)
-          } else {
-            Future.successful(Forbidden(s"You aren't allowed to use the Admin interface"))
-          }
-        }
-      }
-      case _ => Future.successful(NotFound("You aren't logged in!"))
-    }
-  }
-
-  /**
-   * Synchronous version of adminsOnlyAsync(), for simpler functions.
-   */
-  def adminsOnly(f: AdminInfo => Result): EssentialAction = adminsOnlyAsync(info => Future.successful(f(info)))
-
-  /**
-   * Enhanced version of adminsOnlyAsync, for stuff that only super-admins can do.
-   */
-  def superAdminsOnlyAsync(f: AdminInfo => Future[Result]): EssentialAction = adminsOnlyAsync { info =>
-    if (info.permissions.superAdmin) {
-      f(info)
-    } else {
-      Future.successful(Forbidden("You need super-admin permission for this"))
-    }
-  }
-
-  def superAdminsOnly(f: AdminInfo => Result): EssentialAction = superAdminsOnlyAsync(info => Future.successful(f(info)))
 
   def home(): EssentialAction = adminsOnly { info =>
     Ok(arisia.views.html.adminHome(info.permissions))
@@ -83,135 +39,6 @@ class AdminController (
       "username" -> nonEmptyText
     )(LoginId.apply)(LoginId.unapply)
   )
-
-  /* ********************
-   *
-   * Zoom Room CRUD
-   */
-
-  val roomForm = Form(
-    mapping(
-      "id" -> number,
-      "displayName" -> nonEmptyText,
-      "zoomId" -> nonEmptyText,
-      "zambiaName" -> nonEmptyText,
-      "isManual" -> boolean,
-      "isWebinar" -> boolean
-    )(ZoomRoom.apply)(ZoomRoom.unapply)
-  )
-
-  def manageZoomRooms(): EssentialAction = superAdminsOnly { info =>
-    implicit val request = info.request
-
-    val rooms = roomService.getRooms()
-    Ok(arisia.views.html.manageZoomRooms(rooms))
-  }
-
-  def createRoom(): EssentialAction = superAdminsOnly { info =>
-    implicit val request = info.request
-
-    Ok(arisia.views.html.editRoom(roomForm.fill(ZoomRoom.empty)))
-  }
-  def showEditRoom(id: Int): EssentialAction = superAdminsOnly { info =>
-    implicit val request = info.request
-
-    val rooms = roomService.getRooms()
-    rooms.find(_.id == id) match {
-      case Some(room) => Ok(arisia.views.html.editRoom(roomForm.fill(room)))
-      case _ => BadRequest(s"$id isn't a known Room!")
-    }
-  }
-
-  def roomModified(): EssentialAction = superAdminsOnlyAsync { info =>
-    implicit val request = info.request
-
-    roomForm.bindFromRequest().fold(
-      formWithErrors => {
-        // TODO: actually display the error!
-        Future.successful(BadRequest(arisia.views.html.editRoom(formWithErrors)))
-      },
-      room => {
-        val fut =
-          if (room.id == 0) {
-            roomService.addRoom(room)
-          } else {
-            roomService.editRoom(room)
-          }
-
-        fut.map { _ =>
-          Redirect(arisia.controllers.routes.AdminController.manageZoomRooms())
-        }
-      }
-    )
-  }
-
-
-  ///////////////////////////////
-  //
-  // Duck CRUD
-  //
-  // TODO: this is finally getting to be the straw that breaks the camel's back. We should lift up an
-  // AdminControllerBase class, and put these little CRUDs in their own controllers.
-  //
-
-  val duckForm = Form(
-    mapping(
-      "id" -> number,
-      "imageUrl" -> nonEmptyText,
-      "altText" -> nonEmptyText,
-      "link" -> nonEmptyText,
-      "hint" -> optional(text),
-      "requestingUrl" -> text
-    )(Duck.apply)(Duck.unapply)
-  )
-
-  def manageDucks(): EssentialAction = adminsOnly { info =>
-    implicit val request = info.request
-
-    logger.info("In manageDucks")
-
-    val ducks = duckService.getDucks()
-    logger.info("Got the ducks")
-    Ok(arisia.views.html.manageDucks(ducks))
-  }
-
-  def createDuck(): EssentialAction = adminsOnly { info =>
-    implicit val request = info.request
-
-    Ok(arisia.views.html.editDuck(duckForm.fill(Duck.empty)))
-  }
-  def showEditDuck(id: Int): EssentialAction = adminsOnly { info =>
-    implicit val request = info.request
-
-    val ducks = duckService.getDucks()
-    ducks.find(_.id == id) match {
-      case Some(duck) => Ok(arisia.views.html.editDuck(duckForm.fill(duck)))
-      case _ => BadRequest(s"$id isn't a known Duck!")
-    }
-  }
-
-  def duckModified(): EssentialAction = adminsOnlyAsync { info =>
-    implicit val request = info.request
-
-    duckForm.bindFromRequest().fold(
-      formWithErrors => {
-        // TODO: actually display the error!
-        Future.successful(BadRequest(arisia.views.html.editDuck(formWithErrors)))
-      },
-      duck => {
-        val fut =
-          if (duck.id == 0) {
-            duckService.addDuck(duck)
-          } else {
-            duckService.editDuck(duck)
-          }
-
-        fut.map { _ =>
-          Redirect(arisia.controllers.routes.AdminController.manageDucks())
-        }
-      }
-    )
-  }
 
 
   /* ********************

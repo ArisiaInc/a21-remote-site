@@ -14,6 +14,8 @@ import { CalloutBoxComponent } from './callout-box/callout-box.component';
 import { SettingsComponent } from './settings/settings.component';
 import { StarComponent } from './star/star.component';
 import { CarouselComponent } from './carousel/carousel.component';
+import { LoginGuardedLinkDirective } from './login-guarded-link.directive';
+import { DoorDragonComponent } from './door-dragon/door-dragon.component';
 
 @NgModule({
   declarations: [
@@ -27,6 +29,8 @@ import { CarouselComponent } from './carousel/carousel.component';
     SettingsComponent,
     StarComponent,
     CarouselComponent,
+    LoginGuardedLinkDirective,
+    DoorDragonComponent,
   ],
   imports: [
     CommonModule,
@@ -45,6 +49,8 @@ import { CarouselComponent } from './carousel/carousel.component';
     SettingsComponent,
     StarComponent,
     CarouselComponent,
+    LoginGuardedLinkDirective,
+    DoorDragonComponent,
   ]
 })
 export class SharedModule { }

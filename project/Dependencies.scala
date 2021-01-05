@@ -16,11 +16,15 @@ object Dependencies {
 
   val doobieVersion = "0.9.0"
 
+  val enumeratumVersion = "1.6.1"
+
   val hasherVersion = "1.2.2"
 
   val jwtPlayVersion = "4.2.0"
 
   val macwireVersion = "2.3.7"
+
+  val mySqlVersion = "5.1.41"
 
   val playBootstrapVersion = "1.6.1-P28-B4"
 
@@ -41,12 +45,16 @@ object Dependencies {
   val doobieCore = "org.tpolecat" %% "doobie-core" % doobieVersion
   val doobiePostgres = "org.tpolecat" %% "doobie-postgres" % doobieVersion
 
+  val enumeratum = "com.beachape" %% "enumeratum-play" % enumeratumVersion
+
   val hasher = "com.outr" %% "hasher" % hasherVersion
 
   val jwtPlay = "com.pauldijou" %% "jwt-play" % jwtPlayVersion
 
   val macwireMacros = "com.softwaremill.macwire" %% "macros" % macwireVersion % "provided"
   val macwireUtil = "com.softwaremill.macwire" %% "util" % macwireVersion
+
+  val mySqlDriver = "mysql" % "mysql-connector-java" % mySqlVersion
 
   val playBootstrap = "com.adrianhurt" %% "play-bootstrap" % playBootstrapVersion
 

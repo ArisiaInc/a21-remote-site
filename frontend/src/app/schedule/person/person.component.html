@@ -1,6 +1,7 @@
-<div *ngIf="person$ | async as person; else error" class="person">
-    <h2>{{person.name}}</h2>
+<div (click)="expanded = !expanded" [ngClass]="{'expanded': expanded}">
+  <div class="name">{{person.name}}</div>
+  <div class="extra" *ngIf="expanded">
     <p [innerHTML] = "person.bio | sanitizeHtml | linkify"></p>
     <app-item-list [events]="person.events$ | async"></app-item-list>
+  </div>
 </div>
-<ng-template #error>Internal Error</ng-template>

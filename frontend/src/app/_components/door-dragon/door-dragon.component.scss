@@ -1,0 +1,21 @@
+.dragon {
+    width: 19rem;
+    height: 12.625rem;
+}
+
+.directions {
+    margin-top: 1rem;
+}
+
+.comments {
+    margin-top: 1rem;
+}
+
+.comments-dragon {
+    display: flex;
+}
+
+.directions, .comments {
+    font-size: 0.8125rem;
+    line-height: 1.5rem;
+}

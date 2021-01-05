@@ -1,3 +1,3 @@
 <li class="item" [ngbNavItem]="link">
-  <a ngbNavLink [routerLink]="link" (click)="activated.emit()" class="py-md-0 link">{{title}}</a>
+  <a ngbNavLink [routerLink]="link" [queryParams]="returnUrl ? ({returnUrl: returnUrl}) : undefined" (click)="activated.emit()" class="py-md-0 link">{{title}}</a>
 </li>

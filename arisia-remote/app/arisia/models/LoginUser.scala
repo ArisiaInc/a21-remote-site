@@ -1,7 +1,8 @@
 package arisia.models
 
+import arisia.auth.MembershipType
 import arisia.util.{StdString, StdStringUtils}
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Format, Json, Writes}
 
 case class LoginId(v: String) extends StdString
 object LoginId extends StdStringUtils(new LoginId(_))
@@ -16,7 +17,8 @@ case class LoginUser(
   id: LoginId,
   name: LoginName,
   badgeNumber: BadgeNumber,
-  zoomHost: Boolean
+  zoomHost: Boolean,
+  membershipType: MembershipType
 )
 object LoginUser {
   implicit val fmt: Format[LoginUser] = Json.format
