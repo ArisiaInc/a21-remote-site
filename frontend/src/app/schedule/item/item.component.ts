@@ -8,6 +8,7 @@ import { ScheduleEvent } from '@app/_services';
 })
 export class ItemComponent implements OnInit {
   @Input() event!: ScheduleEvent;
+  @Input() showStar = false;
   expanded: boolean = false;
   track!: string;
   type!: string;
@@ -19,8 +20,9 @@ export class ItemComponent implements OnInit {
     this.type = this.event.tags.filter(s => s.startsWith('type'))[0].split(':')[1];
   }
 
-  toggleExpand() {
+  toggleExpand(event: Event) {
     this.expanded = !this.expanded;
+    event.stopPropagation();
   }
 
   onStarClick(event: Event) {

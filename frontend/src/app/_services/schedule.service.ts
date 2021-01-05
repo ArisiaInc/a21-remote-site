@@ -192,6 +192,10 @@ export class SchedulePerson {
     this.tempProg = person.prog;
   }
 
+  static compare(a: SchedulePerson, b: SchedulePerson) {
+    return a.name.localeCompare(b.name);
+  }
+
   link(eventMap: {[_: string]: ScheduleEvent}): void {
     if (this.tempProg) {
       this.events_ = this.tempProg.
@@ -227,10 +231,18 @@ interface ProgramData {
   people: ProgramPerson[]
 }
 
+
+export interface Initial {
+  lower: string;
+  upper: string;
+  active: boolean;
+}
+
 export interface GamingMeta {
     id: string;
     loc: string[];
   }
+
 
 const RELOAD_TIMER = 10 * 1000;
 const USE_FAKE_DATA = false;
@@ -255,6 +267,9 @@ export class ScheduleService {
 
   private peopleMap: {[id: string]: SchedulePerson} = {};
   peopleMap$ = new ReplaySubject<{[id: string]: SchedulePerson}>(1);
+
+  private peopleInitials: {[lower: string]: Initial} = {};
+  peopleInitials$ = new ReplaySubject<{[lower: string]: Initial}>(1);
 
   private tracks: string[] = [];
   tracks$ = new ReplaySubject<string[]>(1);
@@ -312,21 +327,31 @@ export class ScheduleService {
     const program = response.body;
 
     this.peopleMap = {};
+    this.peopleInitials = {};
     this.eventsMap = {};
 
-    this.events = program.program.map((item) => {
-      const event = new ScheduleEvent(item, this.starsService);
-      this.eventsMap[event.id] = event;
-      return event;
-    });
+    for(let letter = 1; letter <= 26; letter++) {
+      const lower = String.fromCharCode(letter + 96);
+      const upper = String.fromCharCode(letter + 64);
+      this.peopleInitials[lower] = {lower, upper, active: false};
+    }
+
+    this.events = program.program.map(item => new ScheduleEvent(item, this.starsService));
+    this.events.forEach(event => this.eventsMap[event.id] = event);
     this.events.sort((a, b) => a.start.getTime() - b.start.getTime());
 
-    this.people = program.people.map((item) => {
-      const person = new SchedulePerson(item);
+    this.people = program.people.map((item) => new SchedulePerson(item));
+    this.people.sort(SchedulePerson.compare);
+    this.people.forEach(person => {
       this.peopleMap[person.id] = person;
-      return person;
+      const lower = person.name[0].toLowerCase();
+      if (this.peopleInitials[lower]) {
+        this.peopleInitials[lower].active = true;
+      } else {
+        const upper = person.name[0].toUpperCase();
+        this.peopleInitials[lower] = {lower, upper, active: true};
+      }
     });
-    this.people.sort((a, b) => (a.name.localeCompare(b.name)));
 
     const tracks = new Set<string>();
     const types = new Set<string>();
@@ -359,6 +384,7 @@ export class ScheduleService {
     this.eventsMap$.next(this.eventsMap);
     this.people$.next(this.people);
     this.peopleMap$.next(this.peopleMap);
+    this.peopleInitials$.next(this.peopleInitials);
     this.tracks$.next(this.tracks);
     this.types$.next(this.types);
     this.scheduleWithoutRelabeling$.next(this.schedule);
@@ -465,10 +491,27 @@ export class ScheduleService {
     );
   }
 
-  getPerson(id:string): Observable<SchedulePerson | undefined> {
+  getPerson(id: string): Observable<SchedulePerson | undefined> {
     return this.peopleMap$.pipe(
       map(peopleMap => peopleMap[id]),
     );
+  }
+
+  getPeople(search: string): Observable<SchedulePerson[]> {
+    if (search === 'goh') {
+      return this.peopleMap$.pipe(
+        // Sort in place is okay since map creates a new array.
+        map(peopleMap => ['7116', '106213', '112042'].
+          map(id => peopleMap[id]).
+          filter(person => person).
+          sort(SchedulePerson.compare)),
+      );
+    } else {
+      const regexp = new RegExp('^'+search, 'i');
+      return this.people$.pipe(
+        map(people => people.filter(person => person.name.match(regexp))),
+      );
+    }
   }
 
   getStarredEvents(filters?: ProgramFilter): Observable<StructuredEvents> {

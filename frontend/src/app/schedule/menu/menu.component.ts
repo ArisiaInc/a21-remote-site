@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
+
+import { StarsService } from '@app/_services';
 
 @Component({
   selector: 'app-menu',
@@ -6,8 +9,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./menu.component.scss']
 })
 export class MenuComponent implements OnInit {
-
-  constructor() { }
+  constructor(public starsService: StarsService) {
+  }
 
   ngOnInit(): void {
   }
