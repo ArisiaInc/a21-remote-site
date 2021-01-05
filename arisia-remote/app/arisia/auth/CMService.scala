@@ -166,6 +166,41 @@ class CMServiceImpl(
     versionId: Option[Int]
   )
 
+  val logHandler: LogHandler = {
+    LogHandler {
+
+      case doobie.util.log.Success(s, a, e1, e2) =>
+        logger.info(s"""Successful Statement Execution:
+                          |
+                          |  ${s.linesIterator.dropWhile(_.trim.isEmpty).mkString("\n  ")}
+                          |
+                          | arguments = [${a.mkString(", ")}]
+                          |   elapsed = ${e1.toMillis.toString} ms exec + ${e2.toMillis.toString} ms processing (${(e1 + e2).toMillis.toString} ms total)
+          """.stripMargin)
+
+      case doobie.util.log.ProcessingFailure(s, a, e1, e2, t) =>
+        logger.error(s"""Failed Resultset Processing:
+                            |
+                            |  ${s.linesIterator.dropWhile(_.trim.isEmpty).mkString("\n  ")}
+                            |
+                            | arguments = [${a.mkString(", ")}]
+                            |   elapsed = ${e1.toMillis.toString} ms exec + ${e2.toMillis.toString} ms processing (failed) (${(e1 + e2).toMillis.toString} ms total)
+                            |   failure = ${t.getMessage}
+          """.stripMargin)
+
+      case doobie.util.log.ExecFailure(s, a, e1, t) =>
+        logger.error(s"""Failed Statement Execution:
+                            |
+                            |  ${s.linesIterator.dropWhile(_.trim.isEmpty).mkString("\n  ")}
+                            |
+                            | arguments = [${a.mkString(", ")}]
+                            |   elapsed = ${e1.toMillis.toString} ms exec (failed)
+                            |   failure = ${t.getMessage}
+          """.stripMargin)
+
+    }
+  }
+
   private def fetchRealDetails(username: LoginId): Future[Option[CMDetails]] = {
     // We do a pretty serious join here, to fetch all of the key information in one decently reliable query
     // This *should* always return one row -- it is weird if it doesn't.
@@ -184,7 +219,7 @@ class CMServiceImpl(
     run(
       query
         // TODO: remove this log handler!
-        .queryWithLogHandler[RawCMResults](LogHandler.jdkLogHandler)
+        .queryWithLogHandler[RawCMResults](logHandler)
         .option
     ).map { rawOpt =>
       rawOpt.map { raw =>
