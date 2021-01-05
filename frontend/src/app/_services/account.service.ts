@@ -45,10 +45,14 @@ export class AccountService {
     );
   }
 
-  getUser(id: string) : Observable<User> {
-    // this is for testing
-    return of({id: 'joe', name: 'Joe', badgeNumber: id, zoomHost: false});
-    // below is the real one
-    //return this.http.get<User>(`${environment.backend}/user/${id}`, {withCredentials: true});
+  getUser(badgeNumber: string) : Observable<User> {
+    if (this.user?.badgeNumber === badgeNumber) {
+      return of(this.user);
+    } else {
+      // This is for testing.
+      return of({id: 'joe', name: 'Joe', badgeNumber: badgeNumber, zoomHost: false});
+      // below is the real one
+      // this.http.get<User>(`${environment.backend}/user/${id}`, {withCredentials: true})
+    }
   }
 }
