@@ -24,12 +24,12 @@ class SettingsController(
   }
 
   def addSettings(): EssentialAction = withLoggedInUser { userRequest =>
-    val jsonStr = userRequest.request.body.toString
-    val json = Json.parse(jsonStr)
-    val settings = json.as[Map[String, String]]
-    settingsService.addSettings(userRequest.user, settings).map { _ =>
-      NoContent
-    }
+    userRequest.request.body.asJson.map { json =>
+      val settings = json.as[Map[String, String]]
+      settingsService.addSettings(userRequest.user, settings).map { _ =>
+        NoContent
+      }
+    }.getOrElse(Future.successful(BadRequest("""{"success":"false", "message":"No JSON body found!"}""")))
   }
 
   def dropSetting(k: String): EssentialAction = withLoggedInUser { userRequest =>
