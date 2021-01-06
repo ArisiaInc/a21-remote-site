@@ -1,17 +1,27 @@
 package arisia.controllers
 
-import arisia.fun.DuckService
+import arisia.auth.LoginService
+import arisia.fun.{Duck, DuckService}
+import play.api.Logging
+import play.api.data._
+import play.api.data.Forms._
+import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
 import play.api.mvc.{BaseController, ControllerComponents, EssentialAction}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{Future, ExecutionContext}
 
 class DuckController(
   val controllerComponents: ControllerComponents,
+  val loginService: LoginService,
   duckService: DuckService
 )(
-  implicit ec: ExecutionContext
-) extends BaseController {
+  implicit val ec: ExecutionContext
+) extends BaseController
+  with AdminControllerFuncs
+  with I18nSupport
+  with Logging
+{
   def getDucks(): EssentialAction = Action { implicit request =>
     val ducks = duckService.getDucks()
     Ok(Json.toJson(ducks).toString())
@@ -47,4 +57,73 @@ class DuckController(
       }
     }
   }
+
+
+  ///////////////////////////////
+  //
+  // Duck CRUD
+  //
+  // TODO: this is finally getting to be the straw that breaks the camel's back. We should lift up an
+  // AdminControllerBase class, and put these little CRUDs in their own controllers.
+  //
+
+  val duckForm = Form(
+    mapping(
+      "id" -> number,
+      "imageUrl" -> nonEmptyText,
+      "altText" -> nonEmptyText,
+      "link" -> nonEmptyText,
+      "hint" -> optional(text),
+      "requestingUrl" -> text
+    )(Duck.apply)(Duck.unapply)
+  )
+
+  def manageDucks(): EssentialAction = adminsOnly { info =>
+    implicit val request = info.request
+
+    logger.info("In manageDucks")
+
+    val ducks = duckService.getDucks()
+    logger.info("Got the ducks")
+    Ok(arisia.views.html.manageDucks(ducks))
+  }
+
+  def createDuck(): EssentialAction = adminsOnly { info =>
+    implicit val request = info.request
+
+    Ok(arisia.views.html.editDuck(duckForm.fill(Duck.empty)))
+  }
+  def showEditDuck(id: Int): EssentialAction = adminsOnly { info =>
+    implicit val request = info.request
+
+    val ducks = duckService.getDucks()
+    ducks.find(_.id == id) match {
+      case Some(duck) => Ok(arisia.views.html.editDuck(duckForm.fill(duck)))
+      case _ => BadRequest(s"$id isn't a known Duck!")
+    }
+  }
+
+  def duckModified(): EssentialAction = adminsOnlyAsync { info =>
+    implicit val request = info.request
+
+    duckForm.bindFromRequest().fold(
+      formWithErrors => {
+        // TODO: actually display the error!
+        Future.successful(BadRequest(arisia.views.html.editDuck(formWithErrors)))
+      },
+      duck => {
+        val fut =
+          if (duck.id == 0) {
+            duckService.addDuck(duck)
+          } else {
+            duckService.editDuck(duck)
+          }
+
+        fut.map { _ =>
+          Redirect(arisia.controllers.routes.DuckController.manageDucks())
+        }
+      }
+    )
+  }
+
 }

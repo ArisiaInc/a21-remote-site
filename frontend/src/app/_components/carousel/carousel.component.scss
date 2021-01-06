@@ -1,0 +1,61 @@
+.carousel {
+    height: 100%;
+    width: 100%;
+}
+
+:host {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+.overlay {
+    z-index: 5; // Underlying images are at 1. Text and Pause button are at 10.
+    position: absolute;
+    bottom: 0;
+
+    pointer-events: none;
+
+    height: 10rem;
+    width: 100%;
+
+    background-image: linear-gradient(rgba(0,0,0,0),rgba(0, 0, 0, 0.5));
+}
+
+.image-wrapper {
+    height: 100%;
+    background: black;
+    overflow: hidden;
+}
+
+.image {
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+}
+
+.caption {
+    bottom: 1.5rem;
+    padding: 0;
+}
+
+.playpause {
+    position: absolute;
+
+    bottom: 1.5rem;
+    right: 8px;
+
+    height: 32px;
+    width: 32px;
+    padding: 6px;
+
+    color: white;
+    z-index: 10;
+    cursor: pointer;
+
+    opacity: 0.7;
+    transition: opacity 0.15s ease;
+}
+.playpause:hover, .playpause:focus {
+    opacity: 1;
+}

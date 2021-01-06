@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
 import { LandingComponent } from './landing/landing.component';
-import { AuthGuard } from './_helpers';
+import { AuthGuard, UserPageRedirectGuard } from './_helpers';
 import { ProgrammingComponent } from './programming/programming.component';
 import { GamingComponent } from './gaming/gaming.component';
 import { RoomComponent } from './programming/room/room.component';
@@ -14,6 +14,7 @@ import { VideoComponent } from './gaming/video/video.component';
 import { TabletopComponent } from './gaming/tabletop/tabletop.component';
 import { LarpComponent } from './gaming/larp/larp.component';
 import { SpecialComponent } from './gaming/special/special.component';
+import { UserComponent } from './user/user.component';
 
 const accountModule = () => import('./account/account.module').then(x => x.AccountModule);
 const scheduleModule = () => import('./schedule/schedule.module').then(x => x.ScheduleModule);
@@ -35,6 +36,8 @@ const routes: Routes = [
   {path: 'artshow/:id', component: ArtistComponent},
   {path: 'dealers', component: DealersComponent},
   {path: 'dealers/:id', component: DealerComponent},
+  {path: 'user', component: UserComponent, canActivate: [AuthGuard, UserPageRedirectGuard]},
+  {path: 'user/:id', component: UserComponent, canActivate: [AuthGuard]},
 
   //redirect home
   {path: '**', redirectTo: '/map'}
