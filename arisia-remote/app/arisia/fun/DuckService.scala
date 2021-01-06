@@ -3,7 +3,9 @@ package arisia.fun
 import java.util.concurrent.atomic.AtomicReference
 
 import arisia.db.DBService
+import arisia.general.{LifecycleService, LifecycleItem}
 import arisia.models.LoginId
+import arisia.util.Done
 import play.api.Logging
 import doobie._
 import doobie.implicits._
@@ -45,10 +47,17 @@ trait DuckService {
 }
 
 class DuckServiceImpl(
-  dbService: DBService
+  dbService: DBService,
+  lifecycleService: LifecycleService
 )(
   implicit ec: ExecutionContext
-) extends DuckService with Logging {
+) extends DuckService with Logging with LifecycleItem {
+
+  val lifecycleName = "DuckService"
+  lifecycleService.register(this)
+  override def init(): Future[Done] = {
+    loadDucks().map { _ => Done }
+  }
 
   // Yes, we're maintaining a high-performance cache of ducks. Why not...
   val _duckCache: AtomicReference[List[Duck]] = new AtomicReference(List.empty)
