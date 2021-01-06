@@ -19,6 +19,7 @@ class DuckController(
   implicit val ec: ExecutionContext
 ) extends BaseController
   with AdminControllerFuncs
+  with UserFuncs
   with I18nSupport
   with Logging
 {
@@ -34,26 +35,19 @@ class DuckController(
     }
   }
 
-  def assignDuck(id: Int): EssentialAction = Action.async { implicit request =>
-    LoginController.loggedInUser() match {
-      case Some(user) => {
-        // Where did this come from?
-        request.headers.get("Referer") match {
-          case Some(referer) => {
-            duckService.assignDuck(user.id, id, referer).map { _ =>
-              Created("")
-            }.recover {
-              case ex: Exception => BadRequest("")
-            }
-          }
-          case _ => {
-            // No referer, so we can't validate the duck claim
-            Future.successful(BadRequest(""))
-          }
+  def assignDuck(id: Int): EssentialAction = withLoggedInUser { userRequest =>
+    // Where did this come from?
+    userRequest.request.headers.get("Referer") match {
+      case Some(referer) => {
+        duckService.assignDuck(userRequest.user.id, id, referer).map { _ =>
+          Created("")
+        }.recover {
+          case ex: Exception => BadRequest("")
         }
       }
       case _ => {
-        Future.successful(Forbidden(s"""{"success":false, "message":"You're not logged in, so you can't have ducks! Sorry..."}"""))
+        // No referer, so we can't validate the duck claim
+        Future.successful(BadRequest(""))
       }
     }
   }
