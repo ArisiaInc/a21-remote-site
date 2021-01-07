@@ -48,6 +48,11 @@ trait ScheduleService {
    * Only specially-designed users (broadly speaking, Tech and Safety) have access to this.
    */
   def getHostUrlFor(who: LoginUser, which: ProgramItemId): Option[String]
+
+  /**
+   * Adds this item to the Schedule, purely in-memory, so that we can test.
+   */
+  def addTestItem(item: ProgramItem): Unit
 }
 
 class ScheduleServiceImpl(
@@ -96,12 +101,23 @@ class ScheduleServiceImpl(
    */
   lazy val arisiaZone: ZoneId = ZoneId.of("EST", ZoneId.SHORT_IDS)
 
+  /**
+   * Test schedule items
+   *
+   * These are purely in-memory, to allow you to add new items for testing schedule and Zoom functionality.
+   */
+  val testItems: AtomicReference[List[ProgramItem]] = new AtomicReference(List.empty)
+
   def parseSchedule(jsonStr: String): Schedule = {
     // TODO: make this cope with failure!
     val originalSchedule = Json.parse(jsonStr).as[Schedule]
+    // Add in any test items, if there are any:
+    val withTest = originalSchedule.copy(
+      program = originalSchedule.program ++ testItems.get()
+    )
     // We are enhancing the Zambia data with pre-calculated timestamps for each program item, to ease the effort
     // on the frontend side:
-    val itemsWithTimestamps = originalSchedule.program.map { item =>
+    val itemsWithTimestamps = withTest.program.map { item =>
       val instant = for {
         date <- item.date
         time <- item.time
@@ -111,7 +127,7 @@ class ScheduleServiceImpl(
         yield ProgramItemTimestamp(zoned.toInstant)
       item.copy(timestamp = instant)
     }
-    originalSchedule.copy(program = itemsWithTimestamps)
+    withTest.copy(program = itemsWithTimestamps)
   }
 
   val _scheduleJson: AtomicReference[String] = new AtomicReference("{\"program\":[], \"people\": []}")
@@ -284,5 +300,11 @@ class ScheduleServiceImpl(
       if (who.zoomHost)
     }
       yield meeting.start_url
+  }
+
+  def addTestItem(item: ProgramItem): Unit = {
+    testItems.accumulateAndGet(List(item), _ ++ _)
+    val schedule = parseSchedule(_scheduleJson.get())
+    setSchedule(schedule)
   }
 }

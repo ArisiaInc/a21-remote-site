@@ -1,0 +1,27 @@
+@(
+  scheduleForm: Form[arisia.controllers.ScheduleInput]
+)(
+  implicit request: RequestHeader, messagesProvider: MessagesProvider
+)
+
+@main("Add Test Schedule Item") {
+  <h1>Add Test Schedule Item</h1>
+
+  <p>This lets you inject a <b>fake</b> schedule item into the online schedule. It is strictly for test purposes,
+  and the item will go away when the server is next restarted. It is only here for pre-con testing, and
+  <b>MUST NOT BE USED</b> during the convention.</p>
+
+  <p>We do no validation of the inputs; if you mess it up, it will just fail.</p>
+
+  @b4.horizontal.form(arisia.controllers.routes.ScheduleTestController.addTestScheduleItem(), "col-md-2", "col-md-10") { implicit hfc =>
+    @b4.text(scheduleForm("id"), Symbol("_label") -> "Item ID", Symbol("_help") -> "Make this a number larger than 1000")
+    @b4.text(scheduleForm("title"), Symbol("_label") -> "Title", Symbol("_help") -> "The title to show in the schedule")
+    @b4.text(scheduleForm("tags"), Symbol("_label") -> "Tags", Symbol("_help") -> "Optional comma-delimited tags")
+    @b4.text(scheduleForm("time"), Symbol("_label") -> "Start Time", Symbol("_help") -> "24-hour time: eg, 22:30 for 10:30pm")
+    @b4.text(scheduleForm("mins"), Symbol("_label") -> "Minutes", Symbol("_help") -> "How long this session runs")
+    @b4.text(scheduleForm("loc"), Symbol("_label") -> "Location", Symbol("_help") -> "Must match a Zambia Zoom room name!")
+    @b4.text(scheduleForm("people"), Symbol("_label") -> "Participant IDs", Symbol("_help") -> "Badge numbers of the panelists")
+    @b4.text(scheduleForm("desc"), Symbol("_label") -> "Description")
+    @b4.submit(Symbol("class") -> "btn btn-primary"){ Submit }
+  }
+}
