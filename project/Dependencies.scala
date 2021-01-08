@@ -30,6 +30,8 @@ object Dependencies {
 
   val postgresDriverVersion = "42.2.18"
 
+  val pprintVersion = "0.5.6"
+
   val scalaTestVersion = "3.2.2"
 
   val scalatestPlusPlayVersion = "5.0.0"
@@ -57,6 +59,8 @@ object Dependencies {
   val mySqlDriver = "mysql" % "mysql-connector-java" % mySqlVersion
 
   val playBootstrap = "com.adrianhurt" %% "play-bootstrap" % playBootstrapVersion
+
+  val pprint = "com.lihaoyi" %% "pprint" % pprintVersion
 
   val scalactic = "org.scalactic" %% "scalactic" % scalaTestVersion
   val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion % "test"
