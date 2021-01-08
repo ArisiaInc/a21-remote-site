@@ -8,9 +8,10 @@ case class ZoomRoom(
   displayName: String,
   zoomId: String,
   zambiaName: String,
+  discordName: String,
   isManual: Boolean,
   isWebinar: Boolean
 )
 object ZoomRoom {
-  val empty = ZoomRoom(0, "", "", "", false, false)
+  val empty = ZoomRoom(0, "", "", "", "", false, false)
 }
