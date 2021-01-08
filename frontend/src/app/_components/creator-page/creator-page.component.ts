@@ -1,5 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Creator, PreferredLink } from '@app/_models';
+import { Image as CarouselImage } from '@app/_components/carousel/carousel.component';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-creator-page',
@@ -7,12 +9,17 @@ import { Creator, PreferredLink } from '@app/_models';
   styleUrls: ['./creator-page.component.scss']
 })
 export class CreatorPageComponent implements OnInit {
-  @Input() creator!: Creator;
+  @Input() creator$!: Observable<Creator>;
+  carouselImages: CarouselImage[] = [];
 
   constructor() { }
 
   ngOnInit(): void {
     // TODO check for undefined creator & handle. 404?
+    this.creator$.subscribe(c => {
+      // i know this is not the right way to do this
+      this.carouselImages = c.images.map(i => ({src: i.url, caption: i.title}))
+    });
   }
 
   nameFromLinkType(linkType: string) {
@@ -32,11 +39,11 @@ export class CreatorPageComponent implements OnInit {
 
   // There's gotta be a better way to do this
   // this is a messy messy sad typecast nightmare
-  linksToDisplay() {
-    if(this.creator && this.creator.links) {
+  linksToDisplay(creator : Creator) {
+    if(creator && creator.links) {
       const result : {[_: string]: string | undefined} = Object();
-      for (let k of Object.keys(this.creator.links) as unknown as PreferredLink) {
-        if (k !== "preferred") result[k] = this.creator.links[k as PreferredLink];
+      for (let k of Object.keys(creator.links) as unknown as PreferredLink) {
+        if (k !== "preferred") result[k] = creator.links[k as PreferredLink];
       }
       return result;
     }
