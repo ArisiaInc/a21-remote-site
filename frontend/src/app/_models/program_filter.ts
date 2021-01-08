@@ -3,7 +3,7 @@
  * before the DateRange's start, but is still going. */
 export interface DateRange {
   start: Date;
-  end: Date;
+  end?: Date;
   inclusive?: boolean;
 }
 

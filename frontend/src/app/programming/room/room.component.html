@@ -2,23 +2,24 @@
 <div class="row">
   <div class="d-none d-md-block col-md-2 col-lg-3"></div>
   <div class="col-12 col-md-8 col-lg-6">
-    <ng-container *ngIf="room" else elseBlock>
+    <ng-container *ngIf="room$ | async as room; else elseBlock">
       <div class="title centered">Welcome to {{room.name | titlecase}}!</div>
-      <ng-container *ngIf="room.currentEvent$ | async as currentEvent" else noEvent>
-        <div class="description current-name">Happening now: {{currentEvent.title}}</div>
-        
-        <div class="description current-panelists">{{currentEvent | programItemPanelists}}</div>
+      <ng-container *ngIf="room.runningEvents$ | async as runningEvents">
+        <ng-container *ngIf="runningEvents.current as currentEvent">
+          <div class="description current-name">Happening now: {{currentEvent.title}}</div>
 
-        <div class="description current-description">{{currentEvent.desc}}</div>
+          <div class="description current-panelists">{{currentEvent | programItemPanelists}}</div>
 
-        <div class="description present-zoom-link">Join the panel in Zoom: (link)</div>
+          <div class="description current-description">{{currentEvent.desc}}</div>
 
-        <div class="description present-discord">Ask questions on Discord: {{room.name | titlecase}}</div>
+          <div class="description present-zoom-link">Join the panel in Zoom: (link)</div>
+
+          <div class="description present-discord">Ask questions on Discord: {{room.name | titlecase}}</div>
+        </ng-container>
       </ng-container>
     </ng-container>
   </div>
   <div class="d-none d-md-block col-md-2 col-lg-3"></div>
 </div>
 <ng-template #noEvent><div>No current Event.</div></ng-template>
-<ng-template #elseBlock><div *ngIf="loading; else error">Loading.</div></ng-template>
-<ng-template #error>Internal Error</ng-template>
+<ng-template #elseBlock><div>Loading or error.</div></ng-template>

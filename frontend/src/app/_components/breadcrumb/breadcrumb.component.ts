@@ -29,7 +29,7 @@ export class BreadcrumbComponent implements OnInit {
     if (path == 'map') {
       return "Lobby";
     }
-    return path.replace('_', ' ');
+    return path.replace(/_/g, ' ');
   }
 
 }

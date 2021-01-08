@@ -3,7 +3,7 @@ import { BehaviorSubject, ReplaySubject, Observable, of, zip, OperatorFunction, 
 import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck, every, switchMap } from 'rxjs/operators';
 import { HttpClient, HttpResponse, HttpErrorResponse } from '@angular/common/http';
 
-import { ProgramItem, ProgramPerson, ProgramFilter, Room, DateRange } from '@app/_models';
+import { ProgramItem, ProgramPerson, ProgramFilter, DateRange } from '@app/_models';
 import { SettingsService } from './settings.service';
 import { StarsService } from './stars.service';
 import { environment } from '@environments/environment';
@@ -239,10 +239,48 @@ export interface Initial {
 }
 
 export interface GamingMeta {
-    id: string;
-    loc: string[];
-  }
+  id: string;
+  loc: string[];
+}
 
+/** Takes a set of dateRanges sorted by start time. */
+function filterEventsByDate(events: ScheduleEvent[], dateRanges: DateRange[], count?: number): ScheduleEvent[] {
+  if (count === 0) {
+    return [];
+  }
+  let i = 0;
+  const eventCount = events.length;
+  let filteredEvents: ScheduleEvent[] = [];
+  for (const dateRange of dateRanges) {
+    for (; i < eventCount && (!count || filteredEvents.length < count) && events[i].start < dateRange.start; i++) {
+      if (dateRange.inclusive && events[i].start.getTime() + events[i].mins * 60 * 1000 >= dateRange.start.getTime()) {
+        filteredEvents.push(events[i]);
+      }
+    }
+    if (!dateRange.end) {
+      filteredEvents = filteredEvents.concat(events.slice(i, count ? i + count - filteredEvents.length : undefined));
+      break;
+    }
+    for (; i < eventCount && (!count || filteredEvents.length < count) && events[i].start < dateRange.end; i++) {
+      filteredEvents.push(events[i]);
+    }
+  }
+  return filteredEvents;
+}
+
+export interface RunningEvents {
+  current?: ScheduleEvent;
+  next?: ScheduleEvent;
+}
+
+export class Room {
+  runningEvents$: Observable<RunningEvents>
+  constructor(public id: string,
+              public name: string,
+              private scheduleService: ScheduleService) {
+    this.runningEvents$ = scheduleService.getNextEvents(name);
+  }
+}
 
 const RELOAD_TIMER = 10 * 1000;
 const USE_FAKE_DATA = false;
@@ -468,22 +506,7 @@ export class ScheduleService {
 
     return eventsObservable.pipe(
       map(events => {
-        let dateFilteredEvents = events;
-        if (dateRanges) {
-          let i = 0;
-          const eventCount = events.length;
-          dateFilteredEvents = [];
-          dateRanges.forEach(dateRange => {
-            for (; i < eventCount && events[i].start < dateRange.start; i++) {
-              if (dateRange.inclusive && events[i].start.getTime() + events[i].mins * 60 * 1000 >= dateRange.start.getTime()) {
-                dateFilteredEvents.push(events[i]);
-              }
-            }
-            for (; i < eventCount && events[i].start < dateRange.end; i++) {
-              dateFilteredEvents.push(events[i]);
-            }
-          });
-        }
+        const dateFilteredEvents = dateRanges ? filterEventsByDate(events, dateRanges) : events;
         return buildStructuredEvents(dateFilteredEvents.filter((event) => munged_filters.every(filter => filter(event))));
       }),
       relabelStructuredEventsAsNeeded(),
@@ -528,6 +551,23 @@ export class ScheduleService {
     );
   }
 
+  getNextEvents(roomName: string): Observable<RunningEvents> {
+    return this.events$.pipe(
+      map(events => events.filter(event => event.location.includes(roomName))),
+      switchMap(events =>
+        new Observable<ScheduleEvent[]>(subscriber => {
+          const filteredEvents = filterEventsByDate(events, [{start: this.settingsService.currentTime, inclusive: true}], 2);
+          function sendNextFilteredEvent(filteredEvents: ScheduleEvent[]) {
+            subscriber.next(filteredEvents);
+            if (filteredEvents.length > 0) {
+            }
+          }
+          sendNextFilteredEvent(filteredEvents);
+        })),
+      map(events => ({current: events[0], next: events[1]})),
+    );
+  }
+
   get_featured_events(): Observable<StructuredEvents> {
     // for testing:
     // return this.getSchedule({id: ['23', '45', '17']});
@@ -543,29 +583,20 @@ export class ScheduleService {
     return this.http.get<GamingMeta[]>(`${environment.backend}/schedule/gamingmeta`);
   }
 
-  get_rooms(): Observable<Room[]> {
-    // Fake data
-    const currentEvent = {
-      id: 'a',
-      title: 'Panel XYZ',
-      people: [{id: "1", name: 'Panelist A'}, {id: "2", name: 'Panelist B'}, {id: "3", name: 'Panelist C'}, {id: "4", name: 'Panelist D'}, {id: "5", name: 'Panelist E'}],
-      desc: 'This is the panel description. It would be longer and more interesting in real life, and hopefully get you excited about the topic being discussed! I’m going to write a couple more sentences so we get a more realistic sense of how much space this might take up. The quick brown fox jumps over the lazy dog. Bowties are cool. Live long and prosper. May the Force be with you.',
-      tags: [],
-      date: '',
-      time: '',
-      timestamp: '',
-      mins: '',
-      loc: [],
-    };
-    return of([new Room('room_1', 'Room 1', currentEvent),
-               new Room('room_2', 'Room 2', currentEvent),
-               new Room('room_3', 'Room 3', currentEvent),
-               new Room('room_4', 'Room 4', currentEvent),
-               new Room('room_5', 'Room 5', currentEvent)]);
+  getRooms(): Observable<Room[]> {
+    return of([{ id: 'zoom_room_1', name: 'Zoom Room 1' },
+               { id: 'zoom_room_2', name: 'Zoom Room 2' },
+               { id: 'zoom_room_3', name: 'Panel Zoom 3' },
+               { id: 'zoom_room_4', name: 'Zoom Room 4' },
+               { id: 'zoom_room_5', name: 'Zoom Room 5' },
+               { id: 'zoom_room_6', name: 'Zoom Room 6' },
+               { id: 'zoom_room_7', name: 'Events Zoom Room' },
+               { id: 'zoom_room_fasttrack', name: 'FastTrack Zoom' },
+              ].map(({id, name}) => new Room(id, name, this)));
   }
 
-  get_room(id: string): Observable<Room | undefined> {
-    return this.get_rooms().pipe(
+  getRoom(id: string): Observable<Room | undefined> {
+    return this.getRooms().pipe(
       map(rooms => rooms.find(room => room.id === id)),
     );
   }
