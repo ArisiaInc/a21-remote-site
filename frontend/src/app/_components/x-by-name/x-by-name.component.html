@@ -1,0 +1,11 @@
+
+<div *ngIf="(search$ | async) || ' ' as search" class="search">
+  <div class="search-title">{{noun}} by name</div>
+  <ng-container *ngFor="let link of links$ | async; last as isLast">
+    <a [routerLink]="linkPrefix + link.link" *ngIf="search !== link.searchCompare && link.active">{{link.display}}</a>
+    <span *ngIf="search === link.searchCompare" class="selected">{{link.display}}</span>
+    <span *ngIf="search !== link.searchCompare && !link.active">{{link.display}}</span>
+    <ng-container *ngIf="!isLast">&nbsp;&middot; </ng-container>
+  </ng-container>
+  <ng-content></ng-content>
+</div>

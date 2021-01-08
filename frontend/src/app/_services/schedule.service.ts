@@ -7,6 +7,7 @@ import { ProgramItem, ProgramPerson, ProgramFilter, Room, DateRange } from '@app
 import { SettingsService } from './settings.service';
 import { StarsService } from './stars.service';
 import { environment } from '@environments/environment';
+import { XByNameService } from './x-by-name.service';
 
 export enum ScheduleState {
   IDLE,
@@ -250,7 +251,7 @@ const USE_FAKE_DATA = false;
 @Injectable({
   providedIn: 'root'
 })
-export class ScheduleService {
+export class ScheduleService extends XByNameService<SchedulePerson> {
 
   private etag?: string;
   private loading = false;
@@ -271,6 +272,8 @@ export class ScheduleService {
   private peopleInitials: {[lower: string]: Initial} = {};
   peopleInitials$ = new ReplaySubject<{[lower: string]: Initial}>(1);
 
+  sortedPeople$ = new ReplaySubject<SchedulePerson[]>(1);
+
   private tracks: string[] = [];
   tracks$ = new ReplaySubject<string[]>(1);
 
@@ -287,6 +290,7 @@ export class ScheduleService {
   constructor(private http: HttpClient,
               private settingsService: SettingsService,
               private starsService: StarsService,) {
+    super();
     this.init();
     hour12ConstSet$ = settingsService.hour12$.pipe(tap(value => hour12 = value));
     hour12ConstSet$.subscribe();
@@ -383,8 +387,10 @@ export class ScheduleService {
     this.events$.next(this.events);
     this.eventsMap$.next(this.eventsMap);
     this.people$.next(this.people);
+    this.all$.next(this.people);
     this.peopleMap$.next(this.peopleMap);
     this.peopleInitials$.next(this.peopleInitials);
+    this.initials$.next(this.peopleInitials);
     this.tracks$.next(this.tracks);
     this.types$.next(this.types);
     this.scheduleWithoutRelabeling$.next(this.schedule);
@@ -495,6 +501,10 @@ export class ScheduleService {
     return this.peopleMap$.pipe(
       map(peopleMap => peopleMap[id]),
     );
+  }
+
+  search(search:string): Observable<SchedulePerson[]>{
+    return this.getPeople(search);
   }
 
   getPeople(search: string): Observable<SchedulePerson[]> {
