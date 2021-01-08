@@ -98,6 +98,10 @@ def main(*args):
                 if row[key] == '':
                     del row[key]
                     continue
+            # check for image id
+            if 'image_id' not in row:
+                print('Missing image id: {}'.format(row))
+                continue
             # check for url
             if 'url' not in row or not row['url'].startswith('https'):
                 # needs a valid url

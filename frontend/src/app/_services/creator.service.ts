@@ -14,7 +14,7 @@ export class CreatorService {
 
   get_dealer_data(local: boolean) {
     if (local) {
-      return this.http.get<Creator[]>(`assets/data/dealers_1231_1.json`);
+      return this.http.get<Creator[]>(`assets/data/dealers.json`);
     }
     return this.http.get<Creator[]>(`${environment.backend}/dealers`);
   }
@@ -37,8 +37,7 @@ export class CreatorService {
   }
 
   get_dealers(ids?: string[]) : Observable<Creator[]>{
-    // change the below value to false to get from the server
-    return this.get_dealer_data(true).pipe(
+    return this.get_dealer_data(environment.local_data).pipe(
       this.make_id_filter(ids)
     );
   }
