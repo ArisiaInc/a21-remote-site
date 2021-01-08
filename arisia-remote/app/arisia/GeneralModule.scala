@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import arisia.admin.{RoomServiceImpl, RoomService, AdminServiceImpl, AdminService}
 import arisia.auth.{CMService, CMServiceImpl, LoginService, LoginServiceImpl}
 import arisia.db.{DBServiceImpl, DBService}
+import arisia.discord.{DiscordService, DiscordServiceImpl}
 import arisia.fun.{DuckServiceImpl, DuckService}
 import arisia.general.{LifecycleServiceImpl, LifecycleService, SettingsService, SettingsServiceImpl}
 import com.softwaremill.macwire.wire
@@ -27,6 +28,7 @@ trait GeneralModule extends ZoomModule {
   lazy val adminService: AdminService = wire[AdminServiceImpl]
   lazy val cmService: CMService = wire[CMServiceImpl]
   lazy val dbService: DBService = wire[DBServiceImpl]
+  lazy val discordService: DiscordService = wire[DiscordServiceImpl]
   lazy val duckService: DuckService = wire[DuckServiceImpl]
   lazy val lifecycleService: LifecycleService = wire[LifecycleServiceImpl]
   lazy val loginService: LoginService = wire[LoginServiceImpl]

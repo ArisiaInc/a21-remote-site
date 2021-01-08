@@ -5,7 +5,7 @@ import arisia.auth.LoginService
 import arisia.fun.{Duck, DuckService}
 import arisia.models.{LoginUser, LoginId, Permissions, ZoomRoom, LoginName}
 import arisia.zoom.ZoomService
-import play.api.Logging
+import play.api.{Logging, Configuration}
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
@@ -17,6 +17,7 @@ import scala.concurrent.{Future, ExecutionContext}
 
 class AdminController (
   val controllerComponents: ControllerComponents,
+  config: Configuration,
   adminService: AdminService,
   val loginService: LoginService,
   zoomService: ZoomService,
@@ -40,7 +41,6 @@ class AdminController (
     )(LoginId.apply)(LoginId.unapply)
   )
 
-
   /* ********************
    *
    * Other ad-hoc functions
@@ -51,15 +51,13 @@ class AdminController (
    * For now, this is internal-only, for testing, and can only be accessed from Swagger.
    */
   def startMeeting(): EssentialAction = adminsOnlyAsync { info =>
-    // The below code no longer works, since we need the user Id. For now, just commenting it out, since it
-    // isn't being used:
-    ???
-//    zoomService.startMeeting("Ad hoc meeting").map { errorOrMeeting =>
-//      errorOrMeeting match {
-//        case Right(meeting) => Ok(Json.toJson(meeting).toString())
-//        case Left(error) => InternalServerError(error)
-//      }
-//    }
+    val userId = config.get[String]("arisia.zoom.api.userId")
+    zoomService.startMeeting("Ad hoc meeting", userId).map { errorOrMeeting =>
+      errorOrMeeting match {
+        case Right(meeting) => Ok(Json.toJson(meeting).toString())
+        case Left(error) => InternalServerError(error)
+      }
+    }
   }
 
   def endMeeting(meetingIdStr: String): EssentialAction = adminsOnlyAsync { info =>

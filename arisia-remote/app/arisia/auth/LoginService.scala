@@ -4,7 +4,7 @@ import arisia.db.DBService
 
 import scala.concurrent.duration._
 import arisia.models.{LoginUser, LoginId, BadgeNumber, Permissions, LoginName}
-import cats.data.OptionT
+import cats.data.{OptionT, EitherT}
 import cats.implicits._
 import doobie.free.connection.ConnectionIO
 import play.api.libs.ws.WSClient
@@ -18,7 +18,7 @@ trait LoginService {
   /**
    * Given credentials, says whether they match a known login.
    */
-  def login(id: String, password: String): Future[Option[LoginUser]]
+  def login(id: String, password: String): Future[Either[LoginError, LoginUser]]
 
   /**
    * Fetch any additional permissions that this person might have.
@@ -35,7 +35,6 @@ class LoginServiceImpl(
   implicit ec: ExecutionContext
 ) extends LoginService {
 
-
   /**
    * These two config settings are intended for local development use only -- to allow yourself to frontend access
    * or admin access, add your CM username to these fields in your secrets.conf:
@@ -46,27 +45,42 @@ class LoginServiceImpl(
   lazy val hardcodedAdmin: Seq[LoginId] =
     config.get[Seq[String]]("arisia.dev.admins").map(LoginId(_))
 
-  // We use OptionT to squish together Option and Future without making ourselves crazy:
-  type OptFutUser = OptionT[Future, LoginUser]
-
-  private def checkPermissions(initialUser: LoginUser): OptFutUser = {
-    val result: Future[Option[LoginUser]] = getPermissions(initialUser.id).map { perms =>
+  private def checkPermissions(initialUser: LoginUser): Future[Either[LoginError, LoginUser]] = {
+    getPermissions(initialUser.id).map { perms =>
       if (perms.tech)
-        Some(initialUser.copy(zoomHost = true))
+        Right(initialUser.copy(zoomHost = true))
       else
-        Some(initialUser)
+        Right(initialUser)
     }
-    OptionT(result)
   }
 
-  def login(idFromUser: String, password: String): Future[Option[LoginUser]] = {
+  def login(idFromUser: String, password: String): Future[Either[LoginError, LoginUser]] = {
     // Normalize everything to lowercase:
     val id = idFromUser.toLowerCase()
-    val result = for {
-      (id, badgeName) <- OptionT(cmService.checkLogin(id, password))
-      details <- OptionT(cmService.fetchDetails(id))
+    val result: EitherT[Future, LoginError, LoginUser] = for {
+      login <- EitherT(cmService.checkLogin(id, password))
+      (id, badgeName) = login
+      details <- EitherT(cmService.fetchDetails(id))
+      // Bleah -- this EitherT math isn't nearly as easy as it should be. This is crying out for a higher-level
+      // function of some sort:
+      _ <-
+        if (details.active) {
+          EitherT.rightT[Future, LoginError](details)
+        } else {
+          EitherT.leftT[Future, LoginUser](LoginError.NoMembership)
+        }
+      _ <-
+        if (details.membershipType == MembershipType.NoMembership)
+          EitherT.leftT[Future, LoginUser](LoginError.NoMembership)
+        else
+          EitherT.rightT[Future, LoginError](details)
+      _ <-
+        if (details.signedCoC)
+          EitherT.rightT[Future, LoginError](details)
+        else
+          EitherT.leftT[Future, LoginUser](LoginError.NoCoC)
       initialUser = LoginUser(id, badgeName, details.badgeNumber, false, details.membershipType)
-      withPermissions <- checkPermissions(initialUser)
+      withPermissions <- EitherT(checkPermissions(initialUser))
     }
       yield withPermissions
 

@@ -113,6 +113,7 @@ lazy val backend = (project in file("arisia-remote"))
       macwireUtil,
       mySqlDriver,
       playBootstrap,
+      pprint,
       scalactic,
       scalaTest,
       scalatestPlusPlay,

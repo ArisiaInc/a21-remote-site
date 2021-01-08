@@ -1,6 +1,6 @@
 package arisia.controllers
 
-import arisia.auth.LoginService
+import arisia.auth.{LoginService, LoginError}
 import arisia.models.{LoginRequest, LoginUser, LoginId}
 import play.api.Configuration
 import play.api.http._
@@ -34,7 +34,7 @@ class LoginController (
     val req = request.body
     loginService.login(req.id, req.password).flatMap {
       _ match {
-        case Some(user) => {
+        case Right(user) => {
           loginService.getPermissions(user.id).map { permissions =>
             val allowed =
               if (earlyAccessOnly) {
@@ -52,12 +52,13 @@ class LoginController (
               val jsStr = Json.stringify(json)
               Ok(jsStr).withSession(userKey -> jsStr).as(JSON)
             } else {
-              Unauthorized("""{"success":"false", "message":"Sorry - you aren't allowed into this site yet. Talk to Remote if you believe you should have access."}""")
+              val msg = LoginError.NotYet.value
+              Unauthorized(s"""{"success":"false", "message":"$msg"}""")
             }
           }
         }
-        case None => {
-          Future.successful(Unauthorized("""{"success":"false", "message":"Sorry - that isn't a valid username and password"}"""))
+        case Left(error) => {
+          Future.successful(Unauthorized(s"""{"success":"false", "message":"${error.value}"}"""))
         }
       }
     }

@@ -82,6 +82,10 @@ GET     /admin/assets/*file          controllers.Assets.versioned(path="/public"
 GET     /test/fakeschedule           arisia.controllers.FakeZambiaController.getSchedule()
 # TODO: remove
 GET     /test/zoomcall               arisia.controllers.ZoomController.test()
+# TODO: remove
+GET     /test/getDiscordMembers      arisia.controllers.DiscordController.test()
+GET     /test/scheduleItem           arisia.controllers.ScheduleTestController.showTestScheduleInput()
+POST    /test/scheduleItem           arisia.controllers.ScheduleTestController.addTestScheduleItem()
 
 # During development, get the Swagger UI at:
 #   http://localhost:9000/docs/swagger-ui/index.html?url=/admin/assets/swagger.json

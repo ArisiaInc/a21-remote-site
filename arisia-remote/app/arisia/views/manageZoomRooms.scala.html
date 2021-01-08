@@ -11,9 +11,11 @@
   <table id="roomTable" class="display dataTable" style="width: 100%">
       <thead>
         <tr>
+            <th>ID</th>
             <th>Display Name</th>
             <th>Zoom User ID</th>
             <th>Zambia Room Name</th>
+            <th>Discord Channel Name</th>
             <th>Manual</th>
             <th>Webinar</th>
         </tr>
@@ -21,9 +23,11 @@
       <tbody>
         @for(room <- rooms) {
           <tr>
+              <td><a href="/admin/editRoom/@{room.id}">@{room.id}</a></td>
               <td>@{room.displayName}</td>
               <td>@{room.zoomId}</td>
               <td>@{room.zambiaName}</td>
+              <td>@{room.discordName}</td>
               <td>@{room.isManual}</td>
               <td>@{room.isWebinar}</td>
           </tr>
