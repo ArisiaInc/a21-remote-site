@@ -30,7 +30,7 @@
                     their preferred web presence.</p>
             </div>
         </div>
-        <p><strong>TODO ToC component</strong></p>
+        <app-x-by-name linkPrefix="/artshow/search/" noun="Artists" [service]="artistService"></app-x-by-name>
     </div>
 </div>
 <app-creator-list [creators]="artists$ | async"></app-creator-list>

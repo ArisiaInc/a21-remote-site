@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, ReplaySubject, Observable, of, zip, OperatorFunction, timer, pipe } from 'rxjs';
-import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck, every, switchMap } from 'rxjs/operators';
+import { map, tap, switchMap } from 'rxjs/operators';
 import { HttpClient, HttpResponse, HttpErrorResponse } from '@angular/common/http';
 
 import { ProgramItem, ProgramPerson, ProgramFilter, Room, DateRange } from '@app/_models';
 import { SettingsService } from './settings.service';
 import { StarsService } from './stars.service';
 import { environment } from '@environments/environment';
-import { XByNameService } from './x-by-name.service';
+import { XByNameService, Initial } from './x-by-name.service';
 
 export enum ScheduleState {
   IDLE,
@@ -230,13 +230,6 @@ export class SchedulePerson {
 interface ProgramData {
   program: ProgramItem[],
   people: ProgramPerson[]
-}
-
-
-export interface Initial {
-  lower: string;
-  upper: string;
-  active: boolean;
 }
 
 export interface GamingMeta {
@@ -517,9 +510,8 @@ export class ScheduleService extends XByNameService<SchedulePerson> {
           sort(SchedulePerson.compare)),
       );
     } else {
-      const regexp = new RegExp('^'+search, 'i');
       return this.people$.pipe(
-        map(people => people.filter(person => person.name.match(regexp))),
+        this.search_alpha(search)
       );
     }
   }

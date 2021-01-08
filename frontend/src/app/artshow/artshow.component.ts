@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Creator } from '@app/_models';
-import { CreatorService } from '@app/_services';
+import { ArtistService } from '@app/_services';
 
 @Component({
   selector: 'app-artshow',
@@ -11,10 +11,18 @@ import { CreatorService } from '@app/_services';
 export class ArtshowComponent implements OnInit {
   artists$!: Observable<Creator[]>;
 
-  constructor(private creatorService: CreatorService) { }
+  constructor(public artistService: ArtistService) { }
 
   ngOnInit(): void {
-    this.artists$ = this.creatorService.get_artists();
+    console.log('artshow init')
+    this.artists$ = this.artistService.get_creators();
+    let subsc = this.artistService.display$.subscribe(artists => {
+      // this line never returns anything
+      // also this subscription doesn't seem to exist.
+      console.log(artists && artists.length ? artists[0].id : 'no artist');
+    });
+    console.log(subsc);
+    console.log('artist service display', this.artistService.display$)
   }
 
 }
