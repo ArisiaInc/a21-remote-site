@@ -4,6 +4,21 @@
     <div class="item_base">
         <h6 class="title" [ngClass]="{'font-weight-bold': expanded}">{{event.title}}</h6>
         <div class="loc text-muted">Location: <span>{{event.location}}</span></div>
+        <div class="links" [ngSwitch]="event.location.length && event.location[0]">
+          <ng-container *ngSwitchCase="'LARP'">
+            <app-room-link-other [href]="event.location[1]">Sign Up for Larp</app-room-link-other>
+            <app-room-link-other [href]="'https://discord.com/channels/743094117554454599/795432881094656020'">Join LARP</app-room-link-other>
+          </ng-container>
+          <ng-container *ngSwitchCase="'Gaming'">
+            <app-room-link-other [href]="event.location[2]">Sign Up for Game</app-room-link-other>
+            <app-room-link-other [href]="event.location[1]">Join Game</app-room-link-other>
+          </ng-container>
+          <app-room-link-other [href]="'/events'" *ngSwitchCase="'Performance Hall'">View in the Performance Hall</app-room-link-other>
+          <ng-container *ngSwitchDefault>
+            <app-room-link [id]="event.id"></app-room-link>
+            <app-room-link-host [id]="event.id"></app-room-link-host>
+          </ng-container>
+        </div>
     </div>
     <div class="extra" *ngIf="expanded">
         <div class="item_tag text-muted">Track: <span>{{track}}</span></div>
