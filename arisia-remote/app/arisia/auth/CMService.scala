@@ -25,12 +25,12 @@ trait CMService {
   /**
    * Confirms that this id/password combination is a known user in CM; if so, returns the initial info about them.
    */
-  def checkLogin(username: String, password: String): Future[Option[(LoginId, LoginName)]]
+  def checkLogin(username: String, password: String): Future[Either[LoginError, (LoginId, LoginName)]]
 
   /**
    * Go out to CM directly, and fetch the details.
    */
-  def fetchDetails(username: LoginId): Future[Option[CMDetails]]
+  def fetchDetails(username: LoginId): Future[Either[LoginError, CMDetails]]
 }
 
 class CMServiceImpl(
@@ -69,11 +69,11 @@ class CMServiceImpl(
    * to CM's login page, and see if we get a success or error back. Conveniently for us, the next page includes the
    * member's badge name, so we pull that out at the same time.
    */
-  def checkLogin(username: String, password: String): Future[Option[(LoginId, LoginName)]] = {
+  def checkLogin(username: String, password: String): Future[Either[LoginError, (LoginId, LoginName)]] = {
     if (!cmEnabled && testUsers.contains(username)) {
       // This is a test user, not actually in CM, so just pass it through here. Note that this code path is
       // ignored if CM integration is actually enabled
-      Future.successful(Some(LoginId(username), LoginName(username)))
+      Future.successful(Right(LoginId(username), LoginName(username)))
     } else {
       // Normal case. Note that, even if CM integration is not enabled, we still do the screen-scrape, since
       // that doesn't require any special setup:
@@ -90,7 +90,7 @@ class CMServiceImpl(
         val body = response.body
         if (body.contains("Bad username or password")) {
           // CM says that it's wrong:
-          None
+          Left(LoginError.NoLogin)
         } else if (body.contains("Please Double-check your name information")) {
           // That indicates that CM thinks it's a legit username/password
           // Parse out the badgename. We're not even going to try and be cute about this
@@ -111,10 +111,10 @@ class CMServiceImpl(
             }
           }
 
-          Some((LoginId(username), LoginName(badgeName)))
+          Right((LoginId(username), LoginName(badgeName)))
         } else {
           logger.error(s"Got unexpected response from Convention Master when checking $username!")
-          None
+          Left{LoginError.NoLogin}
         }
       }
     }
@@ -149,7 +149,7 @@ class CMServiceImpl(
     }
   }
 
-  def fetchDetails(username: LoginId): Future[Option[CMDetails]] = {
+  def fetchDetails(username: LoginId): Future[Either[LoginError, CMDetails]] = {
     if (cmEnabled) {
       fetchRealDetails(username)
     } else {
@@ -201,7 +201,7 @@ class CMServiceImpl(
     }
   }
 
-  private def fetchRealDetails(username: LoginId): Future[Option[CMDetails]] = {
+  private def fetchRealDetails(username: LoginId): Future[Either[LoginError, CMDetails]] = {
     // We do a pretty serious join here, to fetch all of the key information in one decently reliable query
     // This *should* always return one row -- it is weird if it doesn't.
     val usernameStr = username.v
@@ -235,20 +235,20 @@ class CMServiceImpl(
           // (Again, checking this would be welcome.)
           raw.versionId.isDefined
         )
-      }
+      }.toRight(LoginError.NoLogin)
     }
   }
 
-  private def fetchTestDetails(username: LoginId): Option[CMDetails] = {
+  private def fetchTestDetails(username: LoginId): Either[LoginError, CMDetails] = {
     if (username.v == cmNoAccount) {
-      None
+      Left(LoginError.NoLogin)
     } else if (username.v == cmNotRegistered) {
-      Some(CMDetails(cmTestBadgeNumber, true, MembershipType.NoMembership, false))
+      Right(CMDetails(cmTestBadgeNumber, true, MembershipType.NoMembership, false))
     } else if (username.v == cmNoCoC) {
-      Some(CMDetails(cmTestBadgeNumber, true, MembershipType.AdultStandard, false))
+      Right(CMDetails(cmTestBadgeNumber, true, MembershipType.AdultStandard, false))
     } else {
       // Everyone except the test users gets through with everything clear:
-      Some(CMDetails(cmTestBadgeNumber, true, MembershipType.AdultStandard, true))
+      Right(CMDetails(cmTestBadgeNumber, true, MembershipType.AdultStandard, true))
     }
   }
 }

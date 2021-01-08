@@ -1,7 +1,8 @@
 package arisia.controllers
 
 import arisia.auth.LoginService
-import arisia.general.DiscordService
+import arisia.discord.{DiscordService, DiscordUserCredentials}
+import arisia.discord.DiscordUserCredentials
 import play.api.i18n.I18nSupport
 import play.api.mvc.{BaseController, ControllerComponents, EssentialAction}
 
@@ -22,5 +23,11 @@ class DiscordController(
     discordService.getMembers().map { _ =>
       Ok("See logs")
     }
+  }
+
+  def addMember(): EssentialAction = Action.async(controllerComponents.parsers.json[DiscordUserCredentials]) { implicit request =>
+    val creds = request.body
+    // TODO
+    ???
   }
 }

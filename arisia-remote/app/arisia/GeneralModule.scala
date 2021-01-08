@@ -4,8 +4,9 @@ import akka.actor.ActorSystem
 import arisia.admin.{RoomServiceImpl, RoomService, AdminServiceImpl, AdminService}
 import arisia.auth.{CMService, CMServiceImpl, LoginService, LoginServiceImpl}
 import arisia.db.{DBServiceImpl, DBService}
+import arisia.discord.{DiscordService, DiscordServiceImpl}
 import arisia.fun.{DuckServiceImpl, DuckService}
-import arisia.general.{SettingsServiceImpl, LifecycleServiceImpl, DiscordServiceImpl, SettingsService, LifecycleService, DiscordService}
+import arisia.general.{LifecycleServiceImpl, LifecycleService, SettingsService, SettingsServiceImpl}
 import com.softwaremill.macwire.wire
 import arisia.schedule.{ScheduleService, ScheduleQueueService, ScheduleServiceImpl, StarService, StarServiceImpl, ScheduleQueueServiceImpl}
 import arisia.timer.{TimerService, TimeServiceImpl, TimerServiceImpl, TimeService, Ticker, TickerImpl}
