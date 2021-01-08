@@ -41,7 +41,7 @@ class RoomServiceImpl(
   private def loadRooms(): Future[Done] = {
     dbService.run(
       sql"""
-            SELECT did, display_name, zoom_id, zambia_name, manual, webinar
+            SELECT did, display_name, zoom_id, zambia_name, discord_name, manual, webinar
               FROM zoom_rooms"""
         .query[ZoomRoom]
         .to[List]
@@ -57,9 +57,9 @@ class RoomServiceImpl(
     dbService.run(
       sql"""
             INSERT INTO zoom_rooms
-            (display_name, zoom_id, zambia_name, manual, webinar)
+            (display_name, zoom_id, zambia_name, discord_name, manual, webinar)
             VALUES
-            (${room.displayName}, ${room.zoomId}, ${room.zambiaName}, ${room.isManual}, ${room.isWebinar})
+            (${room.displayName}, ${room.zoomId}, ${room.zambiaName}, ${room.discordName}, ${room.isManual}, ${room.isWebinar})
            """
         .update
         .run
@@ -72,6 +72,7 @@ class RoomServiceImpl(
               SET display_name = ${room.displayName},
                   zoom_id = ${room.zoomId},
                   zambia_name = ${room.zambiaName},
+                  discord_name = ${room.discordName},
                   manual = ${room.isManual},
                   webinar = ${room.isWebinar}
             WHERE did = ${room.id}"""
@@ -82,8 +83,9 @@ class RoomServiceImpl(
   def getRoomForZambia(loc: ProgramItemLoc): Future[Option[ZoomRoom]] = {
     dbService.run(
       sql"""
-            SELECT did, display_name, zoom_id, zambia_name, manual, webinar
-              FROM zoom_rooms"""
+            SELECT did, display_name, zoom_id, zambia_name, discord_name, manual, webinar
+              FROM zoom_rooms
+             WHERE zambia_name = ${loc.v}"""
         .query[ZoomRoom]
         .option
     )

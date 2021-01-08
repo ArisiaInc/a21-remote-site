@@ -75,6 +75,7 @@ class ZoomController(
       "displayName" -> nonEmptyText,
       "zoomId" -> nonEmptyText,
       "zambiaName" -> nonEmptyText,
+      "discordName" -> nonEmptyText,
       "isManual" -> boolean,
       "isWebinar" -> boolean
     )(ZoomRoom.apply)(ZoomRoom.unapply)
