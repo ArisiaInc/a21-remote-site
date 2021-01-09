@@ -587,11 +587,11 @@ export class ScheduleService {
   getRooms(): Observable<Room[]> {
     return of([{ id: 'zoom_room_1', name: 'Zoom Room 1', art: 'room-1.png' },
                { id: 'zoom_room_2', name: 'Zoom Room 2', art: 'room-2.png'  },
-               { id: 'zoom_room_3', name: 'Panel Zoom 3', art: 'room-3.png'  },
+               { id: 'zoom_room_3', name: 'Zoom Room 3', art: 'room-3.png'  },
                { id: 'zoom_room_4', name: 'Zoom Room 4', art: 'room-4.png'  },
                { id: 'zoom_room_5', name: 'Zoom Room 5', art: 'room-5.png'  },
                { id: 'zoom_room_6', name: 'Zoom Room 6', art: 'room-6.png'  },
-               { id: 'zoom_room_7', name: 'Events Zoom Room', art: 'room-7.png'  },
+               { id: 'zoom_room_7', name: 'Zoom Room 7', art: 'room-7.png'  },
                { id: 'zoom_room_fasttrack', name: 'FastTrack Zoom', art: 'room-8.png'  },
               ].map(({id, name, art}) => new Room(id, name, `/assets/images/programming/${art}`, this)));
   }
