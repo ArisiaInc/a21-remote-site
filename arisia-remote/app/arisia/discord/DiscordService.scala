@@ -45,7 +45,7 @@ class DiscordServiceImpl(
         .addHttpHeaders("Authorization" -> s"Bot $botToken")
         // TODO: loop and paginate!!!
         .addQueryStringParameters("limit" -> "100")
-        .withRequestFilter(AhcCurlRequestLogger())
+//        .withRequestFilter(AhcCurlRequestLogger())
         .get()
         .map { response =>
           Json.parse(response.body).as[List[DiscordMember]]
@@ -76,7 +76,7 @@ class DiscordServiceImpl(
       findMemberIn(creds, members) match {
         case Some(member) => {
           // TODO:
-          ???
+          Right(member)
         }
         case _ => Left("Please join the Arisia Discord server first, then come back and try again!")
       }

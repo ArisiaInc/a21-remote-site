@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, ReplaySubject, Observable, of, zip, OperatorFunction, timer, pipe } from 'rxjs';
-import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck, every, switchMap } from 'rxjs/operators';
+import { BehaviorSubject, ReplaySubject, Observable, of, zip, OperatorFunction, timer, pipe, defer, concat } from 'rxjs';
+import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck, every, switchMap, repeat, ignoreElements } from 'rxjs/operators';
 import { HttpClient, HttpResponse, HttpErrorResponse } from '@angular/common/http';
 
 import { ProgramItem, ProgramPerson, ProgramFilter, DateRange } from '@app/_models';
@@ -553,19 +553,33 @@ export class ScheduleService {
   }
 
   getNextEvents(roomName: string): Observable<RunningEvents> {
+    let currentTime = this.settingsService.currentTime;
     return this.events$.pipe(
       map(events => events.filter(event => event.location.includes(roomName))),
       switchMap(events =>
-        new Observable<ScheduleEvent[]>(subscriber => {
-          const filteredEvents = filterEventsByDate(events, [{start: this.settingsService.currentTime, inclusive: true}], 2);
-          function sendNextFilteredEvent(filteredEvents: ScheduleEvent[]) {
-            subscriber.next(filteredEvents);
-            if (filteredEvents.length > 0) {
+        /* Calculate next two events based on current time. */
+        defer(() => of(filterEventsByDate(events, [{start: (currentTime = this.settingsService.currentTime), inclusive: true}], 2))).pipe(
+          /* Map to our RunningEvents structure. */
+          map(events => {
+            if (events.length == 0) {
+              return {};
             }
-          }
-          sendNextFilteredEvent(filteredEvents);
-        })),
-      map(events => ({current: events[0], next: events[1]})),
+            if (events[0].start > this.settingsService.currentTime) {
+              return {next: events[0]};
+            } else {
+              return {current: events[0], next: events[1]};
+            }
+          }),
+          /* emit runningEvents, and then calculate the time (based on the current time) until the next change and wait that long (but don't emit the timer event) */
+          mergeMap(runningEvents => concat(of(runningEvents), defer(() => {
+            const nextStartTime = runningEvents.next ? runningEvents.next.start.getTime() - currentTime.getTime() : Infinity;
+            const nextEndTime = runningEvents.current ? runningEvents.current.start.getTime() + runningEvents.current.mins * 60 * 1000 - currentTime.getTime() : Infinity;
+            const delayTime = Math.min(nextStartTime, nextEndTime);
+            return timer(delayTime).pipe(ignoreElements());
+          }))),
+          /* Repeat */
+          repeat(),
+        )),
     );
   }
 

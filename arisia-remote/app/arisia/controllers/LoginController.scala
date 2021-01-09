@@ -1,10 +1,10 @@
 package arisia.controllers
 
-import arisia.auth.{LoginService, LoginError}
+import arisia.auth.{LoginError, LoginService}
 import arisia.models.{LoginRequest, LoginUser, LoginId}
 import play.api.Configuration
 import play.api.http._
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, JsValue}
 import play.api.mvc._
 
 import scala.concurrent.{Future, ExecutionContext}
@@ -72,7 +72,7 @@ class LoginController (
 object LoginController {
   final val userKey = "user"
 
-  def loggedInUser()(implicit request: Request[AnyContent]): Option[LoginUser] = {
+  def loggedInUserBase[T]()(implicit request: Request[T]): Option[LoginUser] = {
     try {
       for {
         userJson <- request.session.get(userKey)
@@ -84,5 +84,11 @@ object LoginController {
       case ex: Exception => None
     }
   }
+
+  def loggedInUser()(implicit request: Request[AnyContent]): Option[LoginUser] =
+    loggedInUserBase[AnyContent]()
+
+  def loggedInUserJson()(implicit request: Request[JsValue]): Option[LoginUser] =
+    loggedInUserBase[JsValue]()
 
 }
