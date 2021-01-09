@@ -36,33 +36,36 @@ class ZoomController(
     }
   }
 
-  def enterItem(itemStr: String): EssentialAction = Action { implicit request =>
+  def enterItemBase(rawItemStr: String)(lookupUrl: (LoginUser, ProgramItemId) => Option[String]): EssentialAction = Action { implicit request =>
+    val itemStr =
+      if (rawItemStr.endsWith("-prep"))
+        rawItemStr.dropRight(5)
+      else
+        rawItemStr
+    val itemId = ProgramItemId(itemStr)
+
     val redirectOpt = for {
       // Only logged in users are allowed to join meetings:
       user <- LoginController.loggedInUser()
-      attendeeUrl <- scheduleService.getAttendeeUrlFor(user, ProgramItemId(itemStr))
+      attendeeUrl <- lookupUrl(user, itemId)
       // If we get here, they're allowed in:
     }
       yield Found(attendeeUrl)
 
     // TODO: what should we return if this fails? This is effectively a system error: it shouldn't be possible for them
     // to get into this state, but we should probably provide a better error.
-    redirectOpt.getOrElse(NotFound("""{"success":false, "message":"That isn't a currently-running panel"}"""))
+    redirectOpt.getOrElse(NotFound(
+      arisia.views.html.errorPage(
+        "Meeting Not Running",
+        "That isn't a meeting that is currently running and open. Please check the schedule. Sorry!"
+      )))
   }
 
-  def enterItemAsHost(itemStr: String): EssentialAction = Action { implicit request =>
-    val redirectOpt = for {
-      // Only logged in users are allowed to join meetings:
-      user <- LoginController.loggedInUser()
-      hostUrl <- scheduleService.getHostUrlFor(user, ProgramItemId(itemStr))
-      // If we get here, they're allowed in:
-    }
-      yield Found(hostUrl)
+  def enterItem(rawItemStr: String): EssentialAction =
+    enterItemBase(rawItemStr)(scheduleService.getAttendeeUrlFor)
 
-    // TODO: what should we return if this fails? This is effectively a system error: it shouldn't be possible for them
-    // to get into this state, but we should probably provide a better error.
-    redirectOpt.getOrElse(NotFound("""{"success":false, "message":"That isn't a currently-running panel"}"""))
-  }
+  def enterItemAsHost(rawItemStr: String): EssentialAction =
+    enterItemBase(rawItemStr)(scheduleService.getHostUrlFor)
 
   /* ********************
    *
