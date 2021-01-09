@@ -46,6 +46,7 @@ class DiscordServiceImpl(
 
   def loadMembers(): Future[List[DiscordMember]] = {
     if (botEnabled) {
+      logger.info("Loading Arisia server members from Discord")
       def loadRecursive(startingAt: String): Future[List[DiscordMember]] = {
         ws.url(s"https://discord.com/api/guilds/$arisiaGuildId/members")
           .addHttpHeaders("Authorization" -> s"Bot $botToken")
@@ -58,21 +59,32 @@ class DiscordServiceImpl(
           .flatMap { response =>
             // Note that the response is in ascending order by User ID; we reverse that so that we can keep
             // tacking more members onto the front, to preverse decent O(n) behavior as we loop:
-            val members = Json.parse(response.body).as[List[DiscordMember]].reverse
-            if (members.isEmpty) {
-              Future.successful(members)
-            } else {
-              // Here's where we recurse, to fetch the next block
-              // Note that members is in ascending order by user ID; that's the
-              // page indicator:
-              loadRecursive(members.head.user.id).map {
-                _ ++ members
+            Json.parse(response.body).asOpt[List[DiscordMember]] match {
+              case Some(membersAsc) => {
+                val members = membersAsc.reverse
+                if (members.isEmpty) {
+                  Future.successful(members)
+                } else {
+                  // Here's where we recurse, to fetch the next block
+                  // Note that members is in ascending order by user ID; that's the
+                  // page indicator:
+                  loadRecursive(members.head.user.id).map {
+                    _ ++ members
+                  }
+                }
+              }
+              case _ => {
+                logger.error(s"Got unexpected response from Discord getMember:\n${response.body}")
+                Future.successful(List.empty)
               }
             }
           }
       }
 
-      loadRecursive("0")
+      loadRecursive("0").map { members =>
+        memberCache.set(members)
+        members
+      }
     } else {
       Future.successful(List.empty)
     }
@@ -91,12 +103,25 @@ class DiscordServiceImpl(
     }
   }
 
+  def findMember(credentials: DiscordUserCredentials): Future[Option[DiscordMember]] = {
+    findMemberIn(credentials, memberCache.get()) match {
+      case Some(member) => {
+        // We already had them loaded, so we're set:
+        Future.successful(Some(member))
+      }
+      case _ => {
+        loadMembers().map { members =>
+          findMemberIn(credentials, members)
+        }
+      }
+    }
+  }
+
   def addArisian(who: LoginUser, creds: DiscordUserCredentials): Future[Either[String, DiscordMember]] = {
-    // TODO: cache the member list, and try the cached list first, to reduce unnecessary loads
     // TODO: check whether these credentials are already claimed, and return a message if so
     // TODO: confirm that the current user is properly registered
-    loadMembers().map { members =>
-      findMemberIn(creds, members) match {
+    findMember(creds).map {
+      _  match {
         case Some(member) => {
           Right(member)
         }
