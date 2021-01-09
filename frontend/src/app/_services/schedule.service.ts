@@ -565,7 +565,13 @@ export class ScheduleService {
           }
           sendNextFilteredEvent(filteredEvents);
         })),
-      map(events => ({current: events[0], next: events[1]})),
+      map(events => {
+        if (events[0].start >this.settingsService.currentTime) {
+          return {next: events[0]};
+        } else {
+          return {current: events[0], next: events[1]};
+        }
+      }),
     );
   }
 
