@@ -20,7 +20,14 @@
 }
 
 .art {
-    width: 15rem;
-    height: 15rem;
+    padding-left: 1rem;
+    padding-right: 3rem;
+    width: 100%;
+    height: 100%;
+    max-height: 33rem;
     object-fit: contain;
+}
+
+.art-row {
+    height: 100%;
 }
