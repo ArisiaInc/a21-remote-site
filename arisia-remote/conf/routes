@@ -53,6 +53,18 @@ GET     /api/settings                arisia.controllers.SettingsController.getSe
 POST    /api/settings                arisia.controllers.SettingsController.addSettings()
 DELETE  /api/settings/:key           arisia.controllers.SettingsController.dropSetting(key)
 
+###
+#  summary: make this person an Arisian
+#  parameters:
+#    - name: body
+#      schema:
+#        $ref: '#/definitions/arisia.discord.DiscordUserCredentials'
+#  responses:
+#    200:
+#      description: success
+###
+POST    /api/discord/addArisian      arisia.controllers.DiscordController.addArisian()
+
 # Admin UI, separate from the attendee-facing site
 GET     /admin                       arisia.controllers.AdminController.home()
 GET     /admin/                      arisia.controllers.AdminController.home()
