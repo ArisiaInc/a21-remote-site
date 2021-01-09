@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
 
-import { ScheduleService } from '@app/_services';
+import { ScheduleService, Room } from '@app/_services';
 
 @Component({
   selector: 'app-programming',
@@ -8,10 +9,12 @@ import { ScheduleService } from '@app/_services';
   styleUrls: ['./programming.component.scss']
 })
 export class ProgrammingComponent implements OnInit {
+  rooms$!: Observable<Room[]>;
 
-  constructor(public scheduleService: ScheduleService) { }
+  constructor(private scheduleService: ScheduleService) { }
 
   ngOnInit(): void {
+    this.rooms$ = this.scheduleService.getRooms();
   }
 
 }

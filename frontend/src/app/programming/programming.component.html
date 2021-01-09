@@ -1,8 +1,14 @@
 <app-breadcrumb></app-breadcrumb>
 <div class="row">
-  <div class="col-12 col-sm-6 col-md-4" *ngFor="let room of scheduleService.getRooms() | async">
-    <div class="row room">
-      <app-link routerLink="/programming/{{room.id}}">{{room.name}}</app-link>
+  <div class="col-12 col-sm-6 col-md-4" *ngFor="let room of rooms$ | async">
+    <div class="row room-box">
+      <div class="room">
+        <app-link routerLink="/programming/{{room.id}}">{{room.name}}</app-link>
+      </div>
+      <ng-container *ngIf="room.runningEvents$ | async as runningEvents">
+        <div class="event-title" *ngIf="runningEvents.current">Happening now: {{runningEvents.current.title}}</div>
+        <div class="event-title" *ngIf="runningEvents.next">Up next: {{runningEvents.next.title}}</div>
+      </ng-container>
     </div>
   </div>
 </div>

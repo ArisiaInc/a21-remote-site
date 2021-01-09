@@ -17,3 +17,14 @@
     height: 100%;
   }
 }
+
+.event-title {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.room-box {
+    width: 100%;
+    height: 100%;
+}
