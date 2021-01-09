@@ -4,6 +4,7 @@
   <div class="col-12 col-md-8 col-lg-6">
     <ng-container *ngIf="room$ | async as room; else elseBlock">
       <div class="title centered">Welcome to {{room.name | titlecase}}!</div>
+      <img [src]="room.art" class="art">
       <ng-container *ngIf="room.runningEvents$ | async as runningEvents">
         <ng-container *ngIf="runningEvents.current as currentEvent">
           <div class="description current-name">Happening now: {{currentEvent.title}}</div>
@@ -12,9 +13,11 @@
 
           <div class="description current-description">{{currentEvent.description}}</div>
 
-          <div class="description present-zoom-link">Join the panel in Zoom: (link)</div>
+          <div class="description present-zoom-link"><app-room-link id="currentEvent.id">Join the panel in Zoom</app-room-link></div>
 
+          <img class="discord-logo" src="/assets/images/Discord-Logo+Wordmark-Color.svg">
           <div class="description present-discord">Ask questions on Discord: {{room.name | titlecase}}</div>
+          <div class="description"><app-room-link-host id="currentEvent.id">Join as co-host</app-room-link-host></div>
         </ng-container>
       </ng-container>
     </ng-container>
