@@ -14,6 +14,10 @@ export class AccountService {
   readonly user$ = new BehaviorSubject<User | undefined>(this.user);
   readonly loggedIn$!: Observable<boolean>;
 
+  get loggedIn(): boolean {
+    return !!this.user;
+  }
+
   constructor( private http: HttpClient,) {
     this.http.get<User>(`${environment.backend}/me`, {withCredentials: true}).pipe(
       tap(user => {
@@ -21,7 +25,7 @@ export class AccountService {
         this.user$.next(this.user);
       }),
     );
-    this.loggedIn$ =this.user$.pipe(
+    this.loggedIn$ = this.user$.pipe(
       map(user => !!user),
     );
   }
