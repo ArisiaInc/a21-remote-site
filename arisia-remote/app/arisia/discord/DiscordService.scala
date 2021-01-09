@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicReference
 import arisia.general.LifecycleItem
 import arisia.models.LoginUser
 import arisia.util.Done
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Format, JsObject, JsArray, JsString, Json}
 import play.api.libs.ws.WSClient
 import play.api.libs.ws.ahc.AhcCurlRequestLogger
 import play.api.{Configuration, Logging, ConfigLoader}
@@ -35,6 +35,7 @@ class DiscordServiceImpl(
 
   def botConfig[T: ConfigLoader](suffix: String) = config.get[T](s"arisia.discord.bot.$suffix")
   lazy val botEnabled = botConfig[Boolean]("enabled")
+  lazy val baseUrl = botConfig[String]("baseUrl")
   lazy val botToken = botConfig[String]("token")
   lazy val arisiaGuildId = botConfig[String]("guildId")
   lazy val arisianRoleId = botConfig[String]("arisianRoleId")
@@ -45,10 +46,12 @@ class DiscordServiceImpl(
   val memberCache: AtomicReference[List[DiscordMember]] = new AtomicReference(List.empty)
 
   def loadMembers(): Future[List[DiscordMember]] = {
+    // TODO: we should maybe move these botEnabled checks out, and instead return a dummy service if it is *not*
+    // enabled
     if (botEnabled) {
       logger.info("Loading Arisia server members from Discord")
       def loadRecursive(startingAt: String): Future[List[DiscordMember]] = {
-        ws.url(s"https://discord.com/api/guilds/$arisiaGuildId/members")
+        ws.url(s"$baseUrl/guilds/$arisiaGuildId/members")
           .addHttpHeaders("Authorization" -> s"Bot $botToken")
           .addQueryStringParameters(
             "limit" -> pageSize,
@@ -117,15 +120,41 @@ class DiscordServiceImpl(
     }
   }
 
+  def setDiscordRoles(member: DiscordMember): Future[Done] = {
+    if (botEnabled) {
+      ws.url(s"$baseUrl/guilds/$arisiaGuildId/members/${member.user.id}/roles/$arisianRoleId")
+        .addHttpHeaders(
+          "Authorization" -> s"Bot $botToken"
+        )
+//        .withRequestFilter(AhcCurlRequestLogger())
+        .put(JsObject.empty)
+        .map { response =>
+          if (response.status == 204) {
+            // The expected case
+            Done
+          } else {
+            logger.error(
+              s"Discord failure when trying to make ${member.user.username}#${member.user.discriminator} an Arisian:\n${response.body}")
+            Done
+          }
+        }
+    } else {
+      Future.successful(Done)
+    }
+  }
+
   def addArisian(who: LoginUser, creds: DiscordUserCredentials): Future[Either[String, DiscordMember]] = {
     // TODO: check whether these credentials are already claimed, and return a message if so
-    // TODO: confirm that the current user is properly registered
-    findMember(creds).map {
+    // TODO: If it is claimed by *this* user, then update it is success -- should we resync?
+    findMember(creds).flatMap {
       _  match {
         case Some(member) => {
-          Right(member)
+          setDiscordRoles(member).map { _ =>
+            Right(member)
+          }
         }
-        case _ => Left("Please join the Arisia Discord server first, then come back and try again!")
+        case _ =>
+          Future.successful(Left("Please join the Arisia Discord server first, then come back and try again!"))
       }
     }
   }
