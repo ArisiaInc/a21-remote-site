@@ -1,6 +1,7 @@
 package arisia.auth
 
 import arisia.db.DBService
+import arisia.discord.DiscordMember
 
 import scala.concurrent.duration._
 import arisia.models.{LoginUser, LoginId, BadgeNumber, Permissions, LoginName}
@@ -25,6 +26,11 @@ trait LoginService {
    * Fetch any additional permissions that this person might have.
    */
   def getPermissions(id: LoginId): Future[Permissions]
+
+  /**
+   * Adds the given Discord credentials to the specified user.
+   */
+  def addDiscordInfo(who: LoginUser, discordMember: DiscordMember): Future[Int]
 }
 
 class LoginServiceImpl(
@@ -103,6 +109,20 @@ class LoginServiceImpl(
     ).map { _ =>
       Right(Done)
     }
+  }
+
+  def addDiscordInfo(who: LoginUser, discordMember: DiscordMember): Future[Int] = {
+    dbService.run(
+      sql"""
+            UPDATE user_info
+               SET discord_username = ${discordMember.user.username},
+                   discord_discriminator = ${discordMember.user.discriminator},
+                   discord_id = ${discordMember.user.id}
+             WHERE username = ${who.id.v}
+        """
+        .update
+        .run
+    )
   }
 
   def fetchPermissionsQuery(id: LoginId): ConnectionIO[Option[Permissions]] =

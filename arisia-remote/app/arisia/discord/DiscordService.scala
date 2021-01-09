@@ -2,6 +2,7 @@ package arisia.discord
 
 import java.util.concurrent.atomic.AtomicReference
 
+import arisia.auth.LoginService
 import arisia.general.LifecycleItem
 import arisia.models.LoginUser
 import arisia.util.Done
@@ -28,7 +29,8 @@ object DiscordUserCredentials {
 
 class DiscordServiceImpl(
   config: Configuration,
-  ws: WSClient
+  ws: WSClient,
+  loginService: LoginService
 )(
   implicit ec: ExecutionContext
 ) extends DiscordService with LifecycleItem with Logging {
@@ -149,9 +151,11 @@ class DiscordServiceImpl(
     findMember(creds).flatMap {
       _  match {
         case Some(member) => {
-          setDiscordRoles(member).map { _ =>
-            Right(member)
+          for {
+            _ <- setDiscordRoles(member)
+            _ <- loginService.addDiscordInfo(who, member)
           }
+            yield Right(member)
         }
         case _ =>
           Future.successful(Left("Please join the Arisia Discord server first, then come back and try again!"))
