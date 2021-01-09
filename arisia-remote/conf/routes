@@ -53,6 +53,11 @@ GET     /api/settings                arisia.controllers.SettingsController.getSe
 POST    /api/settings                arisia.controllers.SettingsController.addSettings()
 DELETE  /api/settings/:key           arisia.controllers.SettingsController.dropSetting(key)
 
+# Expects Discord creds:
+# { "username":"xxx", "discriminator":"1234" }
+# Returns 200 if all is good, 400 if the request isn't the right format, probably other things for data errors
+POST    /api/discord/addArisian      arisia.controllers.DiscordController.addArisian()
+
 # Admin UI, separate from the attendee-facing site
 GET     /admin                       arisia.controllers.AdminController.home()
 GET     /admin/                      arisia.controllers.AdminController.home()
