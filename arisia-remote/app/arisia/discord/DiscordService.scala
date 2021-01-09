@@ -145,6 +145,31 @@ class DiscordServiceImpl(
     }
   }
 
+  def setBadgeName(who: LoginUser, member: DiscordMember): Future[Done] = {
+    if (botEnabled) {
+      ws.url(s"$baseUrl/guilds/$arisiaGuildId/members/${member.user.id}")
+        .addHttpHeaders(
+          "Authorization" -> s"Bot $botToken",
+          "Content-Type" -> "application/json"
+        )
+        .patch(Json.obj(
+          "nick" -> who.name.v
+        ))
+        .map { response =>
+          if (response.status == 204) {
+            // The expected case
+            Done
+          } else {
+            logger.error(
+              s"Discord failure when trying to set ${member.user.username}#${member.user.discriminator} nick to ${who.name.v}:\n${response.body}")
+            Done
+          }
+        }
+    } else {
+      Future.successful(Done)
+    }
+  }
+
   def addArisian(who: LoginUser, creds: DiscordUserCredentials): Future[Either[String, DiscordMember]] = {
     // TODO: check whether these credentials are already claimed, and return a message if so
     // TODO: If it is claimed by *this* user, then update it is success -- should we resync?
@@ -153,6 +178,7 @@ class DiscordServiceImpl(
         case Some(member) => {
           for {
             _ <- setDiscordRoles(member)
+            _ <- setBadgeName(who, member)
             _ <- loginService.addDiscordInfo(who, member)
           }
             yield Right(member)
