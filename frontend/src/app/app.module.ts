@@ -50,7 +50,7 @@ import { UserComponent } from './user/user.component';
     SpecialComponent,
     SignupComponent,
     DropinComponent,
-    UserComponent
+    UserComponent,
   ],
   imports: [
     BrowserModule,

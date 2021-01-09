@@ -16,6 +16,9 @@ import { StarComponent } from './star/star.component';
 import { CarouselComponent } from './carousel/carousel.component';
 import { LoginGuardedLinkDirective } from './login-guarded-link.directive';
 import { DoorDragonComponent } from './door-dragon/door-dragon.component';
+import { RoomLinkHostComponent } from './room-link-host/room-link-host.component';
+import { RoomLinkComponent } from './room-link/room-link.component';
+import { RoomLinkOtherComponent } from './room-link-other/room-link-other.component';
 
 @NgModule({
   declarations: [
@@ -31,6 +34,9 @@ import { DoorDragonComponent } from './door-dragon/door-dragon.component';
     CarouselComponent,
     LoginGuardedLinkDirective,
     DoorDragonComponent,
+    RoomLinkHostComponent,
+    RoomLinkComponent,
+    RoomLinkOtherComponent,
   ],
   imports: [
     CommonModule,
@@ -51,6 +57,9 @@ import { DoorDragonComponent } from './door-dragon/door-dragon.component';
     CarouselComponent,
     LoginGuardedLinkDirective,
     DoorDragonComponent,
+    RoomLinkHostComponent,
+    RoomLinkComponent,
+    RoomLinkOtherComponent,
   ]
 })
 export class SharedModule { }
