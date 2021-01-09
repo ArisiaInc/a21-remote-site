@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { tap, map } from 'rxjs/operators';
+import { tap, map, shareReplay } from 'rxjs/operators';
 import { of, Observable, BehaviorSubject, ReplaySubject } from 'rxjs';
 
 import { environment } from '@environments/environment';
@@ -31,21 +31,27 @@ export class AccountService {
 
   // TODO: stop sending password in plain text
   login(id: string, password: string) {
-    return this.http.post<User>(`${environment.backend}/login`, {id, password}, {withCredentials: true}).pipe(
-      tap(user => {
+    const loginRequest = this.http.post<User>(`${environment.backend}/login`, {id, password}, {withCredentials: true}).pipe(
+      shareReplay(),
+    );
+    loginRequest.subscribe(
+      user => {
         this.user = user;
         this.user$.next(this.user);
-      }),
-    );
+      });
+    return loginRequest;
   }
 
   logout() {
-    return this.http.post(`${environment.backend}/logout`, {}, {withCredentials: true}).pipe(
-      tap(_ => {
+    const loginRequest = this.http.post(`${environment.backend}/logout`, {}, {withCredentials: true}).pipe(
+      shareReplay(),
+    );
+    loginRequest.subscribe(
+      user => {
         this.user = undefined;
         this.user$.next(this.user);
-      }),
-    );
+      });
+    return loginRequest;
   }
 
   getUser(badgeNumber: string) : Observable<User> {
