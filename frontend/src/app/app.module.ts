@@ -27,6 +27,8 @@ import { SpecialComponent } from './gaming/special/special.component';
 import { SignupComponent } from './gaming/signup/signup.component';
 import { DropinComponent } from './gaming/dropin/dropin.component';
 import { UserComponent } from './user/user.component';
+import { HelpComponent } from './help/help.component';
+import { FooterComponent } from './footer/footer.component';
 
 @NgModule({
   declarations: [
@@ -51,6 +53,8 @@ import { UserComponent } from './user/user.component';
     SignupComponent,
     DropinComponent,
     UserComponent,
+    HelpComponent,
+    FooterComponent,
   ],
   imports: [
     BrowserModule,
