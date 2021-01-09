@@ -37,14 +37,14 @@ class DiscordController(
             discordService.addArisian(user, creds).map {
               _ match {
                 case Left(msg) => BadRequest(s"""{"success":"false", "message":"$msg"}""")
-                case Right(member) => Ok(s"""{"success":"true", "message":"${member.user.id}"}""")
+                case Right(member) => Ok(s"""{"success":"true", "message":"You should now have access to the Arisia Discord -- welcome!"}""")
               }
             }
           }
 
         result.getOrElse(Future.successful(BadRequest(s"""{"success":"false", "message":"That isn't the right input!"}""")))
       }
-      case _ => Future.successful(Forbidden("You need to be logged in to do this"))
+      case _ => Future.successful(Forbidden("You need to be logged in to do this!"))
     }
   }
 }
