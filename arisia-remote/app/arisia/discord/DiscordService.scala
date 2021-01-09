@@ -1,5 +1,7 @@
 package arisia.discord
 
+import java.util.concurrent.atomic.AtomicReference
+
 import arisia.general.LifecycleItem
 import arisia.models.LoginUser
 import arisia.util.Done
@@ -36,20 +38,41 @@ class DiscordServiceImpl(
   lazy val botToken = botConfig[String]("token")
   lazy val arisiaGuildId = botConfig[String]("guildId")
   lazy val arisianRoleId = botConfig[String]("arisianRoleId")
+  lazy val pageSize = botConfig[Int]("page.size").toString
 
   val lifecycleName = "DiscordService"
 
+  val memberCache: AtomicReference[List[DiscordMember]] = new AtomicReference(List.empty)
+
   def loadMembers(): Future[List[DiscordMember]] = {
     if (botEnabled) {
-      ws.url(s"https://discord.com/api/guilds/$arisiaGuildId/members")
-        .addHttpHeaders("Authorization" -> s"Bot $botToken")
-        // TODO: loop and paginate!!!
-        .addQueryStringParameters("limit" -> "100")
-//        .withRequestFilter(AhcCurlRequestLogger())
-        .get()
-        .map { response =>
-          Json.parse(response.body).as[List[DiscordMember]]
-        }
+      def loadRecursive(startingAt: String): Future[List[DiscordMember]] = {
+        ws.url(s"https://discord.com/api/guilds/$arisiaGuildId/members")
+          .addHttpHeaders("Authorization" -> s"Bot $botToken")
+          .addQueryStringParameters(
+            "limit" -> pageSize,
+            "after" -> startingAt
+          )
+          //        .withRequestFilter(AhcCurlRequestLogger())
+          .get()
+          .flatMap { response =>
+            // Note that the response is in ascending order by User ID; we reverse that so that we can keep
+            // tacking more members onto the front, to preverse decent O(n) behavior as we loop:
+            val members = Json.parse(response.body).as[List[DiscordMember]].reverse
+            if (members.isEmpty) {
+              Future.successful(members)
+            } else {
+              // Here's where we recurse, to fetch the next block
+              // Note that members is in ascending order by user ID; that's the
+              // page indicator:
+              loadRecursive(members.head.user.id).map {
+                _ ++ members
+              }
+            }
+          }
+      }
+
+      loadRecursive("0")
     } else {
       Future.successful(List.empty)
     }
