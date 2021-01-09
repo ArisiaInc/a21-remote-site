@@ -8,6 +8,7 @@ DISCORD_GUILD_ID = os.getenv('DISCORD_GUILD_ID')
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 
 url = f"https://discord.com/api/v8/applications/{DISCORD_CLIENT_ID}/guilds/{DISCORD_GUILD_ID}/commands"
+#url = f"https://discord.com/api/v8/applications/{DISCORD_CLIENT_ID}/commands"
 
 json = {
     "name": "link",
@@ -33,9 +34,38 @@ json = {
     ]
 }
 
+json2 = {
+    "name": "sync",
+    "description": "Synchronize the registration system and the Virtual Arisia backend.",
+    "options": [{
+        "name": "other-user",
+        "description": "sync someone who is not you (requires helper role)",
+        "type": 6
+    }]
+}
+
+json3 = {
+    "name": "saferspace",
+    "description": "join a saferspace",
+    "options": [{
+        "name": "channel",
+        "description": "the name of the channel you want to join",
+        "type": 3,
+        "required": True
+    }, {
+        "name": "other-user",
+        "description": "add someone to a safer space who is not you",
+        "type": 6
+    }]
+}
+
+commands = [json, json2, json3]
+
 # For authorization, you can use either your bot token 
 headers = {
     "Authorization": f"Bot {DISCORD_BOT_TOKEN}"
 }
 
-r = requests.post(url, headers=headers, json=json)
+for command in commands:
+    r = requests.post(url, headers=headers, json=command)
+    print(r)

@@ -5,7 +5,8 @@ ts=`date +%s`
 # uncomment to build or rebuild python packages
 # you need docker for this
 #rm -rf ./package/
-#docker run --rm lambci/lambda:build-python3.8 -v "$PWD":/var/task pip3 install --target ./package/ discord.py pynacl
+#mkdir ./package
+#docker run --rm -v "$PWD":/var/task lambci/lambda:build-python3.8 pip3 install --target ./package/ discord.py pynacl requests
 cd package
 zip -r ../deployment-$ts.zip .
 cd ..
