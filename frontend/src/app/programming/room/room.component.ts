@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute} from '@angular/router';
-import { ProgramItem, ProgramPerson, Room } from '@app/_models';
-import { ScheduleService } from '@app/_services';
-
+import { ActivatedRoute } from '@angular/router';
+import { Observable } from 'rxjs';
 import { pluck, flatMap } from 'rxjs/operators'
+
+import { ScheduleService, Room } from '@app/_services';
 
 @Component({
   selector: 'app-room',
@@ -11,19 +11,15 @@ import { pluck, flatMap } from 'rxjs/operators'
   styleUrls: ['./room.component.scss']
 })
 export class RoomComponent implements OnInit {
-  room?: Room;
-  loading = true;
+  room$!: Observable<Room | undefined>;
 
   constructor(private route: ActivatedRoute, private scheduleService: ScheduleService) {
   }
 
   ngOnInit(): void {
-    this.route.params.pipe(
+    this.room$ = this.route.params.pipe(
       pluck('id'),
-      flatMap(id => this.scheduleService.get_room(id)),
-    ).subscribe(room => {
-      this.loading = false;
-      this.room = room;
-    });
+      flatMap(id => this.scheduleService.getRoom(id)),
+    );
   }
 }

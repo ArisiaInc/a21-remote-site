@@ -1,20 +1,16 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import {ProgramItem, ProgramPerson} from '@app/_models';
+import { ScheduleEvent, SchedulePerson } from '@app/_services';
 
 @Pipe({
   name: 'programItemPanelists'
 })
 export class ProgramItemPanelistsPipe implements PipeTransform {
 
-  transform(event: ProgramItem): string {
-    return event.people.map((obj) => {
-      const person = obj as ProgramPerson;
-      if (typeof(person.name) === 'string') {
-        return person.name;
-      } else {
-        return person.name.join(' ');
-      }
-    }).join(', ');
+  transform(event: ScheduleEvent): string {
+    return event.people.map(
+      (personData: {person: SchedulePerson, isModerator: boolean}) =>
+        personData.person.name + (personData.isModerator ? ' (M)' : '')
+    ).join(', ');
   }
 
 }
