@@ -27,16 +27,24 @@ class DiscordController(
   }
 
   def addArisian(): EssentialAction = Action.async(controllerComponents.parsers.tolerantJson) { implicit request =>
-    val result = for {
-      json <- Some(request.body)
-      creds <- json.asOpt[DiscordUserCredentials]
-      // TODO: actually do the workflow. May need to make this level more sophisticated, for error handling
-    }
-      yield creds
+    LoginController.loggedInUserJson() match {
+      case Some(user) => {
+        val result = for {
+          json <- Some(request.body)
+          creds <- json.asOpt[DiscordUserCredentials]
+        }
+          yield {
+            discordService.addArisian(user, creds).map {
+              _ match {
+                case Left(msg) => BadRequest(s"""{"success":"false", "message":"$msg"}""")
+                case Right(member) => Ok(s"""{"success":"true", "message":"${member.user.id}"}""")
+              }
+            }
+          }
 
-    result.map { _ =>
-      val msg = "Member added"
-      Future.successful(Ok(s"""{"success":"true", "message":"$msg"}"""))
-    }.getOrElse(Future.successful(BadRequest(s"""{"success":"false", "message":"That isn't the right input!"}""")))
+        result.getOrElse(Future.successful(BadRequest(s"""{"success":"false", "message":"That isn't the right input!"}""")))
+      }
+      case _ => Future.successful(Forbidden("You need to be logged in to do this"))
+    }
   }
 }
