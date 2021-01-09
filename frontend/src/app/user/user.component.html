@@ -1,3 +1,12 @@
 <div class="user" *ngIf="(user$ | async) as user">
     <h1>User Page for {{user.name}}</h1>
+
+    <hr>
+    <p>Only you can see things below this line.</p>
+    <section id="discord">
+        <h3>Arisia Discord</h3>
+        <p>Type in your discord account name and the 4 numbers after it (including the pound sign). Entering your Discord information connects your Discord account to Arisia and allows you to enter the <a href="how do i get this link safely">Arisia Discord server</a>. </p>
+        <!-- TODO screenshot here -->
+        <input type="text" placeholder="this is not hooked up yet" />
+    </section>
 </div>
