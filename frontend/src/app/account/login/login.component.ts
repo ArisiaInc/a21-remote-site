@@ -2,6 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { AccountService } from '@app/_services';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { tap } from 'rxjs/operators'
+
+import { DoorDragonComponent } from '@app/_components';
 
 @Component({
   selector: 'app-login',
@@ -19,7 +23,8 @@ export class LoginComponent implements OnInit {
     private accountService: AccountService,
     private router: Router,
     private route: ActivatedRoute,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private modalService: NgbModal,
   ) { }
 
   ngOnInit(): void {
@@ -51,4 +56,16 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  onForgot() {
+    const modalRef = this.modalService.open(DoorDragonComponent, {size: 'lg'});
+    const doorDragon = modalRef.componentInstance as DoorDragonComponent;
+    doorDragon.style = 'reset';
+    modalRef.closed.pipe (
+      tap(result => {
+        if (result == "success") {
+          window.open('http://reg.arisia.org/kiosk/web_reg/', '_blank');
+        }
+      }),
+    ).subscribe();
+  }
 }

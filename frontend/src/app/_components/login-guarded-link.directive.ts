@@ -1,6 +1,7 @@
 import { Directive, Input, HostListener } from '@angular/core';
 import { Router, UrlTree } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { tap } from 'rxjs/operators';
 
 import { AccountService } from '@app/_services';
 import { DoorDragonComponent } from './door-dragon/door-dragon.component';
@@ -43,7 +44,13 @@ export class LoginGuardedLinkDirective {
       const modalRef = this.modalService.open(DoorDragonComponent, {size: 'lg'});
       const doorDragon = modalRef.componentInstance as DoorDragonComponent;
       doorDragon.style = this.style;
-      doorDragon.url = this.urlTree.toString();
+      modalRef.closed.pipe (
+        tap(result => {
+          if (result == "success") {
+            this.router.navigate(['/account/login'], {queryParams: {returnUrl: this.urlTree.toString()}});
+          }
+        }),
+      ).subscribe();
     }
     return true;
   }

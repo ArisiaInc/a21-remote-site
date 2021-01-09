@@ -21,13 +21,13 @@
       register, <a href="https://reg.arisia.org/kiosk/web_reg/"
       target="_blank">you can do so here</a>.
     </div>
-    <div *ngSwitch="'discord'">
+    <div *ngSwitchCase="'discord'">
       To access the Arisia Discord server, you need to verify your
       Arisia membership with Discord. Go to your profile page and
       enter your Discord name (including the # and four numbers). If
       you need help, the Info Desk is available on Zoom here!
     </div>
-    <div *ngSwitch="'reset'">
+    <div *ngSwitchCase="'reset'">
       The username and password for the arisia virtual site is the
       same username and password you used for registration. This
       window will show you the login screen for reg.arisia.org -
@@ -43,20 +43,20 @@
       If you already have a badge and need help, the Info Desk is
       available on Zoom here!
     </div>
-    <div class="comments" *ngSwitch="'discord'">
+    <div class="comments" *ngSwitchCase="'discord'">
       Don’t have a Discord account? Head over to Discord using this
       link, and click the “create new account” option. Since you are
       coming from the Arisia site, membership verification will happen
       automatically.
     </div>
-    <div class="comments" *ngSwitch="'reset'">
+    <div class="comments" *ngSwitchCase="'reset'">
       If you need help, please contact Registration here.
     </div>
     <img src="assets/images/door-dragon.png" class="dragon">
   </div>
 </div>
 <div class="modal-footer justify-content-between">
-  <button type="button" class="btn btn-outline-dark" (click)="activate()">
+  <button type="button" class="btn btn-outline-dark" (click)="activeModal.close('success')">
     {{linkText}}
   </button>
   <button type="button" class="btn btn-outline-dark" aria-label="Close" (click)="activeModal.dismiss('Close click')">

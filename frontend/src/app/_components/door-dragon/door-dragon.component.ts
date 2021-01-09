@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { UrlTree, Router } from '@angular/router';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
@@ -9,11 +8,9 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 })
 export class DoorDragonComponent {
   @Input() style?: string;
-  @Input() url!: string;
   linkText!: string;
 
-  constructor(public activeModal: NgbActiveModal,
-              private router: Router) { }
+  constructor(public activeModal: NgbActiveModal) { }
 
   ngOnInit() {
     switch (this.style) {
@@ -31,10 +28,5 @@ export class DoorDragonComponent {
         this.linkText = '';
         break;
     }
-  }
-
-  activate() {
-    this.router.navigate(['/account/login'], {queryParams: {returnUrl: this.url}});
-    this.activeModal.dismiss('Success')
   }
 }
