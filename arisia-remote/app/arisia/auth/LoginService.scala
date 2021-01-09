@@ -4,7 +4,8 @@ import arisia.db.DBService
 
 import scala.concurrent.duration._
 import arisia.models.{LoginUser, LoginId, BadgeNumber, Permissions, LoginName}
-import cats.data.{OptionT, EitherT}
+import arisia.util.Done
+import cats.data.{EitherT, OptionT}
 import cats.implicits._
 import doobie.free.connection.ConnectionIO
 import play.api.libs.ws.WSClient
@@ -80,11 +81,28 @@ class LoginServiceImpl(
         else
           EitherT.leftT[Future, LoginUser](LoginError.NoCoC)
       initialUser = LoginUser(id, badgeName, details.badgeNumber, false, details.membershipType)
+      _ <- EitherT(recordUserInfo(initialUser))
       withPermissions <- EitherT(checkPermissions(initialUser))
     }
       yield withPermissions
 
     result.value
+  }
+
+  def recordUserInfo(user: LoginUser): Future[Either[LoginError, Done]] = {
+    dbService.run(
+      sql"""
+            INSERT INTO user_info
+            (username, badge_number, membership_type)
+            VALUES
+            (${user.id.v}, ${user.badgeNumber.v}, ${user.membershipType.value})
+            ON CONFLICT DO NOTHING
+           """
+        .update
+        .run
+    ).map { _ =>
+      Right(Done)
+    }
   }
 
   def fetchPermissionsQuery(id: LoginId): ConnectionIO[Option[Permissions]] =

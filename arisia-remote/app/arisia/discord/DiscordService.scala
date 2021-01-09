@@ -75,7 +75,6 @@ class DiscordServiceImpl(
     loadMembers().map { members =>
       findMemberIn(creds, members) match {
         case Some(member) => {
-          // TODO:
           Right(member)
         }
         case _ => Left("Please join the Arisia Discord server first, then come back and try again!")
