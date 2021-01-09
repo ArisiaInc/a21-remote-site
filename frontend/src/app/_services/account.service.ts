@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { tap, map } from 'rxjs/operators';
-import { of, Observable, BehaviorSubject } from 'rxjs';
+import { of, Observable, BehaviorSubject, ReplaySubject } from 'rxjs';
 
 import { environment } from '@environments/environment';
 import { User } from '@app/_models';
@@ -11,7 +11,7 @@ import { User } from '@app/_models';
 })
 export class AccountService {
   user?: User = undefined;
-  readonly user$ = new BehaviorSubject<User | undefined>(this.user);
+  readonly user$ = new ReplaySubject<User | undefined>(1);
   readonly loggedIn$!: Observable<boolean>;
 
   get loggedIn(): boolean {
@@ -19,12 +19,11 @@ export class AccountService {
   }
 
   constructor( private http: HttpClient,) {
-    this.http.get<User>(`${environment.backend}/me`, {withCredentials: true}).pipe(
-      tap(user => {
+    this.http.get<User>(`${environment.backend}/me`, {withCredentials: true}).subscribe(
+      user => {
         this.user = user;
         this.user$.next(this.user);
-      }),
-    );
+      });
     this.loggedIn$ = this.user$.pipe(
       map(user => !!user),
     );
