@@ -1,5 +1,6 @@
 import { Component, OnChanges, Input } from '@angular/core';
 import { Creator, PreferredLink } from '@app/_models';
+import { Image as CarouselImage } from '@app/_components/carousel/carousel.component';
 
 @Component({
   selector: 'app-creator-page',
@@ -8,12 +9,14 @@ import { Creator, PreferredLink } from '@app/_models';
 })
 export class CreatorPageComponent implements OnChanges {
   @Input() creator!: Creator;
+  carouselImages: CarouselImage[] = [];
   linksToDisplay: {[_: string]: string | undefined} = {};
 
   constructor() { }
 
   ngOnChanges(): void {
     // TODO check for undefined creator & handle. 500 error?
+    this.carouselImages = this.creator.images.map(image => ({src: image.url, caption: image.title}));
 
     // There's gotta be a better way to do this
     // this is a messy messy sad typecast nightmare
