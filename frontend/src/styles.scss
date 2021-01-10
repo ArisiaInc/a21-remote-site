@@ -3,10 +3,21 @@
 /* Importing Bootstrap SCSS file. */
 @import '~bootstrap/scss/bootstrap';
 
+html {
+    background: #FFFAEA;
+    height: 100%;
+}
+
 body {
     background: #FFFAEA;
+    height: 100%;
 }
 
 ngb-carousel>div, ngb-carousel>div>div {
+    height: 100%;
+}
+
+.app-root {
+    width:100%;
     height: 100%;
 }

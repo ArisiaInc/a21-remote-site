@@ -1,6 +1,8 @@
-<div class="row">
+<div class="container">
+  <div class="row">
     <div class="col-12">
         <h1>Welcome to the Dealer's Room</h1>
     </div>
+  </div>
+  <app-creator-list [creators]="dealers$ | async"></app-creator-list>
 </div>
-<app-creator-list [creators]="dealers$ | async"></app-creator-list>
