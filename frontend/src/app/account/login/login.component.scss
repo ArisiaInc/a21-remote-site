@@ -1,3 +1,7 @@
+@import "../../../../node_modules/bootstrap/scss/functions";
+@import "../../../../node_modules/bootstrap/scss/variables";
+@import "../../../../node_modules/bootstrap/scss/mixins";
+
 .login {
     font-size: 2rem;
     background: white;
@@ -58,4 +62,16 @@
     left: 0;
     position: absolute;
     width: 100%;
+}
+
+@include media-breakpoint-down(md) {
+    .art {
+        display: none;
+    }
+    .title {
+        padding-left: .75rem;
+    }
+    .content, .footer {
+        padding-left: 4.75rem;
+    }
 }
