@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Creator } from '@app/_models';
-import { CreatorService } from '@app/_services';
+import { ArtistService } from '@app/_services';
 
 @Component({
   selector: 'app-artshow',
@@ -11,10 +11,11 @@ import { CreatorService } from '@app/_services';
 export class ArtshowComponent implements OnInit {
   artists$!: Observable<Creator[]>;
 
-  constructor(private creatorService: CreatorService) { }
+  constructor(public artistService: ArtistService) {}
 
   ngOnInit(): void {
-    this.artists$ = this.creatorService.get_artists();
+
+    this.artists$ = this.artistService.search('');
   }
 
 }

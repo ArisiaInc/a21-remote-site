@@ -1,45 +1,68 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '@environments/environment';
-import { Observable, of, pipe, OperatorFunction } from 'rxjs';
+import { Observable, of, pipe, ReplaySubject } from 'rxjs';
 import { Creator } from '@app/_models';
-import { flatMap, filter, toArray } from 'rxjs/operators';
+import { shareReplay, map } from 'rxjs/operators';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class CreatorService {
+import { searchPrefixCaseInsensitive, Initial, createInitials } from '@app/_helpers/utils';
 
-  constructor( private http: HttpClient) { }
+export abstract class CreatorService {
 
-  get_dealer_data(local: boolean) {
-    if (local) {
-      return this.http.get<Creator[]>(`assets/data/dealers_1231_1.json`);
-    }
-    return this.http.get<Creator[]>(`${environment.backend}/dealers`);
+  private creators: Creator[] = [];
+  creators$ = new ReplaySubject<Creator[]>(1);
+
+  private creatorMap: {[id: string]: Creator} = {};
+  private creatorMap$ = new ReplaySubject<{[id: string]: Creator}>(1);
+
+  initials$: Observable<Initial[]>;
+
+  constructor(private http: HttpClient) {
+    this.initials$ = this.creators$.pipe(
+      createInitials(),
+      shareReplay(1),
+    );
+
+    this.fetchData(true);
   }
 
-  make_id_filter(ids?: string[]) : OperatorFunction<Creator[], Creator[]> {
-    if (ids) {
-      return pipe(
-        flatMap(x => of(...x)),
-        filter((c: Creator) => ids.includes(c.id)),
-        toArray()
-      )
-    }
-    return pipe()
+  abstract dataUrl(local: boolean): string;
+
+  protected gohSearch(): Observable<Creator[]> {
+    return of([]);
   }
 
-  get_artists(ids?: string[]) : Observable<Creator[]>{
-    return this.http.get<Creator[]>(`${environment.backend}/artists`).pipe(
-      this.make_id_filter(ids)
+  fetchData(local: boolean) {
+    const url = this.dataUrl(local);
+    this.http.get<Creator[]>(url).subscribe(response => this.handleResponse(response));
+  }
+
+  handleResponse(response: Creator[]) {
+    this.creators = response;
+    this.creatorMap = {};
+    this.creators.forEach(creator => this.creatorMap[creator.id] = creator);
+    this.creators$.next(this.creators);
+    this.creatorMap$.next(this.creatorMap);
+  }
+
+  getCreatorsById(ids: string[]) : Observable<Creator[]> {
+    return this.creatorMap$.pipe(
+      map(creatorMap => ids.map(id => creatorMap[id]).filter(creator => creator))
     );
   }
 
-  get_dealers(ids?: string[]) : Observable<Creator[]>{
-    // change the below value to false to get from the server
-    return this.get_dealer_data(true).pipe(
-      this.make_id_filter(ids)
+  getCreator(id: string) : Observable<Creator | undefined> {
+    return this.creatorMap$.pipe(
+      map(creatorMap => creatorMap[id]),
     );
+  }
+
+  search(search: string) : Observable<Creator[]> {
+    if (search === 'goh') {
+      return this.gohSearch();
+    } else {
+      return this.creators$.pipe(
+        searchPrefixCaseInsensitive(search),
+      );
+    }
   }
 }

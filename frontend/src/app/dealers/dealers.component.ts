@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Creator } from '@app/_models';
 import { Observable } from 'rxjs';
-import { CreatorService } from '@app/_services';
+
+import { Creator } from '@app/_models';
+import { DealerService } from '@app/_services';
 
 @Component({
   selector: 'app-dealers',
@@ -11,10 +12,10 @@ import { CreatorService } from '@app/_services';
 export class DealersComponent implements OnInit {
   dealers$!: Observable<Creator[]>;
 
-  constructor(private creatorService: CreatorService) { }
+  constructor(public dealerService: DealerService) {}
 
   ngOnInit(): void {
-    this.dealers$ = this.creatorService.get_dealers();
-  }
 
+    this.dealers$ = this.dealerService.search('');
+  }
 }
