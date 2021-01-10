@@ -23,6 +23,10 @@ export class AccountService {
       user => {
         this.user = user;
         this.user$.next(this.user);
+      },
+      err => {
+        this.user = undefined;
+        this.user$.next(this.user);
       });
     this.loggedIn$ = this.user$.pipe(
       map(user => !!user),
