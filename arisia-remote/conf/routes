@@ -54,6 +54,30 @@ POST    /api/settings                arisia.controllers.SettingsController.addSe
 DELETE  /api/settings/:key           arisia.controllers.SettingsController.dropSetting(key)
 
 ###
+#  summary: fetch the metadata for the Art Show
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/metadata/artshow        arisia.controllers.FileController.getArtshowMetadata()
+
+###
+#  summary: fetch the metadata for the Dealers
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/metadata/dealers        arisia.controllers.FileController.getDealersMetadata()
+
+###
 #  summary: make this person an Arisian
 #  parameters:
 #    - name: body

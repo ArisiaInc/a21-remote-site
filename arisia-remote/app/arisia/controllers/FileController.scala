@@ -58,4 +58,16 @@ class FileController(
   def uploadArtshowMetadata(): EssentialAction = uploadBase(FileType.ArtshowMetadata)
   def uploadDealersMetadata(): EssentialAction = uploadBase(FileType.DealersMetadata)
 
+  def getMetadataBase(tpe: FileType): EssentialAction = Action.async { implicit request =>
+    fileService.getFile(tpe).map {
+      _ match {
+        case Some(metadata) => Ok(metadata)
+        case _ => NotFound("")
+      }
+    }
+  }
+
+  def getArtshowMetadata(): EssentialAction = getMetadataBase(FileType.ArtshowMetadata)
+  def getDealersMetadata(): EssentialAction = getMetadataBase(FileType.DealersMetadata)
+
 }
