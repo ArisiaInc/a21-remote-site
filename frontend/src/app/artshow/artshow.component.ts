@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
+import { pluck, map, switchMap } from 'rxjs/operators';
+
 import { Creator } from '@app/_models';
 import { ArtistService } from '@app/_services';
 
@@ -10,12 +13,21 @@ import { ArtistService } from '@app/_services';
 })
 export class ArtshowComponent implements OnInit {
   artists$!: Observable<Creator[]>;
+  search$!: Observable<string>;
 
-  constructor(public artistService: ArtistService) {}
+  constructor(
+    private route: ActivatedRoute,
+    public artistService: ArtistService) {}
 
   ngOnInit(): void {
+    this.search$ = this.route.params.pipe(
+      pluck('search'),
+      map(search => (search || '').toLowerCase())
+    );
 
-    this.artists$ = this.artistService.search('');
+    this.artists$ = this.search$.pipe(
+      switchMap(search => this.artistService.search(search)),
+    );
   }
 
 }
