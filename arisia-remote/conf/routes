@@ -115,6 +115,7 @@ DELETE  /admin/meeting/:meetingId    arisia.controllers.AdminController.endMeeti
 
 GET     /admin/manageMetadata        arisia.controllers.FileController.manageMetadata()
 POST    /admin/uploadArtshowMetadata arisia.controllers.FileController.uploadArtshowMetadata()
+POST    /admin/uploadDealersMetadata arisia.controllers.FileController.uploadDealersMetadata()
 
 # Note the non-standard path, which is configured in application.conf, so that frontend
 # can own /assets
