@@ -3,6 +3,7 @@ package arisia.controllers
 import akka.stream.scaladsl.Sink
 import akka.util.ByteString
 import arisia.auth.LoginService
+import arisia.general.{FileService, FileType}
 
 import scala.concurrent.ExecutionContext
 import play.api.i18n.I18nSupport
@@ -16,7 +17,8 @@ import play.core.parsers.Multipart.{FilePartHandler, FileInfo}
 
 class FileController(
   val controllerComponents: ControllerComponents,
-  val loginService: LoginService
+  val loginService: LoginService,
+  fileService: FileService
 )(
   implicit val ec: ExecutionContext
 ) extends BaseController
@@ -39,7 +41,7 @@ class FileController(
   def multipartFormDataAsBytes: BodyParser[MultipartFormData[ByteString]] =
     controllerComponents.parsers.multipartFormData(byteStringFilePartHandler)
 
-  def uploadArtshowMetadata(): EssentialAction = adminsOnly(multipartFormDataAsBytes) { adminInfo =>
+  def uploadArtshowMetadata(): EssentialAction = adminsOnlyAsync(multipartFormDataAsBytes) { adminInfo =>
     val request = adminInfo.request
     // Rather than farting around with the terribly sophisticated and terribly hard-to-use multipart machinery
     // built into Play, we're doing this as dead-simply as we can:
@@ -48,7 +50,8 @@ class FileController(
       current ++ next.ref
     }
     val body: String = fullByteString.utf8String
-    println(s"The body is:\n$body")
-    Redirect(routes.AdminController.home())
+    fileService.setFile(FileType.ArtshowMetadata, body).map { _ =>
+      Redirect(routes.AdminController.home())
+    }
   }
 }
