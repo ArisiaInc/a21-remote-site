@@ -42,7 +42,11 @@ class FileController(
   def uploadArtshowMetadata(): EssentialAction = Action(multipartFormDataAsBytes) { implicit request =>
     // Rather than farting around with the terribly sophisticated and terribly hard-to-use multipart machinery
     // built into Play, we're doing this as dead-simply as we can:
-    val body: String = request.body.files.head.ref.utf8String
+    val fileParts: Seq[FilePart[ByteString]] = request.body.files
+    val fullByteString: ByteString = fileParts.foldLeft(ByteString.empty) { (current, next) =>
+      current ++ next.ref
+    }
+    val body: String = fullByteString.utf8String
     println(s"The body is:\n$body")
     Redirect(routes.AdminController.home())
   }
