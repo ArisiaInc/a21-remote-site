@@ -14,7 +14,7 @@ export class LinkComponent implements OnInit {
   @HostBinding('class.circle') @Input() circle = false;
   @HostBinding('style') style = '';
 
-  @HostBinding('class') class = 'm-2';
+  @HostBinding('class') class = 'p-2';
 
   nudgeStyle = '';
 
