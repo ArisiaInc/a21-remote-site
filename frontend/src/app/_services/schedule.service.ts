@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, ReplaySubject, Observable, of, zip, OperatorFunction, timer, pipe, defer, concat } from 'rxjs';
-import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck, every, switchMap, repeat, ignoreElements } from 'rxjs/operators';
+import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck, every, switchMap, repeat, ignoreElements, shareReplay } from 'rxjs/operators';
 import { HttpClient, HttpResponse, HttpErrorResponse } from '@angular/common/http';
 
+import { Initial, createInitials, searchPrefixCaseInsensitive } from '@app/_helpers/utils';
 import { ProgramItem, ProgramPerson, ProgramFilter, DateRange } from '@app/_models';
 import { SettingsService } from './settings.service';
 import { StarsService } from './stars.service';
@@ -231,13 +232,6 @@ interface ProgramData {
   people: ProgramPerson[]
 }
 
-
-export interface Initial {
-  lower: string;
-  upper: string;
-  active: boolean;
-}
-
 export interface GamingMeta {
   id: string;
   loc: string[];
@@ -307,8 +301,7 @@ export class ScheduleService {
   private peopleMap: {[id: string]: SchedulePerson} = {};
   peopleMap$ = new ReplaySubject<{[id: string]: SchedulePerson}>(1);
 
-  private peopleInitials: {[lower: string]: Initial} = {};
-  peopleInitials$ = new ReplaySubject<{[lower: string]: Initial}>(1);
+  peopleInitials$: Observable<Initial[]>;
 
   private tracks: string[] = [];
   tracks$ = new ReplaySubject<string[]>(1);
@@ -333,6 +326,11 @@ export class ScheduleService {
     this.schedule$ = this.scheduleWithoutRelabeling$.pipe(
       relabelStructuredEventsAsNeeded(),
       restarStructuredEventsAsNeeded(),
+    );
+
+    this.peopleInitials$ = this.people$.pipe(
+      createInitials(),
+      shareReplay(1),
     );
   }
 
@@ -366,14 +364,7 @@ export class ScheduleService {
     const program = response.body;
 
     this.peopleMap = {};
-    this.peopleInitials = {};
     this.eventsMap = {};
-
-    for(let letter = 1; letter <= 26; letter++) {
-      const lower = String.fromCharCode(letter + 96);
-      const upper = String.fromCharCode(letter + 64);
-      this.peopleInitials[lower] = {lower, upper, active: false};
-    }
 
     this.events = program.program.map(item => new ScheduleEvent(item, this.starsService));
     this.events.forEach(event => this.eventsMap[event.id] = event);
@@ -383,13 +374,6 @@ export class ScheduleService {
     this.people.sort(SchedulePerson.compare);
     this.people.forEach(person => {
       this.peopleMap[person.id] = person;
-      const lower = person.name[0].toLowerCase();
-      if (this.peopleInitials[lower]) {
-        this.peopleInitials[lower].active = true;
-      } else {
-        const upper = person.name[0].toUpperCase();
-        this.peopleInitials[lower] = {lower, upper, active: true};
-      }
     });
 
     const tracks = new Set<string>();
@@ -423,7 +407,6 @@ export class ScheduleService {
     this.eventsMap$.next(this.eventsMap);
     this.people$.next(this.people);
     this.peopleMap$.next(this.peopleMap);
-    this.peopleInitials$.next(this.peopleInitials);
     this.tracks$.next(this.tracks);
     this.types$.next(this.types);
     this.scheduleWithoutRelabeling$.next(this.schedule);
@@ -531,9 +514,8 @@ export class ScheduleService {
           sort(SchedulePerson.compare)),
       );
     } else {
-      const regexp = new RegExp('^'+search, 'i');
       return this.people$.pipe(
-        map(people => people.filter(person => person.name.match(regexp))),
+        searchPrefixCaseInsensitive(search),
       );
     }
   }

@@ -1,7 +1,7 @@
 import { Component, OnChanges, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { Initial } from '@app/_services';
+import { Initial } from '@app/_helpers';
 
 interface Link {
   link: string;
