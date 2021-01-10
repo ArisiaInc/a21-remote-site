@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 import arisia.auth.LoginService
 import arisia.general.LifecycleItem
-import arisia.models.LoginUser
+import arisia.models.{LoginUser, BadgeNumber}
 import arisia.util.Done
 import play.api.libs.json.{Format, JsObject, JsArray, JsString, Json}
 import play.api.libs.ws.WSClient
@@ -20,11 +20,20 @@ trait DiscordService {
   def getMembers(): Future[Done]
 
   def addArisian(who: LoginUser, creds: DiscordUserCredentials): Future[Either[String, DiscordMember]]
+
+  def generateAssistSecret(who: LoginUser): String
+
+  def addArisianAssisted(creds: DiscordHelpCredentials): Future[Either[String, DiscordMember]]
 }
 
 case class DiscordUserCredentials(username: String, discriminator: String)
 object DiscordUserCredentials {
   implicit val fmt: Format[DiscordUserCredentials] = Json.format
+}
+
+case class DiscordHelpCredentials(badgeNumber: String, secret: String, discordId: String)
+object DiscordHelpCredentials {
+  implicit val fmt: Format[DiscordHelpCredentials] = Json.format
 }
 
 class DiscordServiceImpl(
@@ -170,22 +179,53 @@ class DiscordServiceImpl(
     }
   }
 
+  def addArisianCore(who: LoginUser, member: DiscordMember): Future[Either[String, DiscordMember]] = {
+    for {
+      _ <- setDiscordRoles(member)
+      _ <- setBadgeName(who, member)
+      _ <- loginService.addDiscordInfo(who, member)
+    }
+      yield Right(member)
+  }
+
   def addArisian(who: LoginUser, creds: DiscordUserCredentials): Future[Either[String, DiscordMember]] = {
-    // TODO: check whether these credentials are already claimed, and return a message if so
+    // TODO: check whether this discord user ID (not username#discriminator) is already claimed, and return a message if so
     // TODO: If it is claimed by *this* user, then update it is success -- should we resync?
     findMember(creds).flatMap {
       _  match {
         case Some(member) => {
-          for {
-            _ <- setDiscordRoles(member)
-            _ <- setBadgeName(who, member)
-            _ <- loginService.addDiscordInfo(who, member)
-          }
-            yield Right(member)
+          addArisianCore(who, member)
         }
         case _ =>
           Future.successful(Left("Please join the Arisia Discord server first, then come back and try again!"))
       }
+    }
+  }
+
+  def generateAssistSecret(who: LoginUser): String = {
+    // TODO: figure out the right into for this, and sign it properly
+    s"FakeSecretFor${who.badgeNumber.v}"
+  }
+
+  def validateAssistSecret(secret: String): Boolean = {
+    // TODO: once we have a real secret, do this:
+    true
+  }
+
+  def addArisianAssisted(creds: DiscordHelpCredentials): Future[Either[String, DiscordMember]] = {
+    if (validateAssistSecret(creds.secret)) {
+      // Note that, in this pathway, we don't know the
+      val member = DiscordMember(DiscordUser(creds.discordId, "", ""))
+      loginService.fetchUserInfo(BadgeNumber(creds.badgeNumber)).flatMap {
+        _ match {
+          case Some(user) => {
+            addArisianCore(user, member)
+          }
+          case _ => Future.successful(Left("User not found!"))
+        }
+      }
+    } else {
+      Future.successful(Left("The user secret isn't valid!"))
     }
   }
 }
