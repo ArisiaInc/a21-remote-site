@@ -1,0 +1,12 @@
+.column {
+    display: flex;
+    min-height: 100%;
+    width: 100%;
+    flex-direction: column;
+}
+
+.below-header {
+    flex-grow: 1;
+    width: 100%;
+    position: relative;
+}
