@@ -1,0 +1,48 @@
+:host {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #262626;
+}
+
+.light.left {
+    left: 0;
+}
+
+.light.right {
+    right: 0;
+}
+
+.light {
+    position: absolute;
+    top: 7rem;
+    width: 8.25rem;
+    height: 22.875rem;
+}
+
+$seat-top: 32rem;
+$first-row-height: 3rem;
+$chair-width: 9.125rem;
+
+.top-row-seats {
+    position: absolute;
+    top: $seat-top;
+    left: 0;
+    height: $first-row-height;
+    width: 100%;
+    background: url("/assets/images/chair-top.png") center top / #{$chair-width} #{$first-row-height} repeat-x
+}
+
+$row-top: $seat-top + $first-row-height;
+$row-height: 5.96875rem;
+
+.row-seats {
+    position: absolute;
+    top: $row-top;
+    left: 0;
+    height: calc(100% - #{$row-top});
+    width: 100%;
+    background: url("/assets/images/chair-row.png") center top / #{$chair-width} #{$row-height} repeat
+}

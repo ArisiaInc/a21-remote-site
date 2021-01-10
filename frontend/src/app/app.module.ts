@@ -27,6 +27,7 @@ import { SpecialComponent } from './gaming/special/special.component';
 import { SignupComponent } from './gaming/signup/signup.component';
 import { DropinComponent } from './gaming/dropin/dropin.component';
 import { UserComponent } from './user/user.component';
+import { PerformanceComponent } from './performance/performance.component';
 
 @NgModule({
   declarations: [
@@ -51,6 +52,7 @@ import { UserComponent } from './user/user.component';
     SignupComponent,
     DropinComponent,
     UserComponent,
+    PerformanceComponent,
   ],
   imports: [
     BrowserModule,
