@@ -112,6 +112,10 @@ POST    /admin/editRoom              arisia.controllers.ZoomController.roomModif
 # This is mainly internal, for testing; we might add a UI if we find a use for it, but don't do that casually:
 POST    /admin/meeting               arisia.controllers.AdminController.startMeeting()
 DELETE  /admin/meeting/:meetingId    arisia.controllers.AdminController.endMeeting(meetingId)
+
+GET     /admin/manageMetadata        arisia.controllers.FileController.manageMetadata()
+POST    /admin/uploadArtshowMetadata arisia.controllers.FileController.uploadArtshowMetadata()
+
 # Note the non-standard path, which is configured in application.conf, so that frontend
 # can own /assets
 GET     /admin/assets/*file          controllers.Assets.versioned(path="/public", file: Asset)

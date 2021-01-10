@@ -10,7 +10,7 @@ implicit request: RequestHeader, messagesProvider: MessagesProvider
   We don't do any sort of validation that the uploaded file matches the desired format, so you can
   seriously mess things up here if you aren't careful.</p>
 
-  @helper.form(action = arisia.controllers.routes.FileController.uploadArtshowMetadata, Symbol("enctype") -> "multipart/form-data") {
+  @helper.form(action = arisia.controllers.routes.FileController.uploadArtshowMetadata(), Symbol("enctype") -> "multipart/form-data") {
     <input type="file" name="artshow">
     <p>
       <input type="submit">
