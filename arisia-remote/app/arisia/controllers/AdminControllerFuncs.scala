@@ -45,7 +45,8 @@ trait AdminControllerFuncs { self: BaseController =>
    */
   def adminsOnly[T](parser: BodyParser[T])(f: AdminInfo[T] => Result): EssentialAction =
     adminsOnlyAsync[T](parser)(info => Future.successful(f(info)))
-  def adminsOnly(f: AdminInfo[AnyContent] => Result): EssentialAction = adminsOnly(f)
+  def adminsOnly(f: AdminInfo[AnyContent] => Result): EssentialAction =
+    adminsOnly(controllerComponents.parsers.anyContent)(f)
 
   /**
    * Enhanced version of adminsOnlyAsync, for stuff that only super-admins can do.
@@ -58,10 +59,12 @@ trait AdminControllerFuncs { self: BaseController =>
         Future.successful(Forbidden("You need super-admin permission for this"))
       }
     }
-  def superAdminsOnlyAsync(f: AdminInfo[AnyContent] => Future[Result]): EssentialAction = superAdminsOnlyAsync(f)
+  def superAdminsOnlyAsync(f: AdminInfo[AnyContent] => Future[Result]): EssentialAction =
+    superAdminsOnlyAsync(controllerComponents.parsers.anyContent)(f)
 
   def superAdminsOnly[T](parser: BodyParser[T])(f: AdminInfo[T] => Result): EssentialAction =
     superAdminsOnlyAsync(parser)(info => Future.successful(f(info)))
-  def superAdminsOnly(f: AdminInfo[AnyContent] => Result): EssentialAction = superAdminsOnly(f)
+  def superAdminsOnly(f: AdminInfo[AnyContent] => Result): EssentialAction =
+    superAdminsOnly(controllerComponents.parsers.anyContent)(f)
 
 }
