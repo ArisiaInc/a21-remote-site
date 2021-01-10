@@ -3,8 +3,9 @@ package arisia.general
 import arisia.db.DBService
 import play.api.Logging
 
-trait FileService {
 
+
+trait FileService {
 }
 
 class FileServiceImpl(

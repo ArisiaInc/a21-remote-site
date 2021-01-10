@@ -39,7 +39,8 @@ class FileController(
   def multipartFormDataAsBytes: BodyParser[MultipartFormData[ByteString]] =
     controllerComponents.parsers.multipartFormData(byteStringFilePartHandler)
 
-  def uploadArtshowMetadata(): EssentialAction = Action(multipartFormDataAsBytes) { implicit request =>
+  def uploadArtshowMetadata(): EssentialAction = adminsOnly(multipartFormDataAsBytes) { adminInfo =>
+    val request = adminInfo.request
     // Rather than farting around with the terribly sophisticated and terribly hard-to-use multipart machinery
     // built into Play, we're doing this as dead-simply as we can:
     val fileParts: Seq[FilePart[ByteString]] = request.body.files

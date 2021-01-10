@@ -10,7 +10,7 @@ trait AdminControllerFuncs { self: BaseController =>
   def loginService: LoginService
   implicit def ec: ExecutionContext
 
-  case class AdminInfo(request: Request[AnyContent], user: LoginUser, permissions: Permissions)
+  case class AdminInfo[T](request: Request[T], user: LoginUser, permissions: Permissions)
 
   /**
    * Standard wrapper -- the provided function will only be used iff the user is a logged-in Admin.
@@ -21,8 +21,8 @@ trait AdminControllerFuncs { self: BaseController =>
    *
    * @param f function that actually does something.
    */
-  def adminsOnlyAsync(f: AdminInfo => Future[Result]): EssentialAction = Action.async { implicit request =>
-    LoginController.loggedInUser() match {
+  def adminsOnlyAsync[T](parser: BodyParser[T])(f: AdminInfo[T] => Future[Result]): EssentialAction = Action(parser).async { implicit request =>
+    LoginController.loggedInUserBase[T]() match {
       case Some(user) => {
         loginService.getPermissions(user.id).flatMap { permissions =>
           if (permissions.admin) {
@@ -37,23 +37,31 @@ trait AdminControllerFuncs { self: BaseController =>
       case _ => Future.successful(NotFound("You aren't logged in!"))
     }
   }
+  def adminsOnlyAsync(f: AdminInfo[AnyContent] => Future[Result]): EssentialAction =
+    adminsOnlyAsync(controllerComponents.parsers.anyContent)(f)
 
   /**
    * Synchronous version of adminsOnlyAsync(), for simpler functions.
    */
-  def adminsOnly(f: AdminInfo => Result): EssentialAction = adminsOnlyAsync(info => Future.successful(f(info)))
+  def adminsOnly[T](parser: BodyParser[T])(f: AdminInfo[T] => Result): EssentialAction =
+    adminsOnlyAsync[T](parser)(info => Future.successful(f(info)))
+  def adminsOnly(f: AdminInfo[AnyContent] => Result): EssentialAction = adminsOnly(f)
 
   /**
    * Enhanced version of adminsOnlyAsync, for stuff that only super-admins can do.
    */
-  def superAdminsOnlyAsync(f: AdminInfo => Future[Result]): EssentialAction = adminsOnlyAsync { info =>
-    if (info.permissions.superAdmin) {
-      f(info)
-    } else {
-      Future.successful(Forbidden("You need super-admin permission for this"))
+  def superAdminsOnlyAsync[T](parser: BodyParser[T])(f: AdminInfo[T] => Future[Result]): EssentialAction =
+    adminsOnlyAsync[T](parser) { info =>
+      if (info.permissions.superAdmin) {
+        f(info)
+      } else {
+        Future.successful(Forbidden("You need super-admin permission for this"))
+      }
     }
-  }
+  def superAdminsOnlyAsync(f: AdminInfo[AnyContent] => Future[Result]): EssentialAction = superAdminsOnlyAsync(f)
 
-  def superAdminsOnly(f: AdminInfo => Result): EssentialAction = superAdminsOnlyAsync(info => Future.successful(f(info)))
+  def superAdminsOnly[T](parser: BodyParser[T])(f: AdminInfo[T] => Result): EssentialAction =
+    superAdminsOnlyAsync(parser)(info => Future.successful(f(info)))
+  def superAdminsOnly(f: AdminInfo[AnyContent] => Result): EssentialAction = superAdminsOnly(f)
 
 }
