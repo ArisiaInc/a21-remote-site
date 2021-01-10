@@ -1,0 +1,19 @@
+@(
+)(
+implicit request: RequestHeader, messagesProvider: MessagesProvider
+)
+
+@main("Manage Metadata") {
+  <h1>Manage Metadata</h1>
+
+  <p>This page allows you to upload the metadata files for various purposes. <b>Use this with care!</b>
+  We don't do any sort of validation that the uploaded file matches the desired format, so you can
+  seriously mess things up here if you aren't careful.</p>
+
+  @helper.form(action = arisia.controllers.routes.FileController.uploadArtshowMetadata, Symbol("enctype") -> "multipart/form-data") {
+    <input type="file" name="artshow">
+    <p>
+      <input type="submit">
+    </p>
+  }
+}
