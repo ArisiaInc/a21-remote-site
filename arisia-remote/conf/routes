@@ -64,6 +64,32 @@ DELETE  /api/settings/:key           arisia.controllers.SettingsController.dropS
 #      description: success
 ###
 POST    /api/discord/addArisian      arisia.controllers.DiscordController.addArisian()
+###
+#  summary: fetch a secret to allow this user to verify for help getting hooked up to Discord
+#  responses:
+#    200:
+#      description: success
+###
+GET     /api/discord/getAssistSecret arisia.controllers.DiscordController.generateAssistSecret()
+###
+#  summary: via Lambda, allow Help Desk to add somebody as an Arisian
+#  parameters:
+#    - in: header
+#      name: X-Shared-Secret
+#      schema:
+#        type: string
+#    - name: body
+#      schema:
+#        $ref: '#/definitions/arisia.discord.DiscordHelpCredentials'
+#  responses:
+#    200:
+#      description: success
+#    401:
+#      description: shared secret header not found
+#    400:
+#      description: passed-in info not valid
+###
+POST    /api/discord/assistAddArisian arisia.controllers.DiscordController.assistedAddArisian()
 
 # Admin UI, separate from the attendee-facing site
 GET     /admin                       arisia.controllers.AdminController.home()

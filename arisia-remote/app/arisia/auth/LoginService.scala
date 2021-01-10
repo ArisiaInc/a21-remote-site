@@ -31,6 +31,13 @@ trait LoginService {
    * Adds the given Discord credentials to the specified user.
    */
   def addDiscordInfo(who: LoginUser, discordMember: DiscordMember): Future[Int]
+
+  /**
+   * Get the
+   * @param badgeNumber
+   * @return
+   */
+  def fetchUserInfo(badgeNumber: BadgeNumber): Future[Option[LoginUser]]
 }
 
 class LoginServiceImpl(
@@ -99,15 +106,36 @@ class LoginServiceImpl(
     dbService.run(
       sql"""
             INSERT INTO user_info
-            (username, badge_number, membership_type)
+            (username, badge_number, badge_name, membership_type)
             VALUES
-            (${user.id.v}, ${user.badgeNumber.v}, ${user.membershipType.value})
+            (${user.id.v}, ${user.badgeNumber.v}, ${user.name.v}, ${user.membershipType.value})
             ON CONFLICT DO NOTHING
            """
         .update
         .run
     ).map { _ =>
       Right(Done)
+    }
+  }
+
+  def fetchUserInfo(badgeNumber: BadgeNumber): Future[Option[LoginUser]] = {
+    dbService.run(
+      sql"""
+           SELECT username, badge_name, badge_number, membership_type
+             FROM user_info
+            WHERE badge_number = ${badgeNumber.v}"""
+        .query[(String, String, String, String)]
+        .option
+    ).map {
+      _.map { case (username, badgeName, badgeNumber, membershipType) =>
+          LoginUser(
+            LoginId(username),
+            LoginName(badgeName),
+            BadgeNumber(badgeNumber),
+            false,
+            MembershipType.withValue(membershipType)
+          )
+      }
     }
   }
 
