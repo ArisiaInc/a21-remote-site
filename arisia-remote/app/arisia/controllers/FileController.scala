@@ -41,7 +41,7 @@ class FileController(
   def multipartFormDataAsBytes: BodyParser[MultipartFormData[ByteString]] =
     controllerComponents.parsers.multipartFormData(byteStringFilePartHandler)
 
-  def uploadArtshowMetadata(): EssentialAction = adminsOnlyAsync(multipartFormDataAsBytes) { adminInfo =>
+  def uploadBase(tpe: FileType): EssentialAction = adminsOnlyAsync(multipartFormDataAsBytes) { adminInfo =>
     val request = adminInfo.request
     // Rather than farting around with the terribly sophisticated and terribly hard-to-use multipart machinery
     // built into Play, we're doing this as dead-simply as we can:
@@ -50,8 +50,12 @@ class FileController(
       current ++ next.ref
     }
     val body: String = fullByteString.utf8String
-    fileService.setFile(FileType.ArtshowMetadata, body).map { _ =>
+    fileService.setFile(tpe, body).map { _ =>
       Redirect(routes.AdminController.home())
     }
   }
+
+  def uploadArtshowMetadata(): EssentialAction = uploadBase(FileType.ArtshowMetadata)
+  def uploadDealersMetadata(): EssentialAction = uploadBase(FileType.DealersMetadata)
+
 }
