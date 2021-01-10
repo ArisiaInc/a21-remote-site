@@ -25,8 +25,7 @@ class LoginController (
   def me(): EssentialAction = Action { implicit request =>
     request.session.get(userKey) match {
       case Some(jsonStr) => Ok(jsonStr)
-        // TODO: is there a more robust way to make sure that we hit all the fields here?
-      case None => Ok("""{"id":null,"name":null}""")
+      case None => Unauthorized("""{"id":null,"name":null}""")
     }
   }
 
