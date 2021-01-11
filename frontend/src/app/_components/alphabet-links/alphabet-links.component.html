@@ -1,0 +1,8 @@
+<div class="search" *ngIf="links">
+  <ng-container *ngFor="let link of links; last as isLast">
+    <a [routerLink]="link.link" *ngIf="search !== link.searchCompare && link.active">{{link.display}}</a>
+    <span *ngIf="search === link.searchCompare" class="selected">{{link.display}}</span>
+    <span *ngIf="search !== link.searchCompare && !link.active">{{link.display}}</span>
+    <ng-container *ngIf="!isLast">&nbsp;&middot; </ng-container>
+  </ng-container>
+</div>

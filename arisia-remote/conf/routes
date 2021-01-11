@@ -54,6 +54,30 @@ POST    /api/settings                arisia.controllers.SettingsController.addSe
 DELETE  /api/settings/:key           arisia.controllers.SettingsController.dropSetting(key)
 
 ###
+#  summary: fetch the metadata for the Art Show
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/metadata/artshow        arisia.controllers.FileController.getArtshowMetadata()
+
+###
+#  summary: fetch the metadata for the Dealers
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/metadata/dealers        arisia.controllers.FileController.getDealersMetadata()
+
+###
 #  summary: make this person an Arisian
 #  parameters:
 #    - name: body
@@ -64,6 +88,32 @@ DELETE  /api/settings/:key           arisia.controllers.SettingsController.dropS
 #      description: success
 ###
 POST    /api/discord/addArisian      arisia.controllers.DiscordController.addArisian()
+###
+#  summary: fetch a secret to allow this user to verify for help getting hooked up to Discord
+#  responses:
+#    200:
+#      description: success
+###
+GET     /api/discord/getAssistSecret arisia.controllers.DiscordController.generateAssistSecret()
+###
+#  summary: via Lambda, allow Help Desk to add somebody as an Arisian
+#  parameters:
+#    - in: header
+#      name: X-Shared-Secret
+#      schema:
+#        type: string
+#    - name: body
+#      schema:
+#        $ref: '#/definitions/arisia.discord.DiscordHelpCredentials'
+#  responses:
+#    200:
+#      description: success
+#    401:
+#      description: shared secret header not found
+#    400:
+#      description: passed-in info not valid
+###
+POST    /api/discord/assistAddArisian arisia.controllers.DiscordController.assistedAddArisian()
 
 # Admin UI, separate from the attendee-facing site
 GET     /admin                       arisia.controllers.AdminController.home()
@@ -86,6 +136,11 @@ POST    /admin/editRoom              arisia.controllers.ZoomController.roomModif
 # This is mainly internal, for testing; we might add a UI if we find a use for it, but don't do that casually:
 POST    /admin/meeting               arisia.controllers.AdminController.startMeeting()
 DELETE  /admin/meeting/:meetingId    arisia.controllers.AdminController.endMeeting(meetingId)
+
+GET     /admin/manageMetadata        arisia.controllers.FileController.manageMetadata()
+POST    /admin/uploadArtshowMetadata arisia.controllers.FileController.uploadArtshowMetadata()
+POST    /admin/uploadDealersMetadata arisia.controllers.FileController.uploadDealersMetadata()
+
 # Note the non-standard path, which is configured in application.conf, so that frontend
 # can own /assets
 GET     /admin/assets/*file          controllers.Assets.versioned(path="/public", file: Asset)
