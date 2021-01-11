@@ -1,10 +1,12 @@
 package arisia.auth
 
 import arisia.db.DBService
+import arisia.discord.DiscordMember
 
 import scala.concurrent.duration._
 import arisia.models.{LoginUser, LoginId, BadgeNumber, Permissions, LoginName}
-import cats.data.{OptionT, EitherT}
+import arisia.util.Done
+import cats.data.{EitherT, OptionT}
 import cats.implicits._
 import doobie.free.connection.ConnectionIO
 import play.api.libs.ws.WSClient
@@ -24,6 +26,18 @@ trait LoginService {
    * Fetch any additional permissions that this person might have.
    */
   def getPermissions(id: LoginId): Future[Permissions]
+
+  /**
+   * Adds the given Discord credentials to the specified user.
+   */
+  def addDiscordInfo(who: LoginUser, discordMember: DiscordMember): Future[Int]
+
+  /**
+   * Get the
+   * @param badgeNumber
+   * @return
+   */
+  def fetchUserInfo(badgeNumber: BadgeNumber): Future[Option[LoginUser]]
 }
 
 class LoginServiceImpl(
@@ -80,6 +94,7 @@ class LoginServiceImpl(
         else
           EitherT.leftT[Future, LoginUser](LoginError.NoCoC)
       initialUser = LoginUser(id, badgeName, details.badgeNumber, false, details.membershipType)
+      _ <- EitherT(recordUserInfo(initialUser))
       withPermissions <- EitherT(checkPermissions(initialUser))
     }
       yield withPermissions
@@ -87,10 +102,61 @@ class LoginServiceImpl(
     result.value
   }
 
+  def recordUserInfo(user: LoginUser): Future[Either[LoginError, Done]] = {
+    dbService.run(
+      sql"""
+            INSERT INTO user_info
+            (username, badge_number, badge_name, membership_type)
+            VALUES
+            (${user.id.lower}, ${user.badgeNumber.v}, ${user.name.v}, ${user.membershipType.value})
+            ON CONFLICT DO NOTHING
+           """
+        .update
+        .run
+    ).map { _ =>
+      Right(Done)
+    }
+  }
+
+  def fetchUserInfo(badgeNumber: BadgeNumber): Future[Option[LoginUser]] = {
+    dbService.run(
+      sql"""
+           SELECT username, badge_name, badge_number, membership_type
+             FROM user_info
+            WHERE badge_number = ${badgeNumber.v}"""
+        .query[(String, String, String, String)]
+        .option
+    ).map {
+      _.map { case (username, badgeName, badgeNumber, membershipType) =>
+          LoginUser(
+            LoginId(username),
+            LoginName(badgeName),
+            BadgeNumber(badgeNumber),
+            false,
+            MembershipType.withValue(membershipType)
+          )
+      }
+    }
+  }
+
+  def addDiscordInfo(who: LoginUser, discordMember: DiscordMember): Future[Int] = {
+    dbService.run(
+      sql"""
+            UPDATE user_info
+               SET discord_username = ${discordMember.user.username},
+                   discord_discriminator = ${discordMember.user.discriminator},
+                   discord_id = ${discordMember.user.id}
+             WHERE username = ${who.id.lower}
+        """
+        .update
+        .run
+    )
+  }
+
   def fetchPermissionsQuery(id: LoginId): ConnectionIO[Option[Permissions]] =
     sql"""SELECT super_admin, admin, early_access, tech
          |FROM permissions
-         |WHERE username = ${id.v}""".stripMargin
+         |WHERE username = ${id.lower}""".stripMargin
     .query[Permissions]
     .option
 
