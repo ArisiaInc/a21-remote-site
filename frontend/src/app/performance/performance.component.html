@@ -23,7 +23,7 @@
     </div>
     <div class="d-lg-none col-2"></div>
     <div class="col-12 col-lg-9">
-      <div class="embedding-box">
+      <div class="embedding-box contents">
         <div class="embedding-aspect-ratio-helper"></div>
         <ng-container *ngIf="runningEvents.current; else noevent">
           <ng-container *ngIf="url$ | async as url; else noperformance">
@@ -52,7 +52,10 @@
           Chat on Discord: #performance-hall
         </span>
         <span class="backup link contents">
-          Embedded video for main/featured performance
+          <ng-container *ngIf="externalUrl$ | async as externalUrl">
+            <a [href]="externalUrl" target="blank_" *ngIf="runningEvents.current && runningEvents.current.performance">
+            Open on {{platform$ | async}}: {{externalUrl}}</a> (Doesn't pause here)
+          </ng-container>
         </span>
       </div>
     </div>

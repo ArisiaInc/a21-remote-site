@@ -13,6 +13,9 @@ import { ScheduleService, RunningEvents } from '@app/_services';
 export class PerformanceComponent implements OnInit {
   events$: Observable<RunningEvents>;
   url$: Observable<SafeUrl | undefined>;
+  externalUrl$: Observable<string | undefined>;
+  safeExternalUrl$: Observable<SafeUrl | undefined>;
+  platform$: Observable<string>;
 
   constructor(private scheduleService: ScheduleService,
               private sanitizer: DomSanitizer) {
@@ -41,6 +44,51 @@ export class PerformanceComponent implements OnInit {
           }
         }
         return undefined;
+      }),
+    );
+    this.externalUrl$ = this.events$.pipe(
+      map(runningEvents => {
+        const performance = runningEvents?.current?.performance;
+        if (performance) {
+          let url: string | undefined;
+          switch (performance.platform) {
+            case 'youtubeVideo':
+              return `https://www.youtube.com/watch/${performance.streamId}`;
+              break;
+            case 'twitchChannel':
+              return `https://twitch.tv/${performance.streamId}`;
+              break;
+            case 'twitchVideo':
+              return `https://twitch.tv/videos/${performance.streamId}`;
+              break;
+            case 'vimeoVideo':
+              return `https://vimeo.com/${performance.streamId}`;
+              break;
+          }
+        }
+        return undefined;
+      }),
+    );
+    this.safeExternalUrl$ = this.externalUrl$.pipe(
+      map(url => url && this.sanitizer.bypassSecurityTrustResourceUrl(url)),
+    );
+    this.platform$ = this.events$.pipe(
+      map(runningEvents => {
+        const performance = runningEvents?.current?.performance;
+        if (performance) {
+          switch (performance.platform) {
+            case 'youtubeVideo':
+              return 'YouTube';
+              break;
+            case 'twitchChannel':
+            case 'twitchVideo':
+              return 'Twitch TV';
+            case 'vimeoVideo':
+              return 'Vimeo';
+              break;
+          }
+        }
+        return '';
       }),
     );
   }
