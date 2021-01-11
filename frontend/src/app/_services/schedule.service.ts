@@ -3,10 +3,9 @@ import { BehaviorSubject, ReplaySubject, Observable, of, zip, OperatorFunction, 
 import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck, every, switchMap, repeat, ignoreElements, shareReplay } from 'rxjs/operators';
 import { HttpClient, HttpResponse, HttpErrorResponse } from '@angular/common/http';
 
-import { ProgramItem, ProgramPerson, ProgramFilter, DateRange, Performance } from '@app/_models';
 import { PerformanceService } from './performance.service';
 import { Initial, createInitials, searchPrefixCaseInsensitive } from '@app/_helpers/utils';
-import { ProgramItem, ProgramPerson, ProgramFilter, DateRange } from '@app/_models';
+import { ProgramItem, ProgramPerson, ProgramFilter, DateRange, Performance } from '@app/_models';
 import { SettingsService } from './settings.service';
 import { StarsService } from './stars.service';
 import { environment } from '@environments/environment';
