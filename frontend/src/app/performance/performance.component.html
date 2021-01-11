@@ -1,5 +1,5 @@
 <div class="container">
-  <div class="row">
+  <div class="row" *ngIf="events$ | async as runningEvents">
     <div class="col-12 col-md-4 col-lg-4 col-xl-3">
       <div class="row" contents>
         <app-breadcrumb lastCrumbName="Performance Hall"></app-breadcrumb>
@@ -11,9 +11,13 @@
       <div class="now-playing-box">
         <div class="now-playing-aspect-ratio-helper"></div>
         <div class="now-playing-text">
-          <div class="contents now-playing-now">Now playing:</div>
-          <div class="contents now-playing-title">Title of Event</div>
-          <div class="contents now-playing-next">Coming next: title of event</div>
+          <ng-container *ngIf="runningEvents.current as current">
+            <div class="contents now-playing-now">Now playing:</div>
+            <div class="contents now-playing-title">{{current.title}}</div>
+          </ng-container>
+          <ng-container *ngIf="runningEvents.next as next">
+            <div class="contents now-playing-next">Coming next: {{next.title}}</div>
+          </ng-container>
         </div>
       </div>
     </div>
@@ -21,9 +25,27 @@
     <div class="col-12 col-lg-9">
       <div class="embedding-box">
         <div class="embedding-aspect-ratio-helper"></div>
-        <div class="embedding contents" style="background:#c4c4c4">
-          Add embedding object.
-        </div>
+        <ng-container *ngIf="runningEvents.current; else noevent">
+          <ng-container *ngIf="url$ | async as url; else noperformance">
+            <div class="embedding contents" *ngIf="runningEvents.current.performance as performance; else noperformance">
+              <iframe class="iframe"
+                      [src]="url"
+                      frameborder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowfullscreen></iframe>
+            </div>
+          </ng-container>
+          <ng-template #noperformance>
+            <div *ngIf="runningEvents.current as current; else noevent" style="background:#c4c4c4" class="embedding contents">
+              Missing embedded data.
+            </div>
+          </ng-template>
+        </ng-container>
+        <ng-template #noevent>
+          <div style="background:#c4c4c4" class="embedding contents">
+            No current event.
+          </div>
+        </ng-template>
       </div>
       <div class="links">
         <span class="discord link contents">
