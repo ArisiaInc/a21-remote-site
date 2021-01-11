@@ -14,9 +14,16 @@ export class CreatorService {
 
   get_dealer_data(local: boolean) {
     if (local) {
-      return this.http.get<Creator[]>(`assets/data/dealers_1231_1.json`);
+      return this.http.get<Creator[]>(`assets/data/dealers_18_1.json`);
     }
     return this.http.get<Creator[]>(`${environment.backend}/dealers`);
+  }
+
+  get_artist_data(local: boolean) {
+    if (local) {
+      return this.http.get<Creator[]>(`assets/data/artists_18_1.json`);
+    }
+    return this.http.get<Creator[]>(`${environment.backend}/artists`);
   }
 
   make_id_filter(ids?: string[]) : OperatorFunction<Creator[], Creator[]> {
@@ -31,7 +38,7 @@ export class CreatorService {
   }
 
   get_artists(ids?: string[]) : Observable<Creator[]>{
-    return this.http.get<Creator[]>(`${environment.backend}/artists`).pipe(
+    return this.get_artist_data(true).pipe(
       this.make_id_filter(ids)
     );
   }
