@@ -22,6 +22,7 @@ trait ControllerModule extends GeneralModule with ZoomModule {
   lazy val adminController: AdminController = wire[AdminController]
   lazy val discordController: DiscordController = wire[DiscordController]
   lazy val duckController: DuckController = wire[DuckController]
+  lazy val fileController: FileController = wire[FileController]
   lazy val frontendController: FrontendController = wire[FrontendController]
   lazy val loginController: LoginController = wire[LoginController]
   lazy val scheduleController: ScheduleController = wire[ScheduleController]
