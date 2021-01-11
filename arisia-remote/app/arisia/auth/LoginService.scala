@@ -108,7 +108,7 @@ class LoginServiceImpl(
             INSERT INTO user_info
             (username, badge_number, badge_name, membership_type)
             VALUES
-            (${user.id.v}, ${user.badgeNumber.v}, ${user.name.v}, ${user.membershipType.value})
+            (${user.id.lower}, ${user.badgeNumber.v}, ${user.name.v}, ${user.membershipType.value})
             ON CONFLICT DO NOTHING
            """
         .update
@@ -146,7 +146,7 @@ class LoginServiceImpl(
                SET discord_username = ${discordMember.user.username},
                    discord_discriminator = ${discordMember.user.discriminator},
                    discord_id = ${discordMember.user.id}
-             WHERE username = ${who.id.v}
+             WHERE username = ${who.id.lower}
         """
         .update
         .run
@@ -156,7 +156,7 @@ class LoginServiceImpl(
   def fetchPermissionsQuery(id: LoginId): ConnectionIO[Option[Permissions]] =
     sql"""SELECT super_admin, admin, early_access, tech
          |FROM permissions
-         |WHERE username = ${id.v}""".stripMargin
+         |WHERE username = ${id.lower}""".stripMargin
     .query[Permissions]
     .option
 
