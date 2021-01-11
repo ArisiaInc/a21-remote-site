@@ -1,51 +1,52 @@
 <div class="map-container row">
     <div class="col-12 col-sm-6 col-md-3 p-0 column-2">
-        <div class="row map-entry desk m-2 medium-text">
+        <div class="aspect-ratio map-entry desk medium-text">
           <app-link backgroundImage="assets/images/map/info-desk.png" centerLine="80%" (click)="openInfodesk()">Info Desk</app-link>
         </div>
-        <div class="row map-entry ribbon m-2">
+        <div class="aspect-ratio map-entry ribbon">
           <div class="ribbon-padding">
             <app-link backgroundImage="assets/images/map/safety.png" (click)="openSafety()"></app-link>
           </div>
         </div>
-        <div class="row map-entry ribbon m-2">
+        <div class="aspect-ratio map-entry ribbon">
           <div class="ribbon-padding">
             <app-link backgroundImage="assets/images/map/irt.png" (click)="openIrt()"></app-link>
           </div>
         </div>
     </div>
     <div class="col-12 col-sm-6 col-md-3 p-0 column-1">
-        <div class="row map-entry m-2 large-text">
+        <div class="aspect-ratio map-entry large-text">
             <app-link backgroundImage="assets/images/map/art-show.png" centerLine="56%" color="black" routerLink="/artshow">Art Show</app-link>
         </div>
-        <div class="row map-entry m-2 large-text">
+        <div class="aspect-ratio map-entry large-text">
             <app-link backgroundImage="assets/images/map/gaming.png" centerLine="53%" appLoginGuardedLink="/gaming" appDoorDragonStyle="programming">Gaming</app-link>
         </div>
-        <div class="row map-entry m-2 small-text">
+        <div class="aspect-ratio map-entry small-text">
             <app-link backgroundImage="assets/images/map/dealers-room.png" centerLine="80%" horizontalNudge="5%" routerLink="/dealers">Dealer's Room<br>(incl Creatives' Corner)</app-link>
         </div>
-        <div class="row map-entry m-2 small-medium-text">
+        <div class="aspect-ratio map-entry small-medium-text">
             <app-link backgroundImage="assets/images/map/social-spaces.png" centerLine="55%" appLoginGuardedLink="/social" appDoorDragonStyle="social">Social Spaces</app-link>
         </div>
     </div>
     <div class="col-12 col-sm-6 col-md-3 p-0 column-4">
-        <div class="row map-entry m-2 medium-text">
+        <div class="aspect-ratio map-entry medium-text">
             <app-link backgroundImage="assets/images/map/performance-hall.png" centerLine="90%" appLoginGuardedLink="/events" appDoorDragonStyle="programming">Performance Hall</app-link>
         </div>
-        <div class="row map-entry m-2 medium-text">
+        <div class="aspect-ratio map-entry medium-text">
             <app-link backgroundImage="assets/images/map/programming.png" centerLine="84%" appLoginGuardedLink="/programming" appDoorDragonStyle="programming">Programming</app-link>
         </div>
-        <div class="row map-entry m-2">
+        <div class="aspect-ratio map-entry">
             <app-featured-events></app-featured-events>
         </div>
     </div>
     <div class="col-12 col-sm-6 col-md-3 p-0 column-3">
-        <div class="row hall-header">
+      <div class="map-entry">
+        <div class="hall-header">
           <img class="coffee" src="assets/images/map/coffee.png"> <div class="coffee-text">Coffee Shop Line</div>
         </div>
-        <div class="row map-entry hall">
+        <div class="aspect-ratio hall">
           <app-hall-costumes>Costume Feed</app-hall-costumes>
         </div>
+      </div>
     </div>
-
 </div>
