@@ -111,7 +111,7 @@ class CMServiceImpl(
             }
           }
 
-          Right((LoginId(username), LoginName(badgeName)))
+          Right((LoginId(username.toLowerCase), LoginName(badgeName)))
         } else {
           logger.error(s"Got unexpected response from Convention Master when checking $username!")
           Left{LoginError.NoLogin}

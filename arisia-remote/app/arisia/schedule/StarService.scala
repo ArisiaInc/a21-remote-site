@@ -25,7 +25,7 @@ class StarServiceImpl(
     val query =
       sql"""INSERT INTO starred_items
            (login_id, item_id)
-           VALUES (${who.v}, ${which.v})"""
+           VALUES (${who.lower}, ${which.v})"""
     dbService.run(
       query.
         update.
@@ -36,7 +36,7 @@ class StarServiceImpl(
   def removeStar(who: LoginId, which: ProgramItemId): Future[Int] = {
     val query =
       sql"""DELETE FROM starred_items
-           WHERE login_id = ${who.v} AND item_id = ${which.v}"""
+           WHERE login_id = ${who.lower} AND item_id = ${which.v}"""
     dbService.run(
       query.
         update.
@@ -48,7 +48,7 @@ class StarServiceImpl(
     val query =
       sql"""SELECT item_id
            FROM starred_items
-           WHERE login_id = ${who.v}"""
+           WHERE login_id = ${who.lower}"""
     dbService.run(
       query.
         query[ProgramItemId]
