@@ -3,8 +3,7 @@ import { ActivatedRoute} from '@angular/router';
 import { Observable } from 'rxjs';
 import { pluck, switchMap, map } from 'rxjs/operators';
 
-import { ProgramPerson } from '@app/_models';
-import { ScheduleService } from '@app/_services';
+import { ScheduleService, SchedulePerson } from '@app/_services';
 
 @Component({
   selector: 'app-people',
@@ -12,30 +11,18 @@ import { ScheduleService } from '@app/_services';
   styleUrls: ['./people.component.scss']
 })
 export class PeopleComponent implements OnInit {
-  people$!: Observable<ProgramPerson[]>;
+  people$!: Observable<SchedulePerson[]>;
   search$!: Observable<string>;
-  links$!: Observable<{ link: string,
-                        searchCompare: string,
-                        display: string,
-                        active: boolean,
-         }[]>
 
   constructor(
     private route: ActivatedRoute,
-    private scheduleService: ScheduleService) {
-    this.links$ = this.scheduleService.peopleInitials$.pipe(
-      map(initials =>
-        [{link: '', searchCompare: ' ', display: 'All', active: true},
-         {link: 'goh', searchCompare: 'goh', display: 'GOH', active: true}].
-        concat(Object.values(initials).map(({lower, upper, active}) => ({link: lower, searchCompare: lower, display: upper, active})))
-         ),
-    );
+    public scheduleService: ScheduleService) {
   }
 
   ngOnInit(): void {
     this.search$ = this.route.params.pipe(
       pluck('search'),
-      map(search => search && search.toLowerCase()),
+      map(search => (search || '').toLowerCase()),
     );
     this.people$ = this.search$.pipe(
       switchMap(search => {
