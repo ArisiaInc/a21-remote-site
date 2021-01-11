@@ -17,21 +17,48 @@
             <th>Link</th>
             <th>Hint</th>
             <th>Requesting URL</th>
+            <th></th>
         </tr>
       </thead>
       <tbody>
         @for(duck <- ducks) {
           <tr>
-              <td>@{duck.id}</td>
+              <td><a href="/admin/editDuck/@{duck.id}">@{duck.id}</a></td>
               <td>@{duck.imageUrl}</td>
               <td>@{duck.altText}</td>
               <td>@{duck.link}</td>
               <td>@{duck.hint}</td>
               <td>@{duck.requestingUrl}</td>
+              <td><button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#removeModal" data-confirmid="@{duck.id}">Remove</button></td>
           </tr>
         }
       </tbody>
   </table>
 
   <a class="btn btn-primary" href="/admin/createDuck">Add another Duck</a>
+
+
+@*
+* Confirm dialog for removing this duck.
+*@
+<div class="modal fade confirmModal" id="removeModal" tabindex="-1" role="dialog" aria-labelledby="confirmRemoveLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmRemoveLabel">Confirm Remove Duck</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Please confirm: remove duck <span class="modal-body-id"></span>?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger confirmed-button" id="remove-button"
+                        data-baseurl="/admin/ducks/">Remove Duck</button>
+            </div>
+        </div>
+    </div>
+</div>
 }
