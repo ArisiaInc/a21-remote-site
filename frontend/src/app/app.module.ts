@@ -28,6 +28,7 @@ import { SignupComponent } from './gaming/signup/signup.component';
 import { DropinComponent } from './gaming/dropin/dropin.component';
 import { UserComponent } from './user/user.component';
 import { PerformanceComponent } from './performance/performance.component';
+import { SocialComponent } from './social/social.component';
 
 @NgModule({
   declarations: [
@@ -53,6 +54,7 @@ import { PerformanceComponent } from './performance/performance.component';
     DropinComponent,
     UserComponent,
     PerformanceComponent,
+    SocialComponent,
   ],
   imports: [
     BrowserModule,

@@ -19,6 +19,7 @@ import { DoorDragonComponent } from './door-dragon/door-dragon.component';
 import { RoomLinkHostComponent } from './room-link-host/room-link-host.component';
 import { RoomLinkComponent } from './room-link/room-link.component';
 import { RoomLinkOtherComponent } from './room-link-other/room-link-other.component';
+import { AlphabetLinksComponent } from './alphabet-links/alphabet-links.component';
 
 @NgModule({
   declarations: [
@@ -37,6 +38,7 @@ import { RoomLinkOtherComponent } from './room-link-other/room-link-other.compon
     RoomLinkHostComponent,
     RoomLinkComponent,
     RoomLinkOtherComponent,
+    AlphabetLinksComponent,
   ],
   imports: [
     CommonModule,
@@ -60,6 +62,7 @@ import { RoomLinkOtherComponent } from './room-link-other/room-link-other.compon
     RoomLinkHostComponent,
     RoomLinkComponent,
     RoomLinkOtherComponent,
+    AlphabetLinksComponent,
   ]
 })
 export class SharedModule { }

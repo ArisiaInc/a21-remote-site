@@ -207,7 +207,7 @@ class ScheduleQueueServiceImpl(
       _ <- dbService.run(
         sql"""
               DELETE FROM active_program_items
-               WHERE program_item_id = '${item.itemId.v}'
+               WHERE program_item_id = ${item.itemId.v}
              """
           .update
           .run
