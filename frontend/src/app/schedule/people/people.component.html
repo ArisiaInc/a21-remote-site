@@ -1,12 +1,5 @@
-<div *ngIf="(search$ | async) || ' ' as search" class="search">
-  <div class="search-title">Participants by name</div>
-  <ng-container *ngFor="let link of links$ | async; last as isLast">
-    <a [routerLink]="'/schedule/people/' + link.link" *ngIf="search !== link.searchCompare && link.active">{{link.display}}</a>
-    <span *ngIf="search === link.searchCompare" class="selected">{{link.display}}</span>
-    <span *ngIf="search !== link.searchCompare && !link.active">{{link.display}}</span>
-    <ng-container *ngIf="!isLast">&nbsp;&middot; </ng-container>
-  </ng-container>
-</div>
+<div class="search-title">Participants by name</div>
+<app-alphabet-links [search]="search$ | async" [initials]="scheduleService.peopleInitials$ | async" [includeGoh]="true" urlPrefix="/schedule/people"></app-alphabet-links>
 <ul class="people-box list-group">
   <li *ngFor="let person of people$ | async" class="list-group-item list-group-item-action">
     <app-person [person]="person"></app-person>

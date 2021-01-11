@@ -15,6 +15,7 @@ import { TabletopComponent } from './gaming/tabletop/tabletop.component';
 import { LarpComponent } from './gaming/larp/larp.component';
 import { SpecialComponent } from './gaming/special/special.component';
 import { UserComponent } from './user/user.component';
+import { SocialComponent } from './social/social.component';
 
 const accountModule = () => import('./account/account.module').then(x => x.AccountModule);
 const scheduleModule = () => import('./schedule/schedule.module').then(x => x.ScheduleModule);
@@ -32,12 +33,17 @@ const routes: Routes = [
   {path: 'gaming/tabletop', component: TabletopComponent, canActivate: [AuthGuard]},
   {path: 'gaming/larp', component: LarpComponent, canActivate: [AuthGuard]},
   {path: 'gaming/special', component: SpecialComponent, canActivate: [AuthGuard]},
+  {path: 'artshow/search/:search', component: ArtshowComponent},
+  {path: 'artshow/search', redirectTo: 'artshow'},
   {path: 'artshow', component: ArtshowComponent},
   {path: 'artshow/:id', component: ArtistComponent},
+  {path: 'dealers/search/:search', component: DealersComponent},
+  {path: 'dealers/search', redirectTo: 'dealers'},
   {path: 'dealers', component: DealersComponent},
   {path: 'dealers/:id', component: DealerComponent},
   {path: 'user', component: UserComponent, canActivate: [AuthGuard, UserPageRedirectGuard]},
   {path: 'user/:id', component: UserComponent, canActivate: [AuthGuard]},
+  {path: 'social', component: SocialComponent, canActivate: [AuthGuard]},
 
   //redirect home
   {path: '**', redirectTo: '/map'}
