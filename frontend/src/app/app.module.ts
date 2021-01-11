@@ -28,6 +28,8 @@ import { SignupComponent } from './gaming/signup/signup.component';
 import { DropinComponent } from './gaming/dropin/dropin.component';
 import { UserComponent } from './user/user.component';
 import { SocialComponent } from './social/social.component';
+import { DuckListComponent } from './user/duck-list/duck-list.component';
+import { ProfileDuckComponent } from './user/profile-duck/profile-duck.component';
 
 @NgModule({
   declarations: [
@@ -53,6 +55,8 @@ import { SocialComponent } from './social/social.component';
     DropinComponent,
     UserComponent,
     SocialComponent,
+    DuckListComponent,
+    ProfileDuckComponent,
   ],
   imports: [
     BrowserModule,
@@ -63,6 +67,6 @@ import { SocialComponent } from './social/social.component';
     PipesModule,
   ],
   bootstrap: [AppComponent],
-  entryComponents: [InfodeskComponent, SafetyComponent, IrtComponent]
+  entryComponents: [InfodeskComponent, SafetyComponent, IrtComponent],
 })
 export class AppModule { }

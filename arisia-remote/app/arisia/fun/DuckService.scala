@@ -86,7 +86,7 @@ class DuckServiceImpl(
     // Need to validate that the request is coming from the right URL:
     getDuck(duckId) match {
       case Some(duck) => {
-        if (duck.requestingUrl == from) {
+        if (from contains duck.requestingUrl) {
           // All looks good:
           dbService.run(
             sql"""
@@ -99,7 +99,7 @@ class DuckServiceImpl(
           )
         } else {
           // Somehow got a request from the wrong place, which seems hinky:
-          val error = s"Got a request for Duck $duckId from incorrect location $from!"
+          val error = s"Got a request for Duck $duckId from incorrect location $from! It's supposed to be ${duck.requestingUrl}"
           logger.warn(error)
           Future.failed(new Exception(error))
         }
