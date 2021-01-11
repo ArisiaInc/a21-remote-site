@@ -136,11 +136,11 @@ class DuckServiceImpl(
   def editDuck(duck: Duck): Future[List[Duck]] = {
     dbService.run(
       sql"""
-           UPDATE duck
-              SET image = ${duck.imageUrl}
-                  alt = ${duck.altText}
-                  link = ${duck.link}
-                  hint = ${duck.hint}
+           UPDATE ducks
+              SET image = ${duck.imageUrl},
+                  alt = ${duck.altText},
+                  link = ${duck.link},
+                  hint = ${duck.hint},
                   requesting_url = ${duck.requestingUrl}
             WHERE did = ${duck.id}"""
         .update

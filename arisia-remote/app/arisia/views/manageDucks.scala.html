@@ -23,7 +23,7 @@
       <tbody>
         @for(duck <- ducks) {
           <tr>
-              <td>@{duck.id}</td>
+              <td><a href="/admin/editDuck/@{duck.id}">@{duck.id}</a></td>
               <td>@{duck.imageUrl}</td>
               <td>@{duck.altText}</td>
               <td>@{duck.link}</td>
