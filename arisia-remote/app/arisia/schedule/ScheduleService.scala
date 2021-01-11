@@ -127,7 +127,24 @@ class ScheduleServiceImpl(
         yield ProgramItemTimestamp(zoned.toInstant)
       item.copy(timestamp = instant)
     }
-    withTest.copy(program = itemsWithTimestamps)
+    val relevantLocs = roomService.getRooms().map(room => ProgramItemLoc(room.zambiaName))
+    val (zoomSessions, nonZoomSessions) = itemsWithTimestamps.partition { item =>
+      item.loc.headOption match {
+        case Some(loc) if (relevantLocs.contains(loc)) => true
+        case _ => false
+      }
+    }
+    val adjustedZoomSessions =
+      zoomSessions.map { item =>
+        val doorsOpen = item.when.minus(schedulePrepStop.toJava)
+        val doorsClose = item.end
+        item.copy(
+          doorsOpen = Some(ProgramItemTimestamp(doorsOpen)),
+          doorsClose = Some(ProgramItemTimestamp(doorsClose))
+        )
+      }
+
+    withTest.copy(program = adjustedZoomSessions ++ nonZoomSessions)
   }
 
   val _scheduleJson: AtomicReference[String] = new AtomicReference("{\"program\":[], \"people\": []}")
@@ -143,12 +160,8 @@ class ScheduleServiceImpl(
     new AtomicReference(Schedule.empty)
 
   def computeScheduleWithPrep(base: Schedule): Schedule = {
-    val relevantLocs = roomService.getRooms().map(room => ProgramItemLoc(room.zambiaName))
     val (zoomSessions, nonZoomSessions) = base.program.partition { item =>
-      item.loc.headOption match {
-        case Some(loc) if (relevantLocs.contains(loc)) => true
-        case _ => false
-      }
+      item.doorsOpen.isDefined
     }
     val prepSessions =
       // Only set up prep sessions for items in Zambia locations that correspond to Zoom rooms:
@@ -172,20 +185,11 @@ class ScheduleServiceImpl(
             doorsClose = Some(ProgramItemTimestamp(zoomEnd))
           )
         }
-    val adjustedZoomSessions =
-      zoomSessions.map { item =>
-        val doorsOpen = item.when.minus(entryTime.toJava)
-        val doorsClose = item.end
-        item.copy(
-          doorsOpen = Some(ProgramItemTimestamp(doorsOpen)),
-          doorsClose = Some(ProgramItemTimestamp(doorsClose))
-        )
-      }
 
     logger.info(s"Computed ${prepSessions.length} prep sessions")
 
     base.copy(
-      program = nonZoomSessions ++ adjustedZoomSessions ++ prepSessions
+      program = nonZoomSessions ++ zoomSessions ++ prepSessions
     )
   }
 
