@@ -16,7 +16,7 @@
             <div class="contents now-playing-title">{{current.title}}</div>
           </ng-container>
           <ng-container *ngIf="runningEvents.next as next">
-            <div class="contents now-playing-next">Coming next: {{next.title}}</div>
+            <div class="contents now-playing-next">{{next.getTimeString()}}: {{next.title}}</div>
           </ng-container>
         </div>
       </div>
