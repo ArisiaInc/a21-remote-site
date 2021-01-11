@@ -1,7 +1,7 @@
 <app-breadcrumb></app-breadcrumb>
 <div class="row">
   <div class="col-12 col-sm-6 col-md-4" *ngFor="let room of rooms$ | async">
-    <div class="row room-box">
+    <div class="room-box">
       <div class="room">
         <app-link routerLink="/programming/{{room.id}}">{{room.name}}</app-link>
       </div>
