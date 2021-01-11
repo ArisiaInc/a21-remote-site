@@ -95,7 +95,7 @@ class AdminController (
     addFunc: (AdminService, LoginId) => Future[Int],
     onSuccess: Request[AnyContent] => Future[Result],
     onError: Call
-  ): AdminInfo => Future[Result] = { info =>
+  ): AdminInfo[AnyContent] => Future[Result] = { info =>
     implicit val request = info.request
 
     usernameForm.bindFromRequest().fold(
@@ -113,7 +113,7 @@ class AdminController (
     idStr: String,
     removeFunc: (AdminService, LoginId) => Future[Int],
     whenFinished: Call
-  ): AdminInfo => Future[Result] = { info =>
+  ): AdminInfo[AnyContent] => Future[Result] = { info =>
     val id = LoginId(idStr)
     val fut = for {
       targetPerms <- loginService.getPermissions(id)
