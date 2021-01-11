@@ -48,6 +48,7 @@ GET     /admin/ducks                 arisia.controllers.DuckController.manageDuc
 GET     /admin/createDuck            arisia.controllers.DuckController.createDuck()
 GET     /admin/editDuck/:id          arisia.controllers.DuckController.showEditDuck(id: Int)
 POST    /admin/editDuck              arisia.controllers.DuckController.duckModified()
+DELETE  /admin/ducks/:id             arisia.controllers.DuckController.removeDuck(id: Int)
 
 GET     /api/settings                arisia.controllers.SettingsController.getSettings()
 POST    /api/settings                arisia.controllers.SettingsController.addSettings()
