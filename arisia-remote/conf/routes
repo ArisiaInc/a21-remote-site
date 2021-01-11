@@ -133,6 +133,7 @@ GET     /admin/rooms                 arisia.controllers.ZoomController.manageZoo
 GET     /admin/createRoom            arisia.controllers.ZoomController.createRoom()
 GET     /admin/editRoom/:id          arisia.controllers.ZoomController.showEditRoom(id: Int)
 POST    /admin/editRoom              arisia.controllers.ZoomController.roomModified()
+DELETE  /admin/rooms/:id             arisia.controllers.ZoomController.removeRoom(id: Int)
 
 # This is mainly internal, for testing; we might add a UI if we find a use for it, but don't do that casually:
 POST    /admin/meeting               arisia.controllers.AdminController.startMeeting()

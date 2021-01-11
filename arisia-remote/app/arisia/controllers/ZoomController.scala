@@ -129,4 +129,10 @@ class ZoomController(
     )
   }
 
+  def removeRoom(id: Int): EssentialAction = adminsOnlyAsync { info =>
+    roomService.removeRoom(id).map { _ =>
+      Redirect(arisia.controllers.routes.ZoomController.manageZoomRooms())
+    }
+  }
+
 }
