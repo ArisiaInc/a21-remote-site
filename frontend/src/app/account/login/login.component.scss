@@ -1,3 +1,7 @@
+@import "node_modules/bootstrap/scss/functions";
+@import "node_modules/bootstrap/scss/variables";
+@import "node_modules/bootstrap/scss/mixins/_breakpoints";
+
 .login {
     font-size: 2rem;
     background: white;
@@ -11,34 +15,74 @@
     font-size: .8125rem;
 }
 
-:host {
-    background: linear-gradient(270deg, #DFDAD0 0%, white 59.08%);
-    display: block;
-    height: 43.75rem;
-    position: relative;
+.background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: linear-gradient(90deg, white 40%, #DFDAD0 100%);
     width: 100%;
+    height: 100%;
+    z-index: 1;
 }
+
+:host {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.contents {
+    position: relative;
+    height: 43.75rem;
+    z-index: 2;
+}
+
+$art-padding: 28.75rem;
 
 .art {
     height: 43.75rem;
     left: 0;
     position: absolute;
     top: 0;
+
+    @include media-breakpoint-down(md) {
+        display: none;
+    }
 }
 
 .title {
     font-size: 2.25rem;
     padding-bottom: 3.25rem;
     padding-top: 7.5rem;
-    padding-left: 29.5rem;
+    padding-left: .75rem + $art-padding;
     padding-right: .75rem;
     text-align: center;
     width: 100%;
+
+    @include media-breakpoint-down(lg) {
+        padding-left: $art-padding;
+        padding-right: 0;
+    }
+    @include media-breakpoint-down(md) {
+        padding-left: 0.75rem;
+    }
 }
 
 .content, .footer {
-    padding-left: 33.5rem;
+    padding-left: 4.75rem + $art-padding;
     padding-right: 4.75rem;
+
+    @include media-breakpoint-only(lg) {
+        padding-left: 3rem + $art-padding;
+        padding-right: 3rem;
+    }
+    @include media-breakpoint-only(md) {
+        padding-left: 4.75rem;
+    }
+    @include media-breakpoint-down(sm) {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
 }
 
 .footer {
