@@ -86,7 +86,7 @@ class ScheduleTestController(
           List(ProgramItemLoc(input.loc)),
           people,
           toField(input.desc, ProgramItemDesc(_)),
-          None, None, None, None
+          None, None, None, None, None, None
         )
 
         scheduleService.addTestItem(item)

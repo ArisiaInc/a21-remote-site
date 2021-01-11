@@ -144,15 +144,15 @@ class ScheduleServiceImpl(
 
   def computeScheduleWithPrep(base: Schedule): Schedule = {
     val relevantLocs = roomService.getRooms().map(room => ProgramItemLoc(room.zambiaName))
+    val (zoomSessions, nonZoomSessions) = base.program.partition { item =>
+      item.loc.headOption match {
+        case Some(loc) if (relevantLocs.contains(loc)) => true
+        case _ => false
+      }
+    }
     val prepSessions =
-      base.program
-        // Only set up prep sessions for items in Zambia locations that correspond to Zoom rooms:
-        .filter { item =>
-          item.loc.headOption match {
-            case Some(loc) if (relevantLocs.contains(loc)) => true
-            case _ => false
-          }
-        }
+      // Only set up prep sessions for items in Zambia locations that correspond to Zoom rooms:
+      zoomSessions
         .map { item =>
           val prepTitle = item.title.map(t => ProgramItemTitle(s"Prep - ${t.v}"))
           val itemStart = item.when
@@ -167,14 +167,25 @@ class ScheduleServiceImpl(
             timestamp = Some(ProgramItemTimestamp(prepStart)),
             mins = Some(prepMins.toString),
             zoomStart = Some(ProgramItemTimestamp(prepStart)),
-            zoomEnd = Some(ProgramItemTimestamp(zoomEnd))
+            zoomEnd = Some(ProgramItemTimestamp(zoomEnd)),
+            doorsOpen = Some(ProgramItemTimestamp(prepStart)),
+            doorsClose = Some(ProgramItemTimestamp(zoomEnd))
           )
         }
+    val adjustedZoomSessions =
+      zoomSessions.map { item =>
+        val doorsOpen = item.when.minus(entryTime.toJava)
+        val doorsClose = item.end
+        item.copy(
+          doorsOpen = Some(ProgramItemTimestamp(doorsOpen)),
+          doorsClose = Some(ProgramItemTimestamp(doorsClose))
+        )
+      }
 
     logger.info(s"Computed ${prepSessions.length} prep sessions")
 
     base.copy(
-      program = base.program ++ prepSessions
+      program = nonZoomSessions ++ adjustedZoomSessions ++ prepSessions
     )
   }
 
