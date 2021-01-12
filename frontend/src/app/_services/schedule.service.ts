@@ -3,8 +3,9 @@ import { BehaviorSubject, ReplaySubject, Observable, of, zip, OperatorFunction, 
 import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck, every, switchMap, repeat, ignoreElements, shareReplay } from 'rxjs/operators';
 import { HttpClient, HttpResponse, HttpErrorResponse } from '@angular/common/http';
 
+import { PerformanceService } from './performance.service';
 import { Initial, createInitials, searchPrefixCaseInsensitive } from '@app/_helpers/utils';
-import { ProgramItem, ProgramPerson, ProgramFilter, DateRange } from '@app/_models';
+import { ProgramItem, ProgramPerson, ProgramFilter, DateRange, Performance } from '@app/_models';
 import { SettingsService } from './settings.service';
 import { StarsService } from './stars.service';
 import { environment } from '@environments/environment';
@@ -81,6 +82,8 @@ export class ScheduleEvent {
   mins: number;
   location: string[];
   people: {person: SchedulePerson, isModerator: boolean}[];
+
+  performance?: Performance;
 
   get starred(): boolean {
     return this.starCache;
@@ -316,9 +319,12 @@ export class ScheduleService {
   private status: ScheduleStatus = {state: ScheduleState.IDLE};
   status$ = new BehaviorSubject<ScheduleStatus>(this.status);
 
+  performances?: Performance[];
+
   constructor(private http: HttpClient,
               private settingsService: SettingsService,
-              private starsService: StarsService,) {
+              private starsService: StarsService,
+              private performanceService: PerformanceService,) {
     this.init();
     hour12ConstSet$ = settingsService.hour12$.pipe(tap(value => hour12 = value));
     hour12ConstSet$.subscribe();
@@ -332,6 +338,11 @@ export class ScheduleService {
       createInitials(),
       shareReplay(1),
     );
+
+    performanceService.performances$.subscribe(performances => {
+      this.performances = performances;
+      this.combinePerformances(true);
+    });
   }
 
   private reload(): void {
@@ -403,6 +414,8 @@ export class ScheduleService {
 
     this.schedule = buildStructuredEvents(this.events);
 
+    this.combinePerformances(false);
+
     this.events$.next(this.events);
     this.eventsMap$.next(this.eventsMap);
     this.people$.next(this.people);
@@ -432,6 +445,21 @@ export class ScheduleService {
       this.status$.next(this.status);
     }
     this.loading = false;
+  }
+
+  private combinePerformances(emit: boolean) {
+    if (this.events.length > 0 && this.performances) {
+      this.performances.forEach(performance => {
+        const event = this.eventsMap[performance.sessionId];
+        if (event) {
+          event.performance = performance;
+        }
+      });
+      if (emit) {
+        this.events$.next(this.events);
+        this.eventsMap$.next(this.eventsMap);
+      }
+    }
   }
 
   init() {
@@ -563,6 +591,10 @@ export class ScheduleService {
           repeat(),
         )),
     );
+  }
+
+  getPerformanceEvents(): Observable<RunningEvents> {
+    return this.getNextEvents('Performance Hall');
   }
 
   get_featured_events(): Observable<StructuredEvents> {

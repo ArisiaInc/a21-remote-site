@@ -27,6 +27,7 @@ import { SpecialComponent } from './gaming/special/special.component';
 import { SignupComponent } from './gaming/signup/signup.component';
 import { DropinComponent } from './gaming/dropin/dropin.component';
 import { UserComponent } from './user/user.component';
+import { PerformanceComponent } from './performance/performance.component';
 import { SocialComponent } from './social/social.component';
 import { DuckListComponent } from './user/duck-list/duck-list.component';
 import { ProfileDuckComponent } from './user/profile-duck/profile-duck.component';
@@ -54,6 +55,7 @@ import { ProfileDuckComponent } from './user/profile-duck/profile-duck.component
     SignupComponent,
     DropinComponent,
     UserComponent,
+    PerformanceComponent,
     SocialComponent,
     DuckListComponent,
     ProfileDuckComponent,

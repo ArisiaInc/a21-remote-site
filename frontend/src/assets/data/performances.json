@@ -1,0 +1,38 @@
+[
+    {
+        "sessionId": "258",
+        "streamId": "youraveragechris",
+        "platform": "twitchChannel",
+        "liveQA": false
+    },
+    {
+        "sessionId": "265",
+        "streamId": "837865477",
+        "platform": "twitchVideo",
+        "liveQA": false
+    },
+    {
+        "sessionId": "475",
+        "streamId": "YhYfkLUNt8M",
+        "platform": "youtubeVideo",
+        "liveQA": true
+    },
+    {
+        "sessionId": "475",
+        "streamId": "4749536",
+        "platform": "vimeoVideo",
+        "liveQA": true
+    },
+    {
+        "sessionId": "261",
+        "streamId": "dQw4w9WgXcQ",
+        "platform": "youtubeVideo",
+        "liveQA": true
+    },
+    {
+        "sessionId": "261",
+        "streamId": "dQw4w9WgXcQ",
+        "platform": "youtubeVideo",
+        "liveQA": true
+    }
+]
