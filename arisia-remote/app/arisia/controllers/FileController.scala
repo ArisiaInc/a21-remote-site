@@ -4,6 +4,7 @@ import akka.stream.scaladsl.Sink
 import akka.util.ByteString
 import arisia.auth.LoginService
 import arisia.general.{FileService, FileType}
+import play.api.Logging
 
 import scala.concurrent.ExecutionContext
 import play.api.i18n.I18nSupport
@@ -23,7 +24,9 @@ class FileController(
   implicit val ec: ExecutionContext
 ) extends BaseController
   with AdminControllerFuncs
-  with I18nSupport {
+  with I18nSupport
+  with Logging
+{
 
   def manageMetadata(): EssentialAction = Action { implicit request =>
     Ok(arisia.views.html.uploadMetadata())
@@ -41,7 +44,7 @@ class FileController(
   def multipartFormDataAsBytes: BodyParser[MultipartFormData[ByteString]] =
     controllerComponents.parsers.multipartFormData(byteStringFilePartHandler)
 
-  def uploadBase(tpe: FileType): EssentialAction = adminsOnlyAsync(multipartFormDataAsBytes) { adminInfo =>
+  def uploadBase(tpe: FileType): EssentialAction = adminsOnlyAsync(multipartFormDataAsBytes)(s"Upload ${tpe.value}") { adminInfo =>
     val request = adminInfo.request
     // Rather than farting around with the terribly sophisticated and terribly hard-to-use multipart machinery
     // built into Play, we're doing this as dead-simply as we can:
