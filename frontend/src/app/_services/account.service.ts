@@ -59,13 +59,22 @@ export class AccountService {
   }
 
   getUser(badgeNumber: string) : Observable<User> {
+      // This is for testing.
+      /*
     if (this.user?.badgeNumber === badgeNumber) {
+      this.user.self = true;
+      this.user.ducks = [1];
       return of(this.user);
     } else {
-      // This is for testing.
-      return of({id: 'joe', name: 'Joe', badgeNumber: badgeNumber, zoomHost: false});
-      // below is the real one
-      // this.http.get<User>(`${environment.backend}/user/${id}`, {withCredentials: true})
+      return of({id: 'joe', name: 'Joe', badgeNumber: badgeNumber, zoomHost: false, ducks: [1,3], self: false});
     }
+    */
+    // below is the real one
+    return this.http.get<User>(`${environment.backend}/user/${badgeNumber}`, {withCredentials: true}).pipe(
+      map(user => {
+        user && this.user?.badgeNumber === badgeNumber ? user.self = true : user.self = false;
+        return user;
+      })
+    );
   }
 }
