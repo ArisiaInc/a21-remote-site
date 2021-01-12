@@ -29,6 +29,7 @@ import { DropinComponent } from './gaming/dropin/dropin.component';
 import { UserComponent } from './user/user.component';
 import { HelpComponent } from './help/help.component';
 import { FooterComponent } from './footer/footer.component';
+import { SetupComponent } from './help/setup/setup.component';
 
 @NgModule({
   declarations: [
@@ -55,6 +56,7 @@ import { FooterComponent } from './footer/footer.component';
     UserComponent,
     HelpComponent,
     FooterComponent,
+    SetupComponent,
   ],
   imports: [
     BrowserModule,

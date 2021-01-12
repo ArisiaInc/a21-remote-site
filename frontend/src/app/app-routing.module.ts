@@ -16,6 +16,7 @@ import { LarpComponent } from './gaming/larp/larp.component';
 import { SpecialComponent } from './gaming/special/special.component';
 import { UserComponent } from './user/user.component';
 import { HelpComponent } from './help/help.component';
+import { SetupComponent } from './help/setup/setup.component';
 
 const accountModule = () => import('./account/account.module').then(x => x.AccountModule);
 const scheduleModule = () => import('./schedule/schedule.module').then(x => x.ScheduleModule);
@@ -40,6 +41,7 @@ const routes: Routes = [
   {path: 'user', component: UserComponent, canActivate: [AuthGuard, UserPageRedirectGuard]},
   {path: 'user/:id', component: UserComponent, canActivate: [AuthGuard]},
   {path: 'help', component: HelpComponent},
+  {path: 'setup', component: SetupComponent},
 
   //redirect home
   {path: '**', redirectTo: '/map'}
