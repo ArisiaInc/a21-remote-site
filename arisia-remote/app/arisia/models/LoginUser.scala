@@ -4,7 +4,9 @@ import arisia.auth.MembershipType
 import arisia.util.{StdString, StdStringUtils}
 import play.api.libs.json.{Format, Json, Writes}
 
-case class LoginId(v: String) extends StdString
+case class LoginId(v: String) extends StdString {
+  lazy val lower: String = v.toLowerCase
+}
 object LoginId extends StdStringUtils(new LoginId(_))
 
 case class LoginName(v: String) extends StdString

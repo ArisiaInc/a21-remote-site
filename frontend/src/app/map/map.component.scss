@@ -7,7 +7,7 @@
     margin-top: 0.625rem;
 }
 
-.map-entry {
+.aspect-ratio {
   position: relative;
   width: 100%;
 
@@ -26,28 +26,31 @@
   }
 }
 
-.map-entry.ribbon {
+.aspect-ratio.ribbon {
     &::before {
         padding-top: 44.6%;
     }
 }
 
-.map-entry.desk {
+.aspect-ratio.desk {
     &::before {
         padding-top: 60.8%;
     }
 }
 
-.map-entry.hall {
+.aspect-ratio.hall {
     &::before {
         padding-top: 150%;
     }
 }
 
+.map-entry {
+    margin: 0.5rem;
+}
+
 .hall-header {
     width:100%;
     height: 3rem;
-    margin: 0.625rem;
     margin-bottom: -2.375rem;
     background: rgba(56, 167, 202, 0.25);
     border: 1px solid #006382;
@@ -57,23 +60,27 @@
 
 .hall {
     margin-top: 2.375rem;
-    margin-left: 0.625rem;
-    margin-right: 0.625rem;
+    padding-left: 0.625rem;
+    padding-right: 0.625rem;
+    padding-right: 0.625rem;
 }
 
 .coffee {
     padding: 0.1875rem;
+    position: absolute;
+    left: 0.625rem;
     height: 3rem;
     width: 3rem;
 }
 
+$coffee-text-left: 3.4375rem;
+
 .coffee-text {
     font-size: 1.5rem;
-    width: 100%;
+    width: calc(100% - #{$coffee-text-left});
     position: absolute;
-    padding-left: 3rem;
+    left: $coffee-text-left;
     top: 50%;
-    width: 100%;
     transform: translate(0, -50%);
     text-align: center;
 }

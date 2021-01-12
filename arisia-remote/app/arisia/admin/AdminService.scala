@@ -65,7 +65,7 @@ class AdminServiceImpl(
       val query =
         fr"""INSERT INTO permissions
            (username, """ ++ column ++ fr""")
-           VALUES (${id.v}, TRUE)
+           VALUES (${id.lower}, TRUE)
            ON CONFLICT (username)
            DO UPDATE SET""" ++ column ++ fr"= TRUE"
       dbService.run(
@@ -80,7 +80,7 @@ class AdminServiceImpl(
       val query =
         fr"""UPDATE permissions
            SET""" ++ column ++ fr"""= FALSE
-           WHERE username = ${id.v}"""
+           WHERE username = ${id.lower}"""
       dbService.run(
         query
           .update

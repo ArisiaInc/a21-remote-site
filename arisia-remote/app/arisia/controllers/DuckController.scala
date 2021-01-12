@@ -75,10 +75,7 @@ class DuckController(
   def manageDucks(): EssentialAction = adminsOnly { info =>
     implicit val request = info.request
 
-    logger.info("In manageDucks")
-
     val ducks = duckService.getDucks()
-    logger.info("Got the ducks")
     Ok(arisia.views.html.manageDucks(ducks))
   }
 
@@ -118,6 +115,12 @@ class DuckController(
         }
       }
     )
+  }
+
+  def removeDuck(id: Int): EssentialAction = adminsOnlyAsync { info =>
+    duckService.removeDuck(id).map { _ =>
+      Redirect(arisia.controllers.routes.DuckController.manageDucks())
+    }
   }
 
 }

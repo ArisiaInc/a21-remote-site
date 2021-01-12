@@ -39,6 +39,7 @@
 
 .section-options {
     font-size: 1.125rem;
+    line-height: 1.5rem;
     white-space: nowrap;
 }
 
@@ -68,16 +69,29 @@ $discordAspect: 2.9375;
 }
 
 
+.content {
+    position: relative;
+}
 
-$couchTop: 20rem;
-$couchScale: 1;
+.below-header {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+$floorTop: 37rem;
+
+$couchScale: 0.625;
+
+$couchTop: $floorTop - $couchScale * 34.25rem;
+
 
 .couch {
     position: absolute;
-    left: 0.5rem;
+    left: $couchScale * -5rem;
     top: $couchTop;
-    width: $couchScale * 37.375rem;
-    height: $couchScale * 22.75rem;
+    width: $couchScale * 71.875rem;
+    height: $couchScale * 40.375rem;
     z-index: 3;
 }
 
@@ -86,33 +100,10 @@ $couchScale: 1;
     position: relative;
 }
 
-.content {
-    position: relative;
-}
-
-.below-header {
-    width: 100%;
-    height: 100%;
-//    overflow: hidden;
-    position: relative;
-}
-
-$floorTop: $couchTop + $couchScale * 19.75rem;
-$floorEdgeHeight: $couchScale * 0.625rem;
-
-
-.floorEdge {
-    position: absolute;
-    top: $floorTop;
-    left: 0;
-    height: $floorEdgeHeight;
-    width: 100%;
-    background: #202020;
-    z-index: 2;
-}
 
 .floor {
     position: absolute;
+    border-top: solid 0.625rem #202020;
     top: $floorTop;
     left: 0;
     height: calc(100% - #{$floorTop});

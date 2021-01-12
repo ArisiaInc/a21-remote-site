@@ -93,7 +93,7 @@ class DuckServiceImpl(
            INSERT INTO member_ducks
            (username, duck_id)
            VALUES
-           (${who.v}, $duckId)"""
+           (${who.lower}, $duckId)"""
               .update
               .run
           )
@@ -115,7 +115,7 @@ class DuckServiceImpl(
     dbService.run(
       sql"""
            DELETE FROM member_ducks
-            WHERE username = ${who.v} AND duck_id = $duck"""
+            WHERE username = ${who.lower} AND duck_id = $duck"""
         .update
         .run
     )
@@ -136,11 +136,11 @@ class DuckServiceImpl(
   def editDuck(duck: Duck): Future[List[Duck]] = {
     dbService.run(
       sql"""
-           UPDATE duck
-              SET image = ${duck.imageUrl}
-                  alt = ${duck.altText}
-                  link = ${duck.link}
-                  hint = ${duck.hint}
+           UPDATE ducks
+              SET image = ${duck.imageUrl},
+                  alt = ${duck.altText},
+                  link = ${duck.link},
+                  hint = ${duck.hint},
                   requesting_url = ${duck.requestingUrl}
             WHERE did = ${duck.id}"""
         .update

@@ -18,6 +18,7 @@
             <th>Discord Channel Name</th>
             <th>Manual</th>
             <th>Webinar</th>
+            <th></th>
         </tr>
       </thead>
       <tbody>
@@ -30,10 +31,35 @@
               <td>@{room.discordName}</td>
               <td>@{room.isManual}</td>
               <td>@{room.isWebinar}</td>
+              <td><button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#removeModal" data-confirmid="@{room.id}">Remove</button></td>
           </tr>
         }
       </tbody>
   </table>
 
   <a class="btn btn-primary" href="/admin/createRoom">Add another Zoom Room</a>
+
+@*
+* Confirm dialog for removing this room.
+*@
+<div class="modal fade confirmModal" id="removeModal" tabindex="-1" role="dialog" aria-labelledby="confirmRemoveLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmRemoveLabel">Confirm Remove Room</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Please confirm: remove room <span class="modal-body-id"></span>?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger confirmed-button" id="remove-button"
+                        data-baseurl="/admin/rooms/">Remove Room</button>
+            </div>
+        </div>
+    </div>
+</div>
 }
