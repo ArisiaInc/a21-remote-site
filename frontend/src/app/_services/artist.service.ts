@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 import { environment } from '@environments/environment';
 import { CreatorService } from './creator.service';
+import { Creator } from '@app/_models';
 
 @Injectable({
   providedIn: 'root'
@@ -19,5 +21,9 @@ export class ArtistService extends CreatorService {
     } else {
       return `${environment.backend}/artists`;
     }
+  }
+
+  protected gohSearch(): Observable<Creator[]> {
+    return this.getCreatorsById(["112042"]);
   }
 }
