@@ -102,6 +102,31 @@ GET     /api/metadata/artshow        arisia.controllers.FileController.getArtsho
 ###
 GET     /api/metadata/dealers        arisia.controllers.FileController.getDealersMetadata()
 
+
+###
+#  summary: fetch the metadata for Gaming
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/metadata/gaming        arisia.controllers.FileController.getGamingMetadata()
+
+###
+#  summary: fetch the metadata for Events
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/metadata/events        arisia.controllers.FileController.getEventsMetadata()
+
 ###
 #  summary: make this person an Arisian
 #  parameters:
@@ -166,6 +191,8 @@ DELETE  /admin/meeting/:meetingId    arisia.controllers.AdminController.endMeeti
 GET     /admin/manageMetadata        arisia.controllers.FileController.manageMetadata()
 POST    /admin/uploadArtshowMetadata arisia.controllers.FileController.uploadArtshowMetadata()
 POST    /admin/uploadDealersMetadata arisia.controllers.FileController.uploadDealersMetadata()
+POST    /admin/uploadGamingMetadata  arisia.controllers.FileController.uploadGamingMetadata()
+POST    /admin/uploadEventsMetadata  arisia.controllers.FileController.uploadEventsMetadata()
 
 # Note the non-standard path, which is configured in application.conf, so that frontend
 # can own /assets
