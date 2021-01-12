@@ -1,8 +1,8 @@
 package arisia.controllers
 
 import arisia.auth.LoginService
-import arisia.discord.{DiscordUserCredentials, DiscordService, DiscordHelpCredentials}
-import play.api.Configuration
+import arisia.discord.{DiscordHelpCredentials, DiscordUserCredentials, DiscordService}
+import play.api.{Configuration, Logging}
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
 import play.api.mvc.{BaseController, ControllerComponents, EssentialAction}
@@ -20,6 +20,7 @@ class DiscordController(
   with AdminControllerFuncs
   with UserFuncs
   with I18nSupport
+  with Logging
 {
   // TODO: remove this test entry point
   def test(): EssentialAction = Action.async { implicit request =>
