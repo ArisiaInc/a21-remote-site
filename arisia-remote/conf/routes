@@ -67,6 +67,7 @@ GET     /api/schedule/:id/zoomhost   arisia.controllers.ZoomController.enterItem
 GET     /api/ducks                   arisia.controllers.DuckController.getDucks()
 GET     /api/ducks/:id               arisia.controllers.DuckController.getDuck(id: Int)
 POST    /api/ducks/:id               arisia.controllers.DuckController.assignDuck(id: Int)
+DELETE  /api/ducks/:id               arisia.controllers.DuckController.dropDuck(id: Int)
 
 GET     /admin/ducks                 arisia.controllers.DuckController.manageDucks()
 GET     /admin/createDuck            arisia.controllers.DuckController.createDuck()

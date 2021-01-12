@@ -52,6 +52,12 @@ class DuckController(
     }
   }
 
+  def dropDuck(duckId: Int): EssentialAction = withLoggedInUser { userRequest =>
+    duckService.dropDuck(userRequest.user.id, duckId).map { _ =>
+      NoContent
+    }
+  }
+
 
   ///////////////////////////////
   //
