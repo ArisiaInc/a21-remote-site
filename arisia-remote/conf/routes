@@ -21,6 +21,25 @@ POST    /api/login                   arisia.controllers.LoginController.login()
 
 GET     /api/me                      arisia.controllers.LoginController.me()
 
+
+###
+#  summary: fetch the specified frontend config entry
+#  parameters:
+#    - in: path
+#      name: name
+#      schema:
+#        type: string
+#      required: true
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/config/:name            arisia.controllers.FrontendController.getConfigEntry(name)
+
 ###
 #  summary: fetch the Profile info for the specified person
 #  responses:

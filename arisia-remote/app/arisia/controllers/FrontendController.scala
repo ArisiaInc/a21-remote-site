@@ -21,4 +21,11 @@ class FrontendController(
 
   def assetOrDefault(resource: String): Action[AnyContent] =
     if (resource.contains(".")) assets.versioned(s"/frontend/$resource") else index()
+
+  def getConfigEntry(name: String): EssentialAction = Action { implicit request =>
+    config.getOptional[String](s"arisia.frontend.$name") match {
+      case Some(v) => Ok(v)
+      case _ => NotFound("")
+    }
+  }
 }
