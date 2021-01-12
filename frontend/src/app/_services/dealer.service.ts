@@ -17,7 +17,7 @@ export class DealerService extends CreatorService {
     if (local) {
       return 'assets/data/dealers.json';
     } else {
-      return `${environment.backend}/dealers`;
+      return `${environment.backend}/metadata/dealers`;
     }
   }
 }
