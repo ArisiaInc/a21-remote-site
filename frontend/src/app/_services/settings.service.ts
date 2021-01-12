@@ -67,11 +67,13 @@ export class SettingsService {
               this.settings = settings;
               this.hour12$.next(this.hour12);
               this.timeOffset$.next(this.timeOffset);
+              this.disableAnimations$.next(this.disableAnimations);
             });
         } else {
           this.settings = {};
           this.hour12$.next(this.hour12);
           this.timeOffset$.next(this.timeOffset);
+          this.disableAnimations$.next(this.disableAnimations);
         }
       });
   }
