@@ -21,6 +21,18 @@ POST    /api/login                   arisia.controllers.LoginController.login()
 
 GET     /api/me                      arisia.controllers.LoginController.me()
 
+###
+#  summary: fetch the Profile info for the specified person
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/user/:id                arisia.controllers.LoginController.getProfileInfo(id)
+
 # Logs the current user out
 # No body is expected on this one
 # Always succeeds with OK (200), regardless of whether the user was logged in or not
