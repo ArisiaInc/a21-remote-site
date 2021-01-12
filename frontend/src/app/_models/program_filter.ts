@@ -1,6 +1,6 @@
 /** Events match a DateRange if the start of the even is during the
  * interval. If inclusive is true, then an event that has started
- * before the DateRange's start, but is still going. */
+ * before the DateRange's start, but is still going will match. */
 export interface DateRange {
   start: Date;
   end?: Date;

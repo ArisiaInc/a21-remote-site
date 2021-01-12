@@ -31,7 +31,7 @@ let hour12: boolean = false;
 let hour12ConstSet$!: Observable<boolean>;
 
 export class ScheduleEvent {
-  constructor (item: ProgramItem, private starsService: StarsService) {
+  constructor (item: ProgramItem, private starsService: StarsService, settingsService: SettingsService) {
     this.id = item.id;
     this.title = item.title;
     this.description = item.desc;
@@ -42,6 +42,11 @@ export class ScheduleEvent {
     this.people = [];
     this.tempPeople = item.people;
     this.starCache = this.starsService.has(this.id);
+    if (item.doorsOpen && item.doorsClose) {
+      this.doorsOpen$ = settingsService.isInDateRange({start: new Date(item.doorsOpen), end: new Date(item.doorsClose)});
+    } else {
+      this.doorsOpen$ = of(false);
+    }
   }
 
   link(peopleMap: {[_: string]: SchedulePerson}): void {
@@ -81,6 +86,8 @@ export class ScheduleEvent {
   mins: number;
   location: string[];
   people: {person: SchedulePerson, isModerator: boolean}[];
+
+  doorsOpen$: Observable<boolean>;
 
   get starred(): boolean {
     return this.starCache;
@@ -366,7 +373,7 @@ export class ScheduleService {
     this.peopleMap = {};
     this.eventsMap = {};
 
-    this.events = program.program.map(item => new ScheduleEvent(item, this.starsService));
+    this.events = program.program.map(item => new ScheduleEvent(item, this.starsService, this.settingsService));
     this.events.forEach(event => this.eventsMap[event.id] = event);
     this.events.sort((a, b) => a.start.getTime() - b.start.getTime());
 

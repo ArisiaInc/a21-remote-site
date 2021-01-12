@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, defer, of, timer, concat } from 'rxjs';
+import { repeat, ignoreElements } from 'rxjs/operators';
 
 import { AccountService } from './account.service';
 import { environment } from '@environments/environment';
+import { DateRange } from '@app/_models';
 
 @Injectable({
   providedIn: 'root'
@@ -41,6 +43,20 @@ export class SettingsService {
 
   set currentTime(value: Date) {
     this.timeOffset = value.getTime() - new Date().getTime();
+  }
+
+  isInDateRange(dateRange: DateRange): Observable<boolean> {
+    return defer(() => {
+      const startTime = dateRange.start.getTime() - this.currentTime.getTime();
+      const endTime = dateRange.end ? dateRange.end.getTime() - this.currentTime.getTime() : Infinity;
+      if (startTime > 0) {
+        return concat(of(false), timer(startTime).pipe(ignoreElements()));
+      } else if (endTime > 0) {
+        return concat(of(true), timer(endTime).pipe(ignoreElements()));
+      } else {
+        return concat(of(false), timer(Infinity).pipe(ignoreElements()));
+      }
+    }).pipe(repeat());
   }
 
 
