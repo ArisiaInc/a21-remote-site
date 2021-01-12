@@ -43,25 +43,33 @@ class LoginController (
     }
   }
 
+  def getProfileInfoCore(user: LoginUser): Future[Result] = {
+    duckService.getDucksFor(user.id).map { ducks =>
+      val info = ProfileInfo(
+        user.id,
+        user.name,
+        user.badgeNumber,
+        user.zoomHost,
+        ducks.map(_.toString)
+      )
+      Ok(Json.toJson(info).toString)
+    }
+  }
+
   def getProfileInfo(badgeNum: String): EssentialAction = withLoggedInUser { userRequest =>
     loginService.fetchUserInfo(BadgeNumber(badgeNum)).flatMap {
       _ match {
         case Some(user) => {
-          duckService.getDucksFor(user.id).map { ducks =>
-            val info = ProfileInfo(
-              user.id,
-              user.name,
-              user.badgeNumber,
-              user.zoomHost,
-              ducks.map(_.toString)
-            )
-            Ok(Json.toJson(info).toString)
-          }
+          getProfileInfoCore(user)
         }
         case _ =>
           Future.successful(NotFound(s"""{"success":"false", "message":"$badgeNum has not logged in to Virtual Arisia"}"""))
       }
     }
+  }
+
+  def getProfileInfoForMe(): EssentialAction = withLoggedInUser { userRequest =>
+    getProfileInfoCore(userRequest.user)
   }
 
   def login(): EssentialAction = Action.async(controllerComponents.parsers.tolerantJson[LoginRequest]) { implicit request =>

@@ -29,9 +29,21 @@ GET     /api/me                      arisia.controllers.LoginController.me()
 #      content:
 #        text/plain:
 #          schema:
-#            type: string
+#            $ref: '#/definitions/arisia.controllers.ProfileInfo'
 ###
 GET     /api/user/:id                arisia.controllers.LoginController.getProfileInfo(id)
+
+###
+#  summary: fetch the Profile info for the specified person
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            $ref: '#/definitions/arisia.controllers.ProfileInfo'
+###
+GET     /api/user                    arisia.controllers.LoginController.getProfileInfoForMe()
 
 # Logs the current user out
 # No body is expected on this one
