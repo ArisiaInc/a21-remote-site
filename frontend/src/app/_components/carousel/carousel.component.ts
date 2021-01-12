@@ -25,7 +25,7 @@ function moduloIncrement(value: number, divisor: number): number {
 })
 export class CarouselComponent implements OnChanges {
   @Input() images: Image[] = [];
-  @Input() disableAutoplay = false;
+  @Input() autoplay = true;
 
   currentImage: number = 0;
 
@@ -42,7 +42,7 @@ export class CarouselComponent implements OnChanges {
   constructor(public settingsService: SettingsService) {
     // Can't figure out how to disable autoplay. Set it to a one year interval.
     this.autoplayInterval$ = settingsService.disableAnimations$.pipe(map(
-      disableAnimations => (disableAnimations || this.disableAutoplay) ? 30000000 : 20000));
+      disableAnimations => (this.autoplay && !disableAnimations) ? 20000 : 30000000));
   }
 
   ngOnChanges(): void {
