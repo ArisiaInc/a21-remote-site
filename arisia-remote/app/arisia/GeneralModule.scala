@@ -5,7 +5,7 @@ import arisia.admin.{RoomServiceImpl, RoomService, AdminServiceImpl, AdminServic
 import arisia.auth.{CMService, CMServiceImpl, LoginService, LoginServiceImpl}
 import arisia.db.{DBServiceImpl, DBService}
 import arisia.discord.{DiscordServiceImpl, DiscordService}
-import arisia.fun.{DuckServiceImpl, DuckService}
+import arisia.fun.{RibbonService, DuckServiceImpl, DuckService, RibbonServiceImpl}
 import arisia.general.{SettingsServiceImpl, FileService, LifecycleServiceImpl, SettingsService, LifecycleService, FileServiceImpl}
 import com.softwaremill.macwire.wire
 import arisia.schedule.{ScheduleService, ScheduleQueueService, ScheduleServiceImpl, StarService, StarServiceImpl, ScheduleQueueServiceImpl}
@@ -33,6 +33,7 @@ trait GeneralModule extends ZoomModule {
   lazy val fileService: FileService = wire[FileServiceImpl]
   lazy val lifecycleService: LifecycleService = wire[LifecycleServiceImpl]
   lazy val loginService: LoginService = wire[LoginServiceImpl]
+  lazy val ribbonService: RibbonService = wire[RibbonServiceImpl]
   lazy val roomService: RoomService = wire[RoomServiceImpl]
   lazy val scheduleQueueService: ScheduleQueueService = wire[ScheduleQueueServiceImpl]
   lazy val scheduleService: ScheduleService = wire[ScheduleServiceImpl]

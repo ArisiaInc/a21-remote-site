@@ -94,6 +94,12 @@ GET     /admin/editDuck/:id          arisia.controllers.DuckController.showEditD
 POST    /admin/editDuck              arisia.controllers.DuckController.duckModified()
 DELETE  /admin/ducks/:id             arisia.controllers.DuckController.removeDuck(id: Int)
 
+GET     /admin/ribbons               arisia.controllers.RibbonController.manageRibbons()
+GET     /admin/createRibbon          arisia.controllers.RibbonController.createRibbon()
+GET     /admin/editRibbon/:id        arisia.controllers.RibbonController.showEditRibbon(id: Int)
+POST    /admin/editRibbon            arisia.controllers.RibbonController.ribbonModified()
+DELETE  /admin/ribbons/:id           arisia.controllers.RibbonController.removeRibbon(id: Int)
+
 GET     /api/settings                arisia.controllers.SettingsController.getSettings()
 POST    /api/settings                arisia.controllers.SettingsController.addSettings()
 DELETE  /api/settings/:key           arisia.controllers.SettingsController.dropSetting(key)

@@ -18,6 +18,8 @@ CREATE TABLE member_ribbons (
     display_order integer NOT NULL
 );
 
+CREATE INDEX member_ribbon_index ON member_ribbons (username, ribbonid);
+
 -- !Downs
 
 DROP TABLE ribbons;

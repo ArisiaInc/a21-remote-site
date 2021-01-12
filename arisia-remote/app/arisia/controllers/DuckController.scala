@@ -63,9 +63,6 @@ class DuckController(
   //
   // Duck CRUD
   //
-  // TODO: this is finally getting to be the straw that breaks the camel's back. We should lift up an
-  // AdminControllerBase class, and put these little CRUDs in their own controllers.
-  //
 
   val duckForm = Form(
     mapping(

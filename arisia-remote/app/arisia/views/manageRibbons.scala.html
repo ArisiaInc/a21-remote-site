@@ -1,0 +1,69 @@
+@(
+  ribbons: List[arisia.fun.Ribbon]
+)(
+  implicit request: RequestHeader, messagesProvider: MessagesProvider
+)
+
+@main("Manage Ribbons") {
+  <h1>Manage Ribbons</h1>
+
+  <table id="ribbonTable" class="display dataTable" style="width: 100%">
+      <thead>
+        <tr>
+            <th>ID</th>
+            <th>Ribbon Text</th>
+            <th>Foreground Color</th>
+            <th>Background Color</th>
+            <th>Gradient</th>
+            <th>Foreground Image</th>
+            <th>Background Image</th>
+            <th>Secret</th>
+            <th>Self Service</th>
+            <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(ribbon <- ribbons) {
+          <tr>
+              <td><a href="/admin/editRibbon/@{ribbon.id}">@{ribbon.id}</a></td>
+              <td>@{ribbon.ribbonText}</td>
+              <td>@{ribbon.colorFg}</td>
+              <td>@{ribbon.colorBg}</td>
+              <td>@{ribbon.gradient}</td>
+              <td>@{ribbon.imageFg}</td>
+              <td>@{ribbon.imageBg}</td>
+              <td>@{ribbon.secret}</td>
+              <td>@{ribbon.selfService}</td>
+              <td><button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#removeModal" data-confirmid="@{ribbon.id}">Remove</button></td>
+          </tr>
+        }
+      </tbody>
+  </table>
+
+  <a class="btn btn-primary" href="/admin/createRibbon">Add another Ribbon</a>
+
+
+@*
+* Confirm dialog for removing this ribbon.
+*@
+<div class="modal fade confirmModal" id="removeModal" tabindex="-1" role="dialog" aria-labelledby="confirmRemoveLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmRemoveLabel">Confirm Remove Ribbon</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Please confirm: remove ribbon <span class="modal-body-id"></span>?</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger confirmed-button" id="remove-button"
+                        data-baseurl="/admin/ribbons/">Remove Ribbon</button>
+            </div>
+        </div>
+    </div>
+</div>
+}

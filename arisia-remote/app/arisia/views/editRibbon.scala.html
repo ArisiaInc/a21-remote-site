@@ -1,0 +1,29 @@
+@(
+  ribbonForm: Form[arisia.fun.Ribbon]
+)(
+  implicit request: RequestHeader, messagesProvider: MessagesProvider
+)
+
+@title = @{
+  if (ribbonForm.get.id == 0)
+    "Create Ribbon"
+  else
+    s"Edit Ribbon ${ribbonForm.get.id}"
+}
+
+@main(title) {
+  <h1>@title</h1>
+
+  @b4.horizontal.form(arisia.controllers.routes.RibbonController.ribbonModified(), "col-md-2", "col-md-10") { implicit hfc =>
+    @b4.text(ribbonForm("id"), Symbol("_label") -> "ID", Symbol("readonly") -> true)
+    @b4.text(ribbonForm("ribbonText"), Symbol("_label") -> "Ribbon Text")
+    @b4.text(ribbonForm("colorFg"), Symbol("_label") -> "Foreground Color")
+    @b4.text(ribbonForm("colorBg"), Symbol("_label") -> "Background Color")
+    @b4.text(ribbonForm("gradient"), Symbol("_label") -> "Gradient")
+    @b4.text(ribbonForm("imageFg"), Symbol("_label") -> "Foreground Image")
+    @b4.text(ribbonForm("imageBg"), Symbol("_label") -> "Background Image")
+    @b4.text(ribbonForm("secret"), Symbol("_label") -> "Secret")
+    @b4.checkbox(ribbonForm("selfService"), Symbol("_label") -> "Self Service")
+    @b4.submit(Symbol("class") -> "btn btn-primary"){ Submit }
+  }
+}
