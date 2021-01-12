@@ -24,9 +24,10 @@ trait RibbonService {
   // API endpoints
   def assignRibbon(who: LoginId, ribbon: Int, secret: String): Future[Int]
   def orderRibbons(who: LoginId, ribbonIds: List[Int]): Future[Int]
-  def getRibbons(selfService: Boolean): List[Ribbon]
+  def getSelfServeRibbons(): List[Ribbon]
   def getRibbon(secret: String): Option[Ribbon]
   def getRibbon(id: Int): Option[Ribbon]
+  def getRibbonsFor(who: LoginId): Future[List[Ribbon]]
 
   // CRUD endpoints
   def getAllRibbons(): List[Ribbon]
@@ -57,22 +58,27 @@ class RibbonServiceImpl(
   }
 
   // API endpoints
-  def assignRibbon(who: LoginId, ribbon: Int, secret: String): Future[Int] = {
-    dbService.run(
-      sql"""
+  def assignRibbon(who: LoginId, ribbonId: Int, secret: String): Future[Int] = {
+    getRibbon(ribbonId) match {
+      case Some(ribbon) if (ribbon.secret == secret) => {
+        dbService.run(
+          sql"""
            INSERT INTO member_ribbons
            (username, ribbonid, display_order)
            VALUES
-           (${who.v}, $ribbon, order)
+           (${who.lower}, $ribbonId, order)
            WHERE order = (
              SELECT COUNT(*)
                FROM member_ribbons
-              WHERE username = ${who.v}
+              WHERE username = ${who.lower}
            )
            ON CONFLICT (username, ribbonid) DO NOTHING"""
-        .update
-        .run
-    )
+            .update
+            .run
+        )
+      }
+      case _ => Future.successful(0)
+    }
   }
   def orderRibbons(who: LoginId, ribbonIds: List[Int]): Future[Int] = {
     // There may be a way to do this in Postgres in one command, but I have no clue what it is, so we'll loop:
@@ -85,7 +91,7 @@ class RibbonServiceImpl(
           sql"""
                  UPDATE member_ribbons
                     SET display_order = index
-                  WHERE username = ${who.v} AND ribbonid = $ribbonid"""
+                  WHERE username = ${who.lower} AND ribbonid = $ribbonid"""
             .update
             .run
         ).flatMap(_ => orderRibbonLoop(index + 1, remainingRibbons.tail))
@@ -94,13 +100,27 @@ class RibbonServiceImpl(
 
     orderRibbonLoop(0, ribbonIds)
   }
-  def getRibbons(selfService: Boolean): List[Ribbon] = {
-    // TODO: what is the intent here?
-    ???
+  def getSelfServeRibbons(): List[Ribbon] = {
+    _ribbonCache.get().filter(_.selfService)
   }
 
   def getRibbon(secret: String): Option[Ribbon] = {
     _ribbonCache.get().find(_.secret == secret)
+  }
+
+  def getRibbonsFor(who: LoginId): Future[List[Ribbon]] = {
+    dbService.run(
+      sql"""
+            SELECT ribbonid
+              FROM member_ribbons
+             ORDER BY display_order
+             WHERE username = ${who.lower}
+           """
+        .query[Int]
+        .to[List]
+    ).map { ribbonIds =>
+      ribbonIds.map(getRibbon(_)).flatten
+    }
   }
 
   // CRUD endpoints

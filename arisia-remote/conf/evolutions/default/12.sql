@@ -14,7 +14,7 @@ CREATE TABLE ribbons (
 
 CREATE TABLE member_ribbons (
     username text NOT NULL,
-    ribbonid text NOT NULL,
+    ribbonid integer NOT NULL,
     display_order integer NOT NULL
 );
 

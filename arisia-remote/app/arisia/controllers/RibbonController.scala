@@ -2,13 +2,15 @@ package arisia.controllers
 
 import arisia.auth.LoginService
 import arisia.fun.{RibbonService, Ribbon}
+import arisia.util._
 import play.api.Logging
 import play.api.data._
 import play.api.data.Forms._
 import play.api.i18n.I18nSupport
+import play.api.libs.json.Json
 import play.api.mvc.{BaseController, ControllerComponents, EssentialAction}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{Future, ExecutionContext}
 
 class RibbonController(
   val controllerComponents: ControllerComponents,
@@ -23,6 +25,50 @@ class RibbonController(
   with Logging
 {
 
+  def getRibbons(): EssentialAction = withLoggedInUser { userRequest =>
+    val headers = userRequest.request.headers
+
+    if (headers.get("secret").isDefined) {
+      val secret = headers("secret")
+      ribbonService.getRibbon(secret) match {
+        case Some(ribbon) => fut(Ok(Json.toJson(ribbon).toString))
+        case _ => fut(NotFound(""))
+      }
+    } else if (headers.get("selfServe").isDefined) {
+      fut(Ok(Json.toJson(ribbonService.getSelfServeRibbons())))
+    } else {
+      // All of the ribbons for this user
+      ribbonService.getRibbonsFor(userRequest.user.id).map ( results =>
+        Ok(Json.toJson(results))
+      )
+    }
+  }
+
+  def assignRibbon(id: Int): EssentialAction = Action(controllerComponents.parsers.tolerantJson).async { implicit request =>
+    LoginController.loggedInUserJson() match {
+      case Some(user) => {
+        val json = request.body
+        val secret = (json \ "secret").as[String]
+        ribbonService.assignRibbon(user.id, id, secret).map { _ =>
+          NoContent
+        }
+      }
+      case _ => Future.successful(Forbidden(s"""{"success":false, "message":"You're not logged in! Please log in and try again."}"""))
+    }
+  }
+
+  def arrangeRibbons(): EssentialAction =  Action(controllerComponents.parsers.tolerantJson).async { implicit request =>
+    LoginController.loggedInUserJson() match {
+      case Some(user) => {
+        val json = request.body
+        val order = (json \ "ribbonIds").as[List[Int]]
+        ribbonService.orderRibbons(user.id, order).map { _ =>
+          NoContent
+        }
+      }
+      case _ => Future.successful(Forbidden(s"""{"success":false, "message":"You're not logged in! Please log in and try again."}"""))
+    }
+  }
 
   ///////////////////////////////
   //
