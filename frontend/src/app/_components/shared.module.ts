@@ -20,6 +20,7 @@ import { RoomLinkHostComponent } from './room-link-host/room-link-host.component
 import { RoomLinkComponent } from './room-link/room-link.component';
 import { RoomLinkOtherComponent } from './room-link-other/room-link-other.component';
 import { AlphabetLinksComponent } from './alphabet-links/alphabet-links.component';
+import { DuckComponent } from './duck/duck.component';
 
 @NgModule({
   declarations: [
@@ -39,6 +40,7 @@ import { AlphabetLinksComponent } from './alphabet-links/alphabet-links.componen
     RoomLinkComponent,
     RoomLinkOtherComponent,
     AlphabetLinksComponent,
+    DuckComponent,
   ],
   imports: [
     CommonModule,
@@ -63,6 +65,7 @@ import { AlphabetLinksComponent } from './alphabet-links/alphabet-links.componen
     RoomLinkComponent,
     RoomLinkOtherComponent,
     AlphabetLinksComponent,
+    DuckComponent,
   ]
 })
 export class SharedModule { }
