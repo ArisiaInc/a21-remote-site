@@ -37,7 +37,7 @@
             </div>
         </div>
         <div class="search-title">Artists by name</div>
-        <app-alphabet-links [search]="search$ | async" [initials]="artistService.initials$ | async" [includeGoh]="false" urlPrefix="/artshow/search"></app-alphabet-links>
+        <app-alphabet-links [search]="search$ | async" [initials]="artistService.initials$ | async" [includeGoh]="true" urlPrefix="/artshow/search"></app-alphabet-links>
     </div>
 </div>
 <app-creator-list [creators]="artists$ | async"></app-creator-list>
