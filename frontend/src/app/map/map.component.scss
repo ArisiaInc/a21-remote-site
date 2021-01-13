@@ -101,6 +101,7 @@ $coffee-text-left: 3.4375rem;
 
 .medium-text {
     font-size: 1.5rem;
+    line-height: 1.75rem;
 }
 
 .small-medium-text {
@@ -109,6 +110,7 @@ $coffee-text-left: 3.4375rem;
 
 .small-text {
     font-size: 1.25rem;
+    line-height: 1.5rem;
 }
 
 @include media-breakpoint-up(sm) {
