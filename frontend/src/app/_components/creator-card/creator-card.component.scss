@@ -1,3 +1,7 @@
+@import "node_modules/bootstrap/scss/functions";
+@import "node_modules/bootstrap/scss/variables";
+@import "node_modules/bootstrap/scss/mixins/_breakpoints";
+
 .card {
     margin-bottom: 20px;
 }
@@ -8,4 +12,17 @@ div[ng-reflect-router-link] {
 
 img[ng-reflect-router-link] {
     cursor: pointer;
+}
+
+img {
+    height: 12.5rem;
+    object-fit: cover;
+}
+
+.card-body {
+    height: 10rem;
+
+    @include media-breakpoint-down(xs) {
+        height: 6rem;
+    }
 }

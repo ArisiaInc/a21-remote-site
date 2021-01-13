@@ -2,6 +2,7 @@ package arisia.models
 
 import java.time.format.DateTimeFormatter
 import java.time.{Instant, LocalDate, LocalTime}
+import scala.jdk.DurationConverters._
 
 import arisia.util._
 import play.api.libs.json._
@@ -91,7 +92,9 @@ case class ProgramItem(
   timestamp: Option[ProgramItemTimestamp],
   prepFor: Option[ProgramItemId],
   zoomStart: Option[ProgramItemTimestamp],
-  zoomEnd: Option[ProgramItemTimestamp]
+  zoomEnd: Option[ProgramItemTimestamp],
+  doorsOpen: Option[ProgramItemTimestamp],
+  doorsClose: Option[ProgramItemTimestamp]
 ) {
   lazy val when: Instant = {
     timestamp.map(_.t).getOrElse(Instant.MIN)
@@ -99,6 +102,9 @@ case class ProgramItem(
   lazy val duration: FiniteDuration = {
     mins.map(_.toInt.minutes).getOrElse(0.minutes)
   }
+  lazy val end: Instant = when.plus(duration.toJava)
+
+  lazy val isPrep: Boolean = zoomStart.isDefined
 }
 object ProgramItem {
   implicit val fmt: Format[ProgramItem] = (
@@ -117,6 +123,8 @@ object ProgramItem {
       (JsPath \ "prepFor").formatNullable[ProgramItemId] and
       // The times that the Zoom meetings starts/stops -- only set for prep sessions
       (JsPath \ "zoomStart").formatNullable[ProgramItemTimestamp] and
-      (JsPath \ "zoomEnd").formatNullable[ProgramItemTimestamp]
+      (JsPath \ "zoomEnd").formatNullable[ProgramItemTimestamp] and
+      (JsPath \ "doorsOpen").formatNullable[ProgramItemTimestamp] and
+      (JsPath \ "doorsClose").formatNullable[ProgramItemTimestamp]
     )(ProgramItem.apply, unlift(ProgramItem.unapply))
 }

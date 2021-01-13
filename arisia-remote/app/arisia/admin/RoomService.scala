@@ -19,8 +19,11 @@ trait RoomService {
   def getRooms(): List[ZoomRoom]
   def addRoom(room: ZoomRoom): Future[Done]
   def editRoom(room: ZoomRoom): Future[Done]
+  def removeRoom(id: Int): Future[Done]
 
   def getRoomForZambia(loc: ProgramItemLoc): Future[Option[ZoomRoom]]
+
+  def getManualRoom(name: String): Option[ZoomRoom]
 }
 
 class RoomServiceImpl(
@@ -89,5 +92,19 @@ class RoomServiceImpl(
         .query[ZoomRoom]
         .option
     )
+  }
+
+  def removeRoom(id: Int): Future[Done] = {
+    dbService.run(
+      sql"""
+           DELETE FROM zoom_rooms
+            WHERE did = $id"""
+        .update
+        .run
+    ).flatMap(_ => loadRooms())
+  }
+
+  def getManualRoom(name: String): Option[ZoomRoom] = {
+    _roomCache.get().find(room => room.isManual && room.zambiaName == name)
   }
 }

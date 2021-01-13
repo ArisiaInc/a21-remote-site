@@ -1,0 +1,113 @@
+.header {
+    margin-bottom: 1.5rem;
+}
+
+.title {
+    font-size: 2.25rem;
+    font-weight: 700;
+}
+
+.options {
+    font-size: 1.125rem;
+}
+
+.link-text {
+    position:absolute;
+    top: 50%;
+    transform: translate(0, -50%);
+    width: 100%;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.link {
+    position: relative;
+    height: 3.5rem;
+    width: 24rem;
+    background: #38A7CA;
+}
+
+.section-header {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.section-options {
+    font-size: 1.125rem;
+    line-height: 1.5rem;
+    white-space: nowrap;
+}
+
+.gen-chat-helper {
+    display: flex;
+}
+
+.fan-tables {
+    margin-left: 5rem;
+}
+
+$zoomHeight: 1rem;
+$zoomAspect: 4.458333;
+
+.zoom-logo {
+    height: $zoomHeight;
+    width: $zoomHeight * $zoomAspect;
+    margin: $zoomHeight $zoomHeight $zoomHeight 0;
+}
+
+$discordHeight: 3rem;
+$discordAspect: 2.9375;
+
+.discord-logo {
+    height: $discordHeight;
+    width: $discordHeight * $discordAspect;
+}
+
+
+.content {
+    position: relative;
+}
+
+.below-header {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+$floorTop: 37rem;
+
+$couchScale: 0.625;
+
+$couchTop: $floorTop - $couchScale * 34.25rem;
+
+
+.couch {
+    position: absolute;
+    left: $couchScale * -5rem;
+    top: $couchTop;
+    width: $couchScale * 71.875rem;
+    height: $couchScale * 40.375rem;
+    z-index: 3;
+}
+
+.over-couch {
+    z-index: 4;
+    position: relative;
+}
+
+
+.floor {
+    position: absolute;
+    border-top: solid 0.625rem #202020;
+    top: $floorTop;
+    left: 0;
+    height: calc(100% - #{$floorTop});
+    width: 100%;
+    background: #663333;
+    z-index: 1;
+}

@@ -21,6 +21,72 @@ POST    /api/login                   arisia.controllers.LoginController.login()
 
 GET     /api/me                      arisia.controllers.LoginController.me()
 
+###
+#  summary: is this room open?
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/room/open/:name         arisia.controllers.ZoomController.isRoomOpen(name)
+
+###
+#  summary: go to this room
+#  responses:
+#    303:
+#      description: Redirect
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/room/enter/:name        arisia.controllers.ZoomController.goToRoom(name)
+
+###
+#  summary: fetch the specified frontend config entry
+#  parameters:
+#    - in: path
+#      name: name
+#      schema:
+#        type: string
+#      required: true
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/config/:name            arisia.controllers.FrontendController.getConfigEntry(name)
+
+###
+#  summary: fetch the Profile info for the specified person
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            $ref: '#/definitions/arisia.controllers.ProfileInfo'
+###
+GET     /api/user/:id                arisia.controllers.LoginController.getProfileInfo(id)
+
+###
+#  summary: fetch the Profile info for the specified person
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            $ref: '#/definitions/arisia.controllers.ProfileInfo'
+###
+GET     /api/user                    arisia.controllers.LoginController.getProfileInfoForMe()
+
 # Logs the current user out
 # No body is expected on this one
 # Always succeeds with OK (200), regardless of whether the user was logged in or not
@@ -43,15 +109,66 @@ GET     /api/schedule/:id/zoomhost   arisia.controllers.ZoomController.enterItem
 GET     /api/ducks                   arisia.controllers.DuckController.getDucks()
 GET     /api/ducks/:id               arisia.controllers.DuckController.getDuck(id: Int)
 POST    /api/ducks/:id               arisia.controllers.DuckController.assignDuck(id: Int)
+DELETE  /api/ducks/:id               arisia.controllers.DuckController.dropDuck(id: Int)
 
 GET     /admin/ducks                 arisia.controllers.DuckController.manageDucks()
 GET     /admin/createDuck            arisia.controllers.DuckController.createDuck()
 GET     /admin/editDuck/:id          arisia.controllers.DuckController.showEditDuck(id: Int)
 POST    /admin/editDuck              arisia.controllers.DuckController.duckModified()
+DELETE  /admin/ducks/:id             arisia.controllers.DuckController.removeDuck(id: Int)
 
 GET     /api/settings                arisia.controllers.SettingsController.getSettings()
 POST    /api/settings                arisia.controllers.SettingsController.addSettings()
 DELETE  /api/settings/:key           arisia.controllers.SettingsController.dropSetting(key)
+
+###
+#  summary: fetch the metadata for the Art Show
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/metadata/artshow        arisia.controllers.FileController.getArtshowMetadata()
+
+###
+#  summary: fetch the metadata for the Dealers
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/metadata/dealers        arisia.controllers.FileController.getDealersMetadata()
+
+
+###
+#  summary: fetch the metadata for Gaming
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/metadata/gaming        arisia.controllers.FileController.getGamingMetadata()
+
+###
+#  summary: fetch the metadata for Events
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/metadata/events        arisia.controllers.FileController.getEventsMetadata()
 
 ###
 #  summary: make this person an Arisian
@@ -64,6 +181,48 @@ DELETE  /api/settings/:key           arisia.controllers.SettingsController.dropS
 #      description: success
 ###
 POST    /api/discord/addArisian      arisia.controllers.DiscordController.addArisian()
+###
+#  summary: fetch a secret to allow this user to verify for help getting hooked up to Discord
+#  responses:
+#    200:
+#      description: success
+###
+GET     /api/discord/getAssistSecret arisia.controllers.DiscordController.generateAssistSecret()
+###
+#  summary: via Lambda, allow Help Desk to add somebody as an Arisian
+#  parameters:
+#    - in: header
+#      name: X-Shared-Secret
+#      schema:
+#        type: string
+#    - name: body
+#      schema:
+#        $ref: '#/definitions/arisia.discord.DiscordHelpCredentials'
+#  responses:
+#    200:
+#      description: success
+#    401:
+#      description: shared secret header not found
+#    400:
+#      description: passed-in info not valid
+###
+POST    /api/discord/assistAddArisian arisia.controllers.DiscordController.assistedAddArisian()
+###
+#  summary: via Lambda, sync this Discord user with their current info
+#  parameters:
+#    - in: header
+#      name: X-Shared-Secret
+#      schema:
+#        type: string
+#  responses:
+#    200:
+#      description: success
+#    401:
+#      description: shared secret header not found
+#    400:
+#      description: passed-in info not valid
+###
+PUT     /api/discord/sync/:id         arisia.controllers.DiscordController.sync(id)
 
 # Admin UI, separate from the attendee-facing site
 GET     /admin                       arisia.controllers.AdminController.home()
@@ -82,10 +241,18 @@ GET     /admin/rooms                 arisia.controllers.ZoomController.manageZoo
 GET     /admin/createRoom            arisia.controllers.ZoomController.createRoom()
 GET     /admin/editRoom/:id          arisia.controllers.ZoomController.showEditRoom(id: Int)
 POST    /admin/editRoom              arisia.controllers.ZoomController.roomModified()
+DELETE  /admin/rooms/:id             arisia.controllers.ZoomController.removeRoom(id: Int)
 
 # This is mainly internal, for testing; we might add a UI if we find a use for it, but don't do that casually:
 POST    /admin/meeting               arisia.controllers.AdminController.startMeeting()
 DELETE  /admin/meeting/:meetingId    arisia.controllers.AdminController.endMeeting(meetingId)
+
+GET     /admin/manageMetadata        arisia.controllers.FileController.manageMetadata()
+POST    /admin/uploadArtshowMetadata arisia.controllers.FileController.uploadArtshowMetadata()
+POST    /admin/uploadDealersMetadata arisia.controllers.FileController.uploadDealersMetadata()
+POST    /admin/uploadGamingMetadata  arisia.controllers.FileController.uploadGamingMetadata()
+POST    /admin/uploadEventsMetadata  arisia.controllers.FileController.uploadEventsMetadata()
+
 # Note the non-standard path, which is configured in application.conf, so that frontend
 # can own /assets
 GET     /admin/assets/*file          controllers.Assets.versioned(path="/public", file: Asset)
@@ -93,7 +260,7 @@ GET     /admin/assets/*file          controllers.Assets.versioned(path="/public"
 # Zambia emulator, providing test data
 GET     /test/fakeschedule           arisia.controllers.FakeZambiaController.getSchedule()
 # TODO: remove
-GET     /test/zoomcall               arisia.controllers.ZoomController.test()
+GET     /test/zoomcall/:id               arisia.controllers.ZoomController.test(id: Long)
 # TODO: remove
 GET     /test/getDiscordMembers      arisia.controllers.DiscordController.test()
 GET     /test/scheduleItem           arisia.controllers.ScheduleTestController.showTestScheduleInput()

@@ -1,3 +1,26 @@
 .content {
     display: inline-block;
+    width: 100%;
+}
+
+.expando {
+    width: 1rem;
+    height: 1rem;
+    display: inline-block;
+}
+
+.floating {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+.program_item {
+    cursor: pointer;
+    position: relative;
+    display: flex;
+}
+
+.item_base {
+    position: relative;
 }

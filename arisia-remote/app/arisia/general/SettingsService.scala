@@ -23,7 +23,7 @@ class SettingsServiceImpl(
       sql"""
            SELECT k, v
              FROM user_settings
-            WHERE username = ${who.id.v}"""
+            WHERE username = ${who.id.lower}"""
         .query[(String, String)]
         .to[List]
         .map(_.toMap)
@@ -40,7 +40,7 @@ class SettingsServiceImpl(
             INSERT INTO user_settings
             (username, k, v)
             VALUES
-            (${who.id.v}, $k, $v)
+            (${who.id.lower}, $k, $v)
             ON CONFLICT (username, k)
             DO UPDATE SET v = $v
            """
@@ -55,7 +55,7 @@ class SettingsServiceImpl(
     dbService.run(
       sql"""
            DELETE FROM user_settings
-            WHERE username = ${who.id.v} and k = $which"""
+            WHERE username = ${who.id.lower} and k = $which"""
         .update
         .run
     )

@@ -52,6 +52,12 @@ class DuckController(
     }
   }
 
+  def dropDuck(duckId: Int): EssentialAction = withLoggedInUser { userRequest =>
+    duckService.dropDuck(userRequest.user.id, duckId).map { _ =>
+      NoContent
+    }
+  }
+
 
   ///////////////////////////////
   //
@@ -72,22 +78,19 @@ class DuckController(
     )(Duck.apply)(Duck.unapply)
   )
 
-  def manageDucks(): EssentialAction = adminsOnly { info =>
+  def manageDucks(): EssentialAction = adminsOnly("Manage Ducks") { info =>
     implicit val request = info.request
 
-    logger.info("In manageDucks")
-
     val ducks = duckService.getDucks()
-    logger.info("Got the ducks")
     Ok(arisia.views.html.manageDucks(ducks))
   }
 
-  def createDuck(): EssentialAction = adminsOnly { info =>
+  def createDuck(): EssentialAction = adminsOnly("Show Create Duck") { info =>
     implicit val request = info.request
 
     Ok(arisia.views.html.editDuck(duckForm.fill(Duck.empty)))
   }
-  def showEditDuck(id: Int): EssentialAction = adminsOnly { info =>
+  def showEditDuck(id: Int): EssentialAction = adminsOnly("Show Edit Duck") { info =>
     implicit val request = info.request
 
     val ducks = duckService.getDucks()
@@ -97,7 +100,7 @@ class DuckController(
     }
   }
 
-  def duckModified(): EssentialAction = adminsOnlyAsync { info =>
+  def duckModified(): EssentialAction = adminsOnlyAsync("Duck Modified") { info =>
     implicit val request = info.request
 
     duckForm.bindFromRequest().fold(
@@ -106,6 +109,7 @@ class DuckController(
         Future.successful(BadRequest(arisia.views.html.editDuck(formWithErrors)))
       },
       duck => {
+        info.audit(s"Duck ${duck.id}")
         val fut =
           if (duck.id == 0) {
             duckService.addDuck(duck)
@@ -118,6 +122,12 @@ class DuckController(
         }
       }
     )
+  }
+
+  def removeDuck(id: Int): EssentialAction = adminsOnlyAsync(s"Remove Duck $id") { info =>
+    duckService.removeDuck(id).map { _ =>
+      Redirect(arisia.controllers.routes.DuckController.manageDucks())
+    }
   }
 
 }

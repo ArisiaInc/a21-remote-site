@@ -31,7 +31,7 @@ class AdminController (
   with Logging
 {
 
-  def home(): EssentialAction = adminsOnly { info =>
+  def home(): EssentialAction = adminsOnly("Loaded Home") { info =>
     Ok(arisia.views.html.adminHome(info.permissions))
   }
 
@@ -50,7 +50,7 @@ class AdminController (
   /**
    * For now, this is internal-only, for testing, and can only be accessed from Swagger.
    */
-  def startMeeting(): EssentialAction = adminsOnlyAsync { info =>
+  def startMeeting(): EssentialAction = adminsOnlyAsync("Started test meeting") { info =>
     val userId = config.get[String]("arisia.zoom.api.userId")
     zoomService.startMeeting("Ad hoc meeting", userId).map { errorOrMeeting =>
       errorOrMeeting match {
@@ -60,7 +60,7 @@ class AdminController (
     }
   }
 
-  def endMeeting(meetingIdStr: String): EssentialAction = adminsOnlyAsync { info =>
+  def endMeeting(meetingIdStr: String): EssentialAction = adminsOnlyAsync("Ended meeting manually") { info =>
     meetingIdStr.toLongOption match {
       case Some(meetingId) => {
         zoomService.endMeeting(meetingId).map { _ =>
@@ -95,7 +95,7 @@ class AdminController (
     addFunc: (AdminService, LoginId) => Future[Int],
     onSuccess: Request[AnyContent] => Future[Result],
     onError: Call
-  ): AdminInfo => Future[Result] = { info =>
+  ): AdminInfo[AnyContent] => Future[Result] = { info =>
     implicit val request = info.request
 
     usernameForm.bindFromRequest().fold(
@@ -104,6 +104,7 @@ class AdminController (
         Future.successful(Redirect(onError))
       },
       loginName => {
+        info.audit(s"Add Permission to ${loginName.v}")
         addFunc(adminService, loginName).flatMap(_ => onSuccess(request))
       }
     )
@@ -113,8 +114,9 @@ class AdminController (
     idStr: String,
     removeFunc: (AdminService, LoginId) => Future[Int],
     whenFinished: Call
-  ): AdminInfo => Future[Result] = { info =>
+  ): AdminInfo[AnyContent] => Future[Result] = { info =>
     val id = LoginId(idStr)
+    info.audit(s"Remove Permission from ${id.v}")
     val fut = for {
       targetPerms <- loginService.getPermissions(id)
       // Safety check: you can't remove privs from the super-admins:
@@ -139,12 +141,12 @@ class AdminController (
     )
   }
 
-  def manageAdmins(): EssentialAction = superAdminsOnlyAsync { info =>
+  def manageAdmins(): EssentialAction = superAdminsOnlyAsync("Managed Admins") { info =>
     implicit val request = info.request
     showManageAdmins()
   }
 
-  def addAdmin(): EssentialAction = superAdminsOnlyAsync {
+  def addAdmin(): EssentialAction = superAdminsOnlyAsync("Add Admin") {
     addPermission(
       _.addAdmin(_),
       showManageAdmins()(_),
@@ -152,7 +154,7 @@ class AdminController (
     )
   }
 
-  def removeAdmin(idStr: String): EssentialAction = superAdminsOnlyAsync {
+  def removeAdmin(idStr: String): EssentialAction = superAdminsOnlyAsync("Remove Admin") {
     removePermission(idStr, _.removeAdmin(_), routes.AdminController.manageAdmins())
   }
 
@@ -168,12 +170,12 @@ class AdminController (
       arisia.views.html.manageEarlyAccess(_, usernameForm.fill(LoginId("")))
     )
 
-  def manageEarlyAccess(): EssentialAction = adminsOnlyAsync { info =>
+  def manageEarlyAccess(): EssentialAction = adminsOnlyAsync("Manage Early Access") { info =>
     implicit val request = info.request
     showManageEarlyAccess()
   }
 
-  def addEarlyAccess(): EssentialAction = adminsOnlyAsync {
+  def addEarlyAccess(): EssentialAction = adminsOnlyAsync("Add Early Access") {
     addPermission(
       _.addEarlyAccess(_),
       showManageEarlyAccess()(_),
@@ -181,7 +183,7 @@ class AdminController (
     )
   }
 
-  def removeEarlyAccess(idStr: String): EssentialAction = adminsOnlyAsync {
+  def removeEarlyAccess(idStr: String): EssentialAction = adminsOnlyAsync("Remove Early Access") {
     removePermission(idStr, _.removeEarlyAccess(_), routes.AdminController.manageEarlyAccess())
   }
 
@@ -197,12 +199,12 @@ class AdminController (
       arisia.views.html.manageTech(_, usernameForm.fill(LoginId("")))
     )
 
-  def manageTech(): EssentialAction = adminsOnlyAsync { info =>
+  def manageTech(): EssentialAction = adminsOnlyAsync("Manage Tech") { info =>
     implicit val request = info.request
     showManageTech()
   }
 
-  def addTech(): EssentialAction = adminsOnlyAsync {
+  def addTech(): EssentialAction = adminsOnlyAsync("Add Tech") {
     addPermission(
       _.addTech(_),
       showManageTech()(_),
@@ -210,7 +212,7 @@ class AdminController (
     )
   }
 
-  def removeTech(idStr: String): EssentialAction = adminsOnlyAsync {
+  def removeTech(idStr: String): EssentialAction = adminsOnlyAsync("Remove Tech") {
     removePermission(idStr, _.removeTech(_), routes.AdminController.manageTech())
   }
 }

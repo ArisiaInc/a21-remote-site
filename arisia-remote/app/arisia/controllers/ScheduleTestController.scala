@@ -5,6 +5,7 @@ import java.time.{LocalDate, LocalTime}
 import arisia.auth.LoginService
 import arisia.models.{ProgramItemPersonName, ProgramItemTime, ProgramItemTag, ProgramItemDesc, ProgramItemDate, ProgramItem, ProgramItemPerson, ProgramItemId, ProgramItemLoc, ProgramItemTitle, ProgramPersonId}
 import arisia.schedule.ScheduleService
+import play.api.Logging
 import play.api.mvc.{BaseController, ControllerComponents, EssentialAction}
 import play.api.data._
 import play.api.data.Forms._
@@ -25,6 +26,7 @@ class ScheduleTestController(
 ) extends BaseController
   with AdminControllerFuncs
   with I18nSupport
+  with Logging
 {
 
   val scheduleForm = Form(
@@ -43,13 +45,13 @@ class ScheduleTestController(
     )(ScheduleInput.apply)(ScheduleInput.unapply)
   )
 
-  def showTestScheduleInput(): EssentialAction = adminsOnly { info =>
+  def showTestScheduleInput(): EssentialAction = adminsOnly("Show Test Schedule UI") { info =>
     implicit val request = info.request
 
     Ok(arisia.views.html.addTestScheduleItem(scheduleForm.fill(ScheduleInput.empty)))
   }
 
-  def addTestScheduleItem(): EssentialAction = adminsOnly { info =>
+  def addTestScheduleItem(): EssentialAction = adminsOnly(s"Add Test Schedule Item") { info =>
     implicit val request = info.request
 
     def toField[T](str: String, f: String => T): Option[T] = {
@@ -62,6 +64,7 @@ class ScheduleTestController(
     scheduleForm.bindFromRequest().fold(
       formWithErrors => BadRequest(""),
       input => {
+        info.audit(s"${input.title} at ${input.time}")
         val tags: List[ProgramItemTag] = input.tags.split(',').toList.map(ProgramItemTag(_))
         val time: Option[ProgramItemTime] =
           if (input.time.isEmpty)
@@ -86,7 +89,7 @@ class ScheduleTestController(
           List(ProgramItemLoc(input.loc)),
           people,
           toField(input.desc, ProgramItemDesc(_)),
-          None, None, None, None
+          None, None, None, None, None, None
         )
 
         scheduleService.addTestItem(item)

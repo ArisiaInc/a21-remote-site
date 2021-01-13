@@ -30,6 +30,10 @@ import { UserComponent } from './user/user.component';
 import { HelpComponent } from './help/help.component';
 import { FooterComponent } from './footer/footer.component';
 import { SetupComponent } from './help/setup/setup.component';
+import { PerformanceComponent } from './performance/performance.component';
+import { SocialComponent } from './social/social.component';
+import { DuckListComponent } from './user/duck-list/duck-list.component';
+import { ProfileDuckComponent } from './user/profile-duck/profile-duck.component';
 
 @NgModule({
   declarations: [
@@ -57,6 +61,10 @@ import { SetupComponent } from './help/setup/setup.component';
     HelpComponent,
     FooterComponent,
     SetupComponent,
+    PerformanceComponent,
+    SocialComponent,
+    DuckListComponent,
+    ProfileDuckComponent,
   ],
   imports: [
     BrowserModule,
@@ -67,6 +75,6 @@ import { SetupComponent } from './help/setup/setup.component';
     PipesModule,
   ],
   bootstrap: [AppComponent],
-  entryComponents: [InfodeskComponent, SafetyComponent, IrtComponent]
+  entryComponents: [InfodeskComponent, SafetyComponent, IrtComponent],
 })
 export class AppModule { }

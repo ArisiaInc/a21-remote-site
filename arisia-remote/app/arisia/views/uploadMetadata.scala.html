@@ -1,0 +1,50 @@
+@(
+)(
+implicit request: RequestHeader, messagesProvider: MessagesProvider
+)
+
+@main("Manage Metadata") {
+  <h1>Manage Metadata</h1>
+
+  <p>This page allows you to upload the metadata files for various purposes. <b>Use this with care!</b>
+  We don't do any sort of validation that the uploaded file matches the desired format, so you can
+  seriously mess things up here if you aren't careful.</p>
+
+  <p><b>Make sure you are uploading the right file to the right place!</b></p>
+
+  <h2>Art Show Metadata</h2>
+
+  @helper.form(action = arisia.controllers.routes.FileController.uploadArtshowMetadata(), Symbol("enctype") -> "multipart/form-data") {
+    <input type="file" name="artshow">
+    <p>
+      <input type="submit">
+    </p>
+  }
+
+  <h2>Dealers Metadata</h2>
+
+  @helper.form(action = arisia.controllers.routes.FileController.uploadDealersMetadata(), Symbol("enctype") -> "multipart/form-data") {
+    <input type="file" name="dealers">
+    <p>
+      <input type="submit">
+    </p>
+  }
+
+  <h2>Gaming Metadata</h2>
+
+  @helper.form(action = arisia.controllers.routes.FileController.uploadGamingMetadata(), Symbol("enctype") -> "multipart/form-data") {
+    <input type="file" name="gaming">
+    <p>
+      <input type="submit">
+    </p>
+  }
+
+  <h2>Events Metadata</h2>
+
+  @helper.form(action = arisia.controllers.routes.FileController.uploadEventsMetadata(), Symbol("enctype") -> "multipart/form-data") {
+    <input type="file" name="events">
+    <p>
+      <input type="submit">
+    </p>
+  }
+}
