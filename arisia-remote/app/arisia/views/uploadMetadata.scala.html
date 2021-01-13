@@ -29,4 +29,22 @@ implicit request: RequestHeader, messagesProvider: MessagesProvider
       <input type="submit">
     </p>
   }
+
+  <h2>Gaming Metadata</h2>
+
+  @helper.form(action = arisia.controllers.routes.FileController.uploadGamingMetadata(), Symbol("enctype") -> "multipart/form-data") {
+    <input type="file" name="gaming">
+    <p>
+      <input type="submit">
+    </p>
+  }
+
+  <h2>Events Metadata</h2>
+
+  @helper.form(action = arisia.controllers.routes.FileController.uploadEventsMetadata(), Symbol("enctype") -> "multipart/form-data") {
+    <input type="file" name="events">
+    <p>
+      <input type="submit">
+    </p>
+  }
 }

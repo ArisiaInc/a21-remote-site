@@ -4,9 +4,7 @@
     <div *ngFor="let time of day.times" class="mb-4">
       <h5>{{time.timeString}}</h5>
       <ul class="list-group">
-        <li class="program_item list-group-item list-group-item-action" *ngFor="let event of time.events">
-          <app-item [event]="event" [showStar]="showStars"></app-item>
-        </li>
+          <app-item *ngFor="let event of time.events" [event]="event" [showStar]="showStars"></app-item>
       </ul>
     </div>
   </div>

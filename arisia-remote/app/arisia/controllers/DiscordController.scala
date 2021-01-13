@@ -1,8 +1,8 @@
 package arisia.controllers
 
 import arisia.auth.LoginService
-import arisia.discord.{DiscordUserCredentials, DiscordService, DiscordHelpCredentials}
-import play.api.Configuration
+import arisia.discord.{DiscordHelpCredentials, DiscordUserCredentials, DiscordService}
+import play.api.{Configuration, Logging}
 import play.api.i18n.I18nSupport
 import play.api.libs.json.Json
 import play.api.mvc.{BaseController, ControllerComponents, EssentialAction}
@@ -20,6 +20,7 @@ class DiscordController(
   with AdminControllerFuncs
   with UserFuncs
   with I18nSupport
+  with Logging
 {
   // TODO: remove this test entry point
   def test(): EssentialAction = Action.async { implicit request =>
@@ -69,6 +70,24 @@ class DiscordController(
             }
           }
           case _ => Future.successful(BadRequest("Malformed request to help add an Arisian"))
+        }
+      }
+      case _ => Future.successful(Unauthorized("Shared secret not found in the X-Shared"))
+    }
+  }
+
+  def sync(id: String): EssentialAction = Action.async { implicit request =>
+    request.headers.get("X-Shared-Secret") match {
+      case Some(secret) if (secret == sharedSecret) => {
+        loginService.fetchUserFromDiscordId(id).flatMap {
+          _ match {
+            case Some(user) => {
+              discordService.syncUser(user, id).map { _ =>
+                Ok("")
+              }
+            }
+            case _ => Future.successful(NotFound("Not a known Discord user!"))
+          }
         }
       }
       case _ => Future.successful(Unauthorized("Shared secret not found in the X-Shared"))

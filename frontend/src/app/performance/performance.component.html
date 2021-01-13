@@ -1,0 +1,71 @@
+<div class="container">
+  <div class="row" *ngIf="events$ | async as runningEvents">
+    <div class="col-12 col-md-4 col-lg-4 col-xl-3">
+      <div class="row" contents>
+        <app-breadcrumb lastCrumbName="Performance Hall"></app-breadcrumb>
+      </div>
+    </div>
+    <div class="d-none d-lg-block col-lg-8 col-xl-9"></div>
+    <div class="d-md-none col-2"></div>
+    <div class="col-8 col-md-6 col-lg-3 now-playing-column contents">
+      <div class="now-playing-box">
+        <div class="now-playing-aspect-ratio-helper"></div>
+        <div class="now-playing-text">
+          <ng-container *ngIf="runningEvents.current as current">
+            <div class="contents now-playing-now">Now playing:</div>
+            <div class="contents now-playing-title">{{current.title}}</div>
+          </ng-container>
+          <ng-container *ngIf="runningEvents.next as next">
+            <div class="contents now-playing-next">{{next.getTimeString()}}: {{next.title}}</div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+    <div class="d-lg-none col-2"></div>
+    <div class="col-12 col-lg-9">
+      <div class="embedding-box contents">
+        <div class="embedding-aspect-ratio-helper"></div>
+        <ng-container *ngIf="runningEvents.current; else noevent">
+          <ng-container *ngIf="url$ | async as url; else noperformance">
+            <div class="embedding contents" *ngIf="runningEvents.current.performance as performance; else noperformance">
+              <iframe class="iframe"
+                      [src]="url"
+                      frameborder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowfullscreen></iframe>
+            </div>
+          </ng-container>
+          <ng-template #noperformance>
+            <div *ngIf="runningEvents.current as current; else noevent" style="background:#c4c4c4" class="embedding contents">
+              Missing embedded data.
+            </div>
+          </ng-template>
+        </ng-container>
+        <ng-template #noevent>
+          <div style="background:#c4c4c4" class="embedding contents">
+            No current event.
+          </div>
+        </ng-template>
+      </div>
+      <div class="links">
+        <span class="discord link contents">
+          Chat on Discord: #performance-hall
+        </span>
+        <span class="backup link contents">
+          <ng-container *ngIf="externalUrl$ | async as externalUrl">
+            <a [href]="externalUrl" target="blank_" *ngIf="runningEvents.current && runningEvents.current.performance">
+            Open on {{platform$ | async}}: {{externalUrl}}</a> (Doesn't pause here)
+          </ng-container>
+        </span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- Background -->
+<img src="/assets/images/light-left.png" class="background light left">
+<img src="/assets/images/light-right.png" class="background light right">
+<div class="background top-row-seats"></div>
+<div class="background row-seats"></div>

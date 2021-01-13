@@ -15,6 +15,9 @@ import { TabletopComponent } from './gaming/tabletop/tabletop.component';
 import { LarpComponent } from './gaming/larp/larp.component';
 import { SpecialComponent } from './gaming/special/special.component';
 import { UserComponent } from './user/user.component';
+import { HelpComponent } from './help/help.component';
+import { SetupComponent } from './help/setup/setup.component';
+import { PerformanceComponent } from './performance/performance.component';
 import { SocialComponent } from './social/social.component';
 
 const accountModule = () => import('./account/account.module').then(x => x.AccountModule);
@@ -43,6 +46,9 @@ const routes: Routes = [
   {path: 'dealers/:id', component: DealerComponent},
   {path: 'user', component: UserComponent, canActivate: [AuthGuard, UserPageRedirectGuard]},
   {path: 'user/:id', component: UserComponent, canActivate: [AuthGuard]},
+  {path: 'help', component: HelpComponent},
+  {path: 'setup', component: SetupComponent},
+  {path: 'performance', component: PerformanceComponent, canActivate: [AuthGuard]},
   {path: 'social', component: SocialComponent, canActivate: [AuthGuard]},
 
   //redirect home

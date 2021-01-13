@@ -119,7 +119,7 @@ lazy val backend = (project in file("arisia-remote"))
       scalatestPlusPlay,
       swaggerUI
     ),
-    swaggerDomainNameSpaces := Seq("arisia.models", "arisia.discord"),
+    swaggerDomainNameSpaces := Seq("arisia.models", "arisia.discord", "arisia.controllers"),
     swaggerPrettyJson := true
   )
   .enablePlugins(PlayScala, SwaggerPlugin)

@@ -24,6 +24,8 @@ trait DiscordService {
   def generateAssistSecret(who: LoginUser): String
 
   def addArisianAssisted(creds: DiscordHelpCredentials): Future[Either[String, DiscordMember]]
+
+  def syncUser(who: LoginUser, discordId: String): Future[Done]
 }
 
 case class DiscordUserCredentials(username: String, discriminator: String)
@@ -154,9 +156,9 @@ class DiscordServiceImpl(
     }
   }
 
-  def setBadgeName(who: LoginUser, member: DiscordMember): Future[Done] = {
+  def setBadgeName(who: LoginUser, memberId: String): Future[Done] = {
     if (botEnabled) {
-      ws.url(s"$baseUrl/guilds/$arisiaGuildId/members/${member.user.id}")
+      ws.url(s"$baseUrl/guilds/$arisiaGuildId/members/${memberId}")
         .addHttpHeaders(
           "Authorization" -> s"Bot $botToken",
           "Content-Type" -> "application/json"
@@ -170,7 +172,7 @@ class DiscordServiceImpl(
             Done
           } else {
             logger.error(
-              s"Discord failure when trying to set ${member.user.username}#${member.user.discriminator} nick to ${who.name.v}:\n${response.body}")
+              s"Discord failure when trying to set $memberId nick to ${who.name.v}:\n${response.body}")
             Done
           }
         }
@@ -182,7 +184,7 @@ class DiscordServiceImpl(
   def addArisianCore(who: LoginUser, member: DiscordMember): Future[Either[String, DiscordMember]] = {
     for {
       _ <- setDiscordRoles(member)
-      _ <- setBadgeName(who, member)
+      _ <- setBadgeName(who, member.user.id)
       _ <- loginService.addDiscordInfo(who, member)
     }
       yield Right(member)
@@ -227,5 +229,10 @@ class DiscordServiceImpl(
     } else {
       Future.successful(Left("The user secret isn't valid!"))
     }
+  }
+
+  def syncUser(who: LoginUser, discordId: String): Future[Done] = {
+    // TODO: in airy theory this should set Roles, but we don't have any interesting ones that change yet:
+    setBadgeName(who, discordId)
   }
 }

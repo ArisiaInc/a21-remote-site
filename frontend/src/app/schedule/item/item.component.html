@@ -1,10 +1,11 @@
-<div class="item_frame" (click)="toggleExpand($event)" [ngClass]="{'expanded': expanded}">
+<li class="program_item list-group-item list-group-item-action"  (click)="toggleExpand($event)" [ngClass]="{'expanded': expanded}">
   <app-star *ngIf="showStar" [active]="event.starred" (click)="onStarClick($event)"></app-star>
   <div class="content">
     <div class="item_base">
-        <h6 class="title" [ngClass]="{'font-weight-bold': expanded}">{{event.title}}</h6>
-        <div class="loc text-muted">Location: <span>{{event.location}}</span></div>
-        <div class="links" [ngSwitch]="event.location.length && event.location[0]">
+      <h6 class="title" [ngClass]="{'font-weight-bold': expanded}">{{event.title}}</h6>
+      <div>
+        <span class="loc text-muted">Location: <span>{{event.location}}</span> </span>&ngsp;
+        <span class="links" [ngSwitch]="event.location.length && event.location[0]">
           <ng-container *ngSwitchCase="'LARP'">
             <app-room-link-other [href]="event.location[1]">Sign Up for Larp</app-room-link-other>
             <app-room-link-other [href]="'https://discord.com/channels/743094117554454599/795432881094656020'">Join LARP</app-room-link-other>
@@ -20,21 +21,30 @@
             </ng-container>
             <app-room-link-host [id]="event.id"></app-room-link-host>
           </ng-container>
-        </div>
+        </span>
+      </div>
+      <div class="floating expando">
+        <svg *ngIf="expanded" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-up" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"/>
+        </svg>
+        <svg *ngIf="!expanded" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+        </svg>
+      </div>
     </div>
     <div class="extra" *ngIf="expanded">
-        <div class="item_tag text-muted">Track: <span>{{track}}</span></div>
-        <div class="item_tag text-muted">Type: <span>{{type}}</span></div>
-        <div class="item-people mt-2">
-          <ng-container *ngFor="let person of event.people; last as isLast">
-            <a href="/schedule/people/{{person.person.id}}"
-               >{{person.person.name}}<ng-container *ngIf="person.isModerator"
-                                                    > (moderator)</ng-container>
-            </a>
-            <ng-container *ngIf="!isLast">,&nbsp;</ng-container>
-          </ng-container>
-        </div>
-        <p class="mt-2" [innerHTML]="event.description | sanitizeHtml | linkify"></p>
+      <div class="item_tag text-muted">Track: <span>{{track}}</span></div>
+      <div class="item_tag text-muted">Type: <span>{{type}}</span></div>
+      <div class="item-people mt-2">
+        <ng-container *ngFor="let person of event.people; last as isLast">
+          <a href="/schedule/people/{{person.person.id}}"
+             >{{person.person.name}}<ng-container *ngIf="person.isModerator"
+                                                  > (moderator)</ng-container>
+          </a>
+          <ng-container *ngIf="!isLast">,&nbsp;</ng-container>
+        </ng-container>
+      </div>
+      <p class="mt-2" [innerHTML]="event.description | sanitizeHtml | linkify"></p>
     </div>
   </div>
-</div>
+</li>
