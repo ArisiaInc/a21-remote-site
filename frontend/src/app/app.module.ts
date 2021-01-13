@@ -31,6 +31,8 @@ import { PerformanceComponent } from './performance/performance.component';
 import { SocialComponent } from './social/social.component';
 import { DuckListComponent } from './user/duck-list/duck-list.component';
 import { ProfileDuckComponent } from './user/profile-duck/profile-duck.component';
+import { RibbonListComponent } from './user/ribbon-list/ribbon-list.component';
+import { RibbonTableComponent } from './user/ribbon-table/ribbon-table.component';
 
 @NgModule({
   declarations: [
@@ -59,6 +61,8 @@ import { ProfileDuckComponent } from './user/profile-duck/profile-duck.component
     SocialComponent,
     DuckListComponent,
     ProfileDuckComponent,
+    RibbonListComponent,
+    RibbonTableComponent,
   ],
   imports: [
     BrowserModule,

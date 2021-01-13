@@ -21,6 +21,8 @@ import { RoomLinkComponent } from './room-link/room-link.component';
 import { RoomLinkOtherComponent } from './room-link-other/room-link-other.component';
 import { AlphabetLinksComponent } from './alphabet-links/alphabet-links.component';
 import { DuckComponent } from './duck/duck.component';
+import { RibbonComponent } from './ribbon/ribbon.component';
+import { RibbonModalComponent } from './ribbon-modal/ribbon-modal.component';
 
 @NgModule({
   declarations: [
@@ -41,6 +43,8 @@ import { DuckComponent } from './duck/duck.component';
     RoomLinkOtherComponent,
     AlphabetLinksComponent,
     DuckComponent,
+    RibbonComponent,
+    RibbonModalComponent,
   ],
   imports: [
     CommonModule,

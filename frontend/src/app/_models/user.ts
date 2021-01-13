@@ -5,4 +5,5 @@ export interface User {
   zoomHost: boolean;
   ducks?: number[];
   self?: boolean;
+  ribbons?: number[];
 }
