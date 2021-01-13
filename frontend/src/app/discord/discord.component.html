@@ -1,0 +1,44 @@
+<div class="info">
+  <div>Arisia Discord:</div>
+  <div>
+    Type in your Discord account name and the 4 numbers after it
+    (including the pound sign). Entering your Discord information
+    connects your Discord account to Arisia and allows you to enter the
+    Arisia Discord server.
+  </div>
+
+  <div class="discord-example">
+    <span class="username">discordname</span><span class="discriminator">#1234</span>
+  </div>
+
+  <form (ngSubmit)="connect()">
+    <div class="form-group">
+      <input type="text" [(ngModel)]="username" name="username" class="form-control" [ngClass]="{ 'is-invalid': usernameErrors }" />
+      <div *ngIf="usernameErrors" class="invalid-feedback">
+        {{usernameErrors}}
+      </div>
+    </div>
+    <div class="form-group align-center login-group">
+      <button [disabled]="loading" class="btn btn-outline-dark mx-auto d-block px-5 login">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+        Submit
+      </button>
+    </div>
+  </form>
+  <div class="secret-directions">
+    Need help? Click here to talk to the info desk. They will ask you for this code:
+  </div>
+  <div class="secret-box">
+    <div class="secret-text">
+      <ng-container *ngIf="secretDisplayed; else hiddenSecret">
+        {{secret}}
+      </ng-container>
+      <ng-template #hiddenSecret>
+        ********
+      </ng-template>
+      </div>
+    <button [disabled]="secretLoading" class="secret-button btn btn-dark" *ngIf="!secretDisplayed" (click)="display()">Display</button>
+    <button [disabled]="secretLoading"  class="secret-button btn btn-dark" *ngIf="secretDisplayed" (click)="hide()">Hide</button>
+  </div>
+  <div>{{secretError}}</div>
+</div>

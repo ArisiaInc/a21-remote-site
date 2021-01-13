@@ -1,12 +1,13 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LandingComponent } from './landing/landing.component';
 import { SharedModule } from './_components';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ProgrammingComponent } from './programming/programming.component';
 import { GamingComponent } from './gaming/gaming.component';
 import { NavigationComponent } from './navigation/navigation.component';
@@ -31,6 +32,7 @@ import { PerformanceComponent } from './performance/performance.component';
 import { SocialComponent } from './social/social.component';
 import { DuckListComponent } from './user/duck-list/duck-list.component';
 import { ProfileDuckComponent } from './user/profile-duck/profile-duck.component';
+import { DiscordComponent } from './discord/discord.component';
 
 @NgModule({
   declarations: [
@@ -59,6 +61,7 @@ import { ProfileDuckComponent } from './user/profile-duck/profile-duck.component
     SocialComponent,
     DuckListComponent,
     ProfileDuckComponent,
+    DiscordComponent,
   ],
   imports: [
     BrowserModule,
@@ -67,6 +70,7 @@ import { ProfileDuckComponent } from './user/profile-duck/profile-duck.component
     HttpClientModule,
     NgbModule,
     PipesModule,
+    FormsModule,
   ],
   bootstrap: [AppComponent],
   entryComponents: [InfodeskComponent, SafetyComponent, IrtComponent],
