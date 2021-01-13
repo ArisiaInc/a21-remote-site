@@ -26,16 +26,18 @@ class ZoomController(
   implicit val ec: ExecutionContext
 ) extends BaseController
   with AdminControllerFuncs
+  with UserFuncs
   with I18nSupport
   with Logging
 {
 
   // TODO: get rid of this. There isn't much harm to it, but we won't need it once integration is really working,
   // and there is no point leaving extra entry points around for potential mischief.
-  def test(): EssentialAction = Action.async { implicit request =>
-    zoomService.getUsers().map { _ =>
-      Ok("Got it!")
-    }
+  def test(meetingId: Long): EssentialAction = Action.async { implicit request =>
+    ???
+//    zoomService.checkMeeting(meetingId).map { _ =>
+//      Ok("Got it!")
+//    }
   }
 
   def enterItemBase(rawItemStr: String)(lookupUrl: (LoginUser, ProgramItemId) => Option[String]): EssentialAction = Action { implicit request =>
@@ -68,6 +70,34 @@ class ZoomController(
 
   def enterItemAsHost(rawItemStr: String): EssentialAction =
     enterItemBase(rawItemStr)(scheduleService.getHostUrlFor)
+
+  def isRoomOpen(name: String): EssentialAction = withLoggedInUser { userRequest =>
+    roomService.getManualRoom(name) match {
+      case Some(room) => {
+        val meetingId = room.zoomId.toLong
+        zoomService.isMeetingRunning(meetingId).map { running =>
+          if (running) {
+            Ok("""{"running":true}""")
+          } else {
+            Ok("""{"running":false}""")
+          }
+        }
+      }
+      case _ => Future.successful(BadRequest(""))
+    }
+  }
+
+  def goToRoom(name: String): EssentialAction =  withLoggedInUser { userRequest =>
+    roomService.getManualRoom(name) match {
+      case Some(room) => {
+        val meetingId = room.zoomId.toLong
+        zoomService.getJoinUrl(meetingId).map { url =>
+          Redirect(url)
+        }
+      }
+      case _ => Future.successful(BadRequest(""))
+    }
+  }
 
   /* ********************
    *
