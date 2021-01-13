@@ -9,7 +9,7 @@ import scala.jdk.DurationConverters._
 import scala.concurrent.duration._
 import arisia.db.DBService
 import arisia.general.{LifecycleService, LifecycleItem}
-import arisia.models.{ProgramItemTime, LoginUser, ProgramItem, ProgramItemTimestamp, Schedule, ProgramItemId, ProgramItemLoc, ProgramItemTitle}
+import arisia.models.{ProgramItemTime, LoginUser, BadgeNumber, ProgramItem, ProgramItemTimestamp, Schedule, ProgramItemId, ProgramItemLoc, ProgramItemTitle}
 import arisia.timer.{TimerService, TimeService}
 import arisia.util.Done
 import doobie._
@@ -32,6 +32,11 @@ trait ScheduleService {
    * This should only be presented to potential Zoom hosts, who have access to all sessions.
    */
   def fullSchedule(): Schedule
+
+  /**
+   * Program participants get a customized schedule.
+   */
+  def customScheduleFor(badgeNumber: BadgeNumber): Schedule
 
   /**
    * Iff this ProgramItem is running, and this person is allowed to enter it, return the URL to join.
@@ -191,6 +196,20 @@ class ScheduleServiceImpl(
     base.copy(
       program = nonZoomSessions ++ zoomSessions ++ prepSessions
     )
+  }
+
+  def customScheduleFor(badgeNumber: BadgeNumber): Schedule = {
+    val fullSchedule = _scheduleWithPrep.get()
+
+    val customProgram =
+      fullSchedule.program
+      .filterNot { item =>
+        if (item.isPrep)
+          !(item.people.exists(_.id.matches(badgeNumber)))
+        else
+          false
+      }
+    fullSchedule.copy(program = customProgram)
   }
 
   def setSchedule(cache: Schedule): Future[Done] = {

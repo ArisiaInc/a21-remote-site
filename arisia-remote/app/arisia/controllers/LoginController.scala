@@ -1,22 +1,36 @@
 package arisia.controllers
 
 import arisia.auth.{LoginError, LoginService}
-import arisia.models.{LoginRequest, LoginUser, LoginId}
+import arisia.fun.DuckService
+import arisia.models.{LoginRequest, LoginUser, LoginId, BadgeNumber, LoginName}
 import play.api.Configuration
 import play.api.http._
-import play.api.libs.json.{Json, JsValue}
+import play.api.libs.json.{Json, JsValue, Format}
 import play.api.mvc._
 
 import scala.concurrent.{Future, ExecutionContext}
 
+case class ProfileInfo(
+  id: LoginId,
+  name: LoginName,
+  badgeNumber: BadgeNumber,
+  zoomHost: Boolean,
+  ducks: List[String]
+)
+object ProfileInfo {
+  implicit val fmt: Format[ProfileInfo] = Json.format
+}
+
 class LoginController (
   val controllerComponents: ControllerComponents,
   config: Configuration,
-  loginService: LoginService
+  loginService: LoginService,
+  duckService: DuckService
 )(
   implicit ec: ExecutionContext
 )
   extends BaseController
+  with UserFuncs
 {
   import LoginController._
 
@@ -27,6 +41,35 @@ class LoginController (
       case Some(jsonStr) => Ok(jsonStr)
       case None => Unauthorized("""{"id":null,"name":null}""")
     }
+  }
+
+  def getProfileInfoCore(user: LoginUser): Future[Result] = {
+    duckService.getDucksFor(user.id).map { ducks =>
+      val info = ProfileInfo(
+        user.id,
+        user.name,
+        user.badgeNumber,
+        user.zoomHost,
+        ducks.map(_.toString)
+      )
+      Ok(Json.toJson(info).toString)
+    }
+  }
+
+  def getProfileInfo(badgeNum: String): EssentialAction = withLoggedInUser { userRequest =>
+    loginService.fetchUserInfo(BadgeNumber(badgeNum)).flatMap {
+      _ match {
+        case Some(user) => {
+          getProfileInfoCore(user)
+        }
+        case _ =>
+          Future.successful(NotFound(s"""{"success":"false", "message":"$badgeNum has not logged in to Virtual Arisia"}"""))
+      }
+    }
+  }
+
+  def getProfileInfoForMe(): EssentialAction = withLoggedInUser { userRequest =>
+    getProfileInfoCore(userRequest.user)
   }
 
   def login(): EssentialAction = Action.async(controllerComponents.parsers.tolerantJson[LoginRequest]) { implicit request =>

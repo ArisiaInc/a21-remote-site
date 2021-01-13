@@ -5,6 +5,7 @@
 export const environment = {
   production: false,
   backend: 'http://localhost:9000/api',
+  local_data: true,
 };
 
 /*

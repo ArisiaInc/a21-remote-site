@@ -5,6 +5,7 @@ import { Creator } from '@app/_models';
 import { shareReplay, map } from 'rxjs/operators';
 
 import { searchPrefixCaseInsensitive, Initial, createInitials } from '@app/_helpers/utils';
+import { environment } from '@environments/environment';
 
 export abstract class CreatorService {
 
@@ -22,7 +23,7 @@ export abstract class CreatorService {
       shareReplay(1),
     );
 
-    this.fetchData(true);
+    this.fetchData(environment.local_data);
   }
 
   abstract dataUrl(local: boolean): string;

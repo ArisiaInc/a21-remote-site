@@ -103,6 +103,8 @@ case class ProgramItem(
     mins.map(_.toInt.minutes).getOrElse(0.minutes)
   }
   lazy val end: Instant = when.plus(duration.toJava)
+
+  lazy val isPrep: Boolean = zoomStart.isDefined
 }
 object ProgramItem {
   implicit val fmt: Format[ProgramItem] = (

@@ -19,7 +19,7 @@ export class ArtistService extends CreatorService {
     if (local) {
       return `assets/data/artists.json`;
     } else {
-      return `${environment.backend}/artists`;
+      return `${environment.backend}/metadata/artshow`;
     }
   }
 

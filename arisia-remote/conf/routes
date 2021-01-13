@@ -21,6 +21,49 @@ POST    /api/login                   arisia.controllers.LoginController.login()
 
 GET     /api/me                      arisia.controllers.LoginController.me()
 
+
+###
+#  summary: fetch the specified frontend config entry
+#  parameters:
+#    - in: path
+#      name: name
+#      schema:
+#        type: string
+#      required: true
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/config/:name            arisia.controllers.FrontendController.getConfigEntry(name)
+
+###
+#  summary: fetch the Profile info for the specified person
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            $ref: '#/definitions/arisia.controllers.ProfileInfo'
+###
+GET     /api/user/:id                arisia.controllers.LoginController.getProfileInfo(id)
+
+###
+#  summary: fetch the Profile info for the specified person
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            $ref: '#/definitions/arisia.controllers.ProfileInfo'
+###
+GET     /api/user                    arisia.controllers.LoginController.getProfileInfoForMe()
+
 # Logs the current user out
 # No body is expected on this one
 # Always succeeds with OK (200), regardless of whether the user was logged in or not
@@ -43,6 +86,7 @@ GET     /api/schedule/:id/zoomhost   arisia.controllers.ZoomController.enterItem
 GET     /api/ducks                   arisia.controllers.DuckController.getDucks()
 GET     /api/ducks/:id               arisia.controllers.DuckController.getDuck(id: Int)
 POST    /api/ducks/:id               arisia.controllers.DuckController.assignDuck(id: Int)
+DELETE  /api/ducks/:id               arisia.controllers.DuckController.dropDuck(id: Int)
 
 GET     /admin/ducks                 arisia.controllers.DuckController.manageDucks()
 GET     /admin/createDuck            arisia.controllers.DuckController.createDuck()
@@ -77,6 +121,31 @@ GET     /api/metadata/artshow        arisia.controllers.FileController.getArtsho
 #            type: string
 ###
 GET     /api/metadata/dealers        arisia.controllers.FileController.getDealersMetadata()
+
+
+###
+#  summary: fetch the metadata for Gaming
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/metadata/gaming        arisia.controllers.FileController.getGamingMetadata()
+
+###
+#  summary: fetch the metadata for Events
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/metadata/events        arisia.controllers.FileController.getEventsMetadata()
 
 ###
 #  summary: make this person an Arisian
@@ -142,6 +211,8 @@ DELETE  /admin/meeting/:meetingId    arisia.controllers.AdminController.endMeeti
 GET     /admin/manageMetadata        arisia.controllers.FileController.manageMetadata()
 POST    /admin/uploadArtshowMetadata arisia.controllers.FileController.uploadArtshowMetadata()
 POST    /admin/uploadDealersMetadata arisia.controllers.FileController.uploadDealersMetadata()
+POST    /admin/uploadGamingMetadata  arisia.controllers.FileController.uploadGamingMetadata()
+POST    /admin/uploadEventsMetadata  arisia.controllers.FileController.uploadEventsMetadata()
 
 # Note the non-standard path, which is configured in application.conf, so that frontend
 # can own /assets

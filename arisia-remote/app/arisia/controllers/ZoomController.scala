@@ -5,6 +5,7 @@ import arisia.auth.LoginService
 import arisia.models.{ProgramItemId, LoginUser, ZoomRoom}
 import arisia.schedule.ScheduleService
 import arisia.zoom.ZoomService
+import play.api.Logging
 import play.api.data._
 import play.api.data.Forms._
 import play.api.mvc.{BaseController, ControllerComponents, EssentialAction}
@@ -26,6 +27,7 @@ class ZoomController(
 ) extends BaseController
   with AdminControllerFuncs
   with I18nSupport
+  with Logging
 {
 
   // TODO: get rid of this. There isn't much harm to it, but we won't need it once integration is really working,
@@ -84,19 +86,19 @@ class ZoomController(
     )(ZoomRoom.apply)(ZoomRoom.unapply)
   )
 
-  def manageZoomRooms(): EssentialAction = superAdminsOnly { info =>
+  def manageZoomRooms(): EssentialAction = superAdminsOnly("Manage Zoom Rooms") { info =>
     implicit val request = info.request
 
     val rooms = roomService.getRooms()
     Ok(arisia.views.html.manageZoomRooms(rooms))
   }
 
-  def createRoom(): EssentialAction = superAdminsOnly { info =>
+  def createRoom(): EssentialAction = superAdminsOnly("Show Create Room") { info =>
     implicit val request = info.request
 
     Ok(arisia.views.html.editRoom(roomForm.fill(ZoomRoom.empty)))
   }
-  def showEditRoom(id: Int): EssentialAction = superAdminsOnly { info =>
+  def showEditRoom(id: Int): EssentialAction = superAdminsOnly(s"Show Edit Room $id") { info =>
     implicit val request = info.request
 
     val rooms = roomService.getRooms()
@@ -106,7 +108,7 @@ class ZoomController(
     }
   }
 
-  def roomModified(): EssentialAction = superAdminsOnlyAsync { info =>
+  def roomModified(): EssentialAction = superAdminsOnlyAsync("Room Modified") { info =>
     implicit val request = info.request
 
     roomForm.bindFromRequest().fold(
@@ -115,6 +117,7 @@ class ZoomController(
         Future.successful(BadRequest(arisia.views.html.editRoom(formWithErrors)))
       },
       room => {
+        info.audit(s"Room ${room.id} (${room.zambiaName})")
         val fut =
           if (room.id == 0) {
             roomService.addRoom(room)
@@ -129,7 +132,7 @@ class ZoomController(
     )
   }
 
-  def removeRoom(id: Int): EssentialAction = adminsOnlyAsync { info =>
+  def removeRoom(id: Int): EssentialAction = adminsOnlyAsync(s"Remove Room $id") { info =>
     roomService.removeRoom(id).map { _ =>
       Redirect(arisia.controllers.routes.ZoomController.manageZoomRooms())
     }

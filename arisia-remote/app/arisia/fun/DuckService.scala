@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 import arisia.db.DBService
 import arisia.general.{LifecycleService, LifecycleItem}
-import arisia.models.LoginId
+import arisia.models.{LoginId, BadgeNumber}
 import arisia.util.Done
 import play.api.Logging
 import doobie._
@@ -36,6 +36,7 @@ object Duck {
 trait DuckService {
   // API endpoints
   def getDucks(): List[Duck]
+  def getDucksFor(who: LoginId): Future[List[Int]]
   def getDuck(id: Int): Option[Duck]
   def assignDuck(who: LoginId, duck: Int, from: String): Future[Int]
   def dropDuck(who: LoginId, duck: Int): Future[Int]
@@ -86,7 +87,7 @@ class DuckServiceImpl(
     // Need to validate that the request is coming from the right URL:
     getDuck(duckId) match {
       case Some(duck) => {
-        if (duck.requestingUrl == from) {
+        if (from contains duck.requestingUrl) {
           // All looks good:
           dbService.run(
             sql"""
@@ -99,7 +100,7 @@ class DuckServiceImpl(
           )
         } else {
           // Somehow got a request from the wrong place, which seems hinky:
-          val error = s"Got a request for Duck $duckId from incorrect location $from!"
+          val error = s"Got a request for Duck $duckId from incorrect location $from! It's supposed to be ${duck.requestingUrl}"
           logger.warn(error)
           Future.failed(new Exception(error))
         }
@@ -118,6 +119,17 @@ class DuckServiceImpl(
             WHERE username = ${who.lower} AND duck_id = $duck"""
         .update
         .run
+    )
+  }
+  def getDucksFor(who: LoginId): Future[List[Int]] = {
+    dbService.run(
+      sql"""
+            SELECT duck_id
+              FROM member_ducks
+             WHERE username = ${who.lower}
+           """
+        .query[Int]
+        .to[List]
     )
   }
 
