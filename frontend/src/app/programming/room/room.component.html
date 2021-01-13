@@ -10,7 +10,7 @@
       <div class="title centered row">Welcome to {{room.name | titlecase}}!</div>
       <ng-container *ngIf="room.runningEvents$ | async as runningEvents">
         <ng-container *ngIf="runningEvents.current as currentEvent">
-          <div class="description current-name row">Happening now: {{currentEvent.title}}</div>
+          <div class="description current-name row"><span class="happening-now">Happening now:&ngsp;</span><span class="event-title">{{currentEvent.title}}</span></div>
 
           <div class="description current-panelists row">{{currentEvent | programItemPanelists}}</div>
 
