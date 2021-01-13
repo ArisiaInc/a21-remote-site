@@ -4,3 +4,22 @@
 .expanded .name {
     font-weight: bold;
 }
+
+.expando {
+    width: 1rem;
+    height: 1rem;
+    display: inline-block;
+}
+
+.floating {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translate(0, -50%);
+}
+.base_item {
+    position: relative;
+}
+.content {
+    width: 100%;
+}

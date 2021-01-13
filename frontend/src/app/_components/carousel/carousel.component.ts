@@ -1,5 +1,9 @@
-import { Component, OnInit, ViewChild, Input } from '@angular/core';
+import { Component, OnChanges, ViewChild, Input } from '@angular/core';
 import { NgbCarousel, NgbSlideEvent } from '@ng-bootstrap/ng-bootstrap';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+import { SettingsService } from '@app/_services';
 
 export interface Image {
   src: string;
@@ -19,8 +23,9 @@ function moduloIncrement(value: number, divisor: number): number {
   templateUrl: './carousel.component.html',
   styleUrls: ['./carousel.component.scss']
 })
-export class CarouselComponent implements OnInit {
+export class CarouselComponent implements OnChanges {
   @Input() images: Image[] = [];
+  @Input() autoplay = true;
 
   currentImage: number = 0;
 
@@ -30,11 +35,17 @@ export class CarouselComponent implements OnInit {
 
   paused: boolean = false;
 
+  autoplayInterval$: Observable<number>
+
   @ViewChild(NgbCarousel) carousel!: NgbCarousel;
 
-  constructor() { }
+  constructor(public settingsService: SettingsService) {
+    // Can't figure out how to disable autoplay. Set it to a one year interval.
+    this.autoplayInterval$ = settingsService.disableAnimations$.pipe(map(
+      disableAnimations => (this.autoplay && !disableAnimations) ? 20000 : 30000000));
+  }
 
-  ngOnInit(): void {
+  ngOnChanges(): void {
     this.updateImageBufferSize();
     this.forceUpdateImageBuffer();
   }
