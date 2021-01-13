@@ -4,7 +4,14 @@
 
 .login {
     font-size: 2rem;
-    background: white;
+}
+
+.login:not(:active):not(:hover) {
+    background-color: white;
+}
+
+.login:disabled, .login.disabled {
+    background-color: white;
 }
 
 .login-group {
