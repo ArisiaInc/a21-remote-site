@@ -22,6 +22,8 @@ trait RoomService {
   def removeRoom(id: Int): Future[Done]
 
   def getRoomForZambia(loc: ProgramItemLoc): Future[Option[ZoomRoom]]
+
+  def getManualRoom(name: String): Option[ZoomRoom]
 }
 
 class RoomServiceImpl(
@@ -100,5 +102,9 @@ class RoomServiceImpl(
         .update
         .run
     ).flatMap(_ => loadRooms())
+  }
+
+  def getManualRoom(name: String): Option[ZoomRoom] = {
+    _roomCache.get().find(room => room.isManual && room.zambiaName == name)
   }
 }
