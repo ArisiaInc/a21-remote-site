@@ -18,21 +18,32 @@ class ScheduleController(
 {
   def getSchedule(): EssentialAction = Action { implicit request =>
     val userOpt = LoginController.loggedInUser()
-    // Note: we explicitly assume that this fetch is synchronous and fast. It is up to the ScheduleService to
-    // ensure that.
-    val schedule = userOpt match {
-      // Potential Zoom hosts see everything, including all prep sessions:
-      case Some(user) if (user.zoomHost) => scheduleService.fullSchedule()
-      // TODO: check if this person is a program participant; if so, give them a filtered version of the
-      // full schedule:
-      case _ => scheduleService.currentSchedule()
-    }
+    val currentSchedule = scheduleService.currentSchedule()
     // The HTTP standard says that the hash should be in double-quotes in both directions:
     //   https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
-    val hashStr = s""""${schedule.hash}""""
+    // Note that the hash is always derived from the current schedule -- the others are based on it, so we
+    // don't need to reload unless the base schedule has changed. This saves us from super-expensive
+    // recalculations on the program participant schedules.
+    val hashStr = s""""${currentSchedule.hash}""""
+
     request.headers.get("If-None-Match") match {
       case Some(prev) if (prev == hashStr) => NotModified
-      case _ => Ok(schedule.json).as(JSON).withHeaders(("ETag", hashStr))
+      case _ => {
+        // Note: we explicitly assume that this fetch is synchronous and fast. It is up to the ScheduleService to
+        // ensure that.
+        val schedule = userOpt match {
+          // Potential Zoom hosts see everything, including all prep sessions:
+          case Some(user) if (user.zoomHost) => scheduleService.fullSchedule()
+          // Program participants see a filtered schedule:
+          case Some(user) if (currentSchedule.participants.contains(user.badgeNumber)) => {
+            scheduleService.customScheduleFor(user.badgeNumber)
+          }
+          // Everyone else sees the public schedule:
+          case _ => currentSchedule
+        }
+
+        Ok(schedule.json).as(JSON).withHeaders(("ETag", hashStr))
+      }
     }
   }
 
