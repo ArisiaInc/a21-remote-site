@@ -17,6 +17,7 @@ export class LoginComponent implements OnInit {
   form!: FormGroup;
   loading = false;
   submitted = false;
+  submissionError = false;
   justLoggedOut = false;
 
   constructor(
@@ -40,6 +41,7 @@ export class LoginComponent implements OnInit {
 
   login() {
     this.submitted = true;
+    this.submissionError = false;
     // todo alert service for errors
     if (this.form.invalid) {
       return;
@@ -53,6 +55,7 @@ export class LoginComponent implements OnInit {
       // TODO show something to the user here about 401s?
       console.error(error);
       this.loading = false;
+      this.submissionError = true;
     });
   }
 
