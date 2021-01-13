@@ -13,7 +13,7 @@ const routes: Routes = [
    children: [
      { path: '', redirectTo: 'program', pathMatch: 'full' },
      { path: 'starred', component: StarredComponent, canActivate: [AuthGuard] },
-     { path: 'people/:search', component: PeopleComponent },
+     { path: 'people/search/:search', component: PeopleComponent },
      { path: 'people', component: PeopleComponent },
      { path: 'program', component: ProgramComponent },
    ]
