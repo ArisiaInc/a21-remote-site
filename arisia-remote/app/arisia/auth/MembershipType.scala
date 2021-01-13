@@ -53,6 +53,7 @@ object MembershipType extends StringEnum[MembershipType] {
   case object RolloverComp extends MembershipType("CMPROL", Comp)
   case object GamingComp extends MembershipType("CMPGAM", Comp)
   case object GOHComp extends MembershipType("CMPGOH", Comp)
+  case object MiscComp extends MembershipType("CMPMSC", Comp)
 
   val values = findValues
 
