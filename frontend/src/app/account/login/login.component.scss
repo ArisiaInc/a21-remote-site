@@ -82,6 +82,14 @@ $art-padding: 28.75rem;
     @include media-breakpoint-down(md) {
         padding-left: 0.75rem;
     }
+    @include media-breakpoint-only(xs) {
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+    }
+    @include media-breakpoint-only(lg) {
+        padding-top: 3rem;
+        padding-bottom: 1.5rem;
+    }
 }
 
 .content, .footer {
@@ -102,20 +110,19 @@ $art-padding: 28.75rem;
 }
 
 .footer {
-    font-size: 1.125rem;
-    left: 0;
-    line-height: 2rem;
-    position: absolute;
-    text-align: center;
-    top: 50%;
-    transform: translate(0, -50%);
     width: 100%;
+    font-size: 1.125rem;
+    line-height: 2rem;
+    text-align: center;
+    padding-bottom: 0.625rem;
 }
 
 .footer-container {
-    bottom: 0;
-    height: 5.25rem;
-    left: 0;
-    position: absolute;
+    @include media-breakpoint-up(sm) {
+        min-height: 5.25rem;
+        bottom: 0;
+        left: 0;
+        position: absolute;
+    }
     width: 100%;
 }
