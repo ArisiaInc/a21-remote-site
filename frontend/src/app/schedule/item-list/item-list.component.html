@@ -1,11 +1,13 @@
 <ng-container *ngFor="let showStars of [starsService.active$ | async]">
-  <div *ngFor="let day of events">
-    <h4>{{day.dateString}}</h4>
-    <div *ngFor="let time of day.times" class="mb-4">
-      <h5>{{time.timeString}}</h5>
-      <ul class="list-group">
-          <app-item *ngFor="let event of time.events" [event]="event" [showStar]="showStars"></app-item>
-      </ul>
+  <ng-container *ngIf="scheduleService.openDoors$ | async as openDoors">
+    <div *ngFor="let day of events">
+      <h4>{{day.dateString}}</h4>
+      <div *ngFor="let time of day.times" class="mb-4">
+        <h5>{{time.timeString}}</h5>
+        <ul class="list-group">
+          <app-item *ngFor="let event of time.events" [event]="event" [showStar]="showStars" [showDoors]="openDoors.has(event.id)"></app-item>
+        </ul>
+      </div>
     </div>
-  </div>
+  </ng-container>
 </ng-container>

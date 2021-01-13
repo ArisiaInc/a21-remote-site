@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, ReplaySubject, Observable, of, zip, OperatorFunction, timer, pipe, defer, concat } from 'rxjs';
-import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck, every, switchMap, repeat, ignoreElements, shareReplay } from 'rxjs/operators';
+import { BehaviorSubject, ReplaySubject, Subject, Observable, of, zip, OperatorFunction, timer, pipe, defer, concat, merge } from 'rxjs';
+import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck, every, switchMap, repeat, ignoreElements, shareReplay, take } from 'rxjs/operators';
 import { HttpClient, HttpResponse, HttpErrorResponse } from '@angular/common/http';
 
 import { PerformanceService } from './performance.service';
@@ -44,10 +44,13 @@ export class ScheduleEvent {
     this.tempPeople = item.people;
     this.starCache = this.starsService.has(this.id);
     if (item.doorsOpen && item.doorsClose) {
-      this.doorsOpen$ = settingsService.isInDateRange({start: new Date(item.doorsOpen), end: new Date(item.doorsClose)});
-    } else {
-      this.doorsOpen$ = of(false);
+      this.doors = {start: new Date(item.doorsOpen), end: new Date(item.doorsClose)};
     }
+//    if (item.doorsOpen && item.doorsClose) {
+//      this.doorsOpen$ = settingsService.isInDateRange(doors);
+//    } else {
+//      this.doorsOpen$ = of(false);
+//    }
   }
 
   link(peopleMap: {[_: string]: SchedulePerson}): void {
@@ -88,7 +91,8 @@ export class ScheduleEvent {
   location: string[];
   people: {person: SchedulePerson, isModerator: boolean}[];
 
-  doorsOpen$: Observable<boolean>;
+  //  doorsOpen$: Observable<boolean>;
+  doors?: DateRange;
 
   performance?: Performance;
 
@@ -302,6 +306,8 @@ export class ScheduleService {
   private events: ScheduleEvent[] = [];
   events$ = new ReplaySubject<ScheduleEvent[]>(1);
 
+  public openDoors$: Observable<Set<string>>;
+
   private eventsMap: {[id: string]: ScheduleEvent} = {};
   eventsMap$ = new ReplaySubject<{[id: string]: ScheduleEvent}>(1);
 
@@ -322,6 +328,8 @@ export class ScheduleService {
   private schedule: StructuredEvents = [];
   private scheduleWithoutRelabeling$ = new ReplaySubject<StructuredEvents>(1);
   private schedule$: Observable<StructuredEvents>;
+
+  private update$ = new Subject();
 
   private status: ScheduleStatus = {state: ScheduleState.IDLE};
   status$ = new BehaviorSubject<ScheduleStatus>(this.status);
@@ -346,10 +354,41 @@ export class ScheduleService {
       shareReplay(1),
     );
 
+
     performanceService.performances$.subscribe(performances => {
       this.performances = performances;
       this.combinePerformances(true);
     });
+
+    this.openDoors$ = defer((): Observable<Set<string>>  => {
+      const currentTime = settingsService.currentTime.getTime();
+      const openDoors = new Set<string>();
+      let delay = Infinity;
+      for (const event of this.events) {
+        if (event.doors) {
+          const startDelay = event.doors.start.getTime() - currentTime;
+          const endDelay = event.doors.end ? event.doors.end.getTime() - currentTime : Infinity;
+          if (startDelay <= 0 && endDelay >= 0) {
+            openDoors.add(event.id);
+          }
+          if (startDelay > 0) {
+            delay = Math.min(delay, startDelay);
+          }
+          if (endDelay >= 0) {
+            delay = Math.min(delay, endDelay);
+          }
+        }
+      }
+      if (delay === Infinity) {
+        return concat(of(openDoors), ignoreElements()(this.update$.pipe(take(1))));
+      } else {
+        return concat(of(openDoors), ignoreElements()(merge(this.update$, timer(delay)).pipe(take(1))));
+      }
+    }).pipe(
+      repeat(),
+      shareReplay(1)
+    );
+    this.openDoors$.subscribe(val => console.log (`${val}${!!val}`));
   }
 
   private reload(): void {
@@ -429,6 +468,7 @@ export class ScheduleService {
     this.peopleMap$.next(this.peopleMap);
     this.tracks$.next(this.tracks);
     this.types$.next(this.types);
+    this.update$.next(0);
     this.scheduleWithoutRelabeling$.next(this.schedule);
 
     this.status.state = ScheduleState.READY;

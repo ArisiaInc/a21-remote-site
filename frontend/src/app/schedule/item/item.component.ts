@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { ScheduleEvent } from '@app/_services';
+import { ScheduleService, ScheduleEvent } from '@app/_services';
 
 @Component({
   selector: 'app-item',
@@ -9,6 +9,7 @@ import { ScheduleEvent } from '@app/_services';
 export class ItemComponent implements OnInit {
   @Input() event!: ScheduleEvent;
   @Input() showStar = false;
+  @Input() showDoors = false;
   expanded: boolean = false;
   track!: string;
   type!: string;

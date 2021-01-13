@@ -16,10 +16,10 @@
           </ng-container>
           <app-room-link-other [href]="'/events'" *ngSwitchCase="'Performance Hall'">View in the Performance Hall</app-room-link-other>
           <ng-container *ngSwitchDefault>
-            <ng-container *ngIf="event.doorsOpen$ | async">
+            <ng-container *ngIf="showDoors">
               <app-room-link [id]="event.id"></app-room-link>
+              <app-room-link-host [id]="event.id"></app-room-link-host>
             </ng-container>
-            <app-room-link-host [id]="event.id"></app-room-link-host>
           </ng-container>
         </span>
       </div>
