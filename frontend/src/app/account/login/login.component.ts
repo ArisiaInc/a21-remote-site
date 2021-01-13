@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AccountService } from '@app/_services';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/core/http';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { tap } from 'rxjs/operators'
 
@@ -17,7 +18,7 @@ export class LoginComponent implements OnInit {
   form!: FormGroup;
   loading = false;
   submitted = false;
-  submissionError = false;
+  submissionError?: HttpErrorResponse;
   justLoggedOut = false;
 
   constructor(
@@ -41,7 +42,7 @@ export class LoginComponent implements OnInit {
 
   login() {
     this.submitted = true;
-    this.submissionError = false;
+    this.submissionError = undefined;
     // todo alert service for errors
     if (this.form.invalid) {
       return;
@@ -52,10 +53,8 @@ export class LoginComponent implements OnInit {
       console.log('logged in');
       this.router.navigate([this.returnUrl]);
     }, error => {
-      // TODO show something to the user here about 401s?
-      console.error(error);
       this.loading = false;
-      this.submissionError = true;
+      this.submissionError = error;
     });
   }
 
