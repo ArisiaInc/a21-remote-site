@@ -207,6 +207,22 @@ GET     /api/discord/getAssistSecret arisia.controllers.DiscordController.genera
 #      description: passed-in info not valid
 ###
 POST    /api/discord/assistAddArisian arisia.controllers.DiscordController.assistedAddArisian()
+###
+#  summary: via Lambda, sync this Discord user with their current info
+#  parameters:
+#    - in: header
+#      name: X-Shared-Secret
+#      schema:
+#        type: string
+#  responses:
+#    200:
+#      description: success
+#    401:
+#      description: shared secret header not found
+#    400:
+#      description: passed-in info not valid
+###
+PUT     /api/discord/sync/:id         arisia.controllers.DiscordController.sync(id)
 
 # Admin UI, separate from the attendee-facing site
 GET     /admin                       arisia.controllers.AdminController.home()
