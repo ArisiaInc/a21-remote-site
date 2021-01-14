@@ -1,7 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { ReplaySubject, of } from 'rxjs';
-import { Duck, DuckState } from '@app/_models';
-import { tap, catchError, mapTo, map, filter } from 'rxjs/operators';
+import { ReplaySubject } from 'rxjs';
 
 export class MetadataCacher<DataT> {
   private data: DataT;
