@@ -1,4 +1,5 @@
-<div class="duck" *ngIf="(duck$ | async) as duck">
+<ng-container *ngIf="(duck$ | async) as duck">
+  <div class="duck" *ngIf="show$ | async">
     <img [src]="duck.imageUrl" [alt]="duck.alt"  (click)="awardDuck(duck.id, duck.link)">
-</div>
-
+  </div>
+</ng-container>
