@@ -4,9 +4,17 @@
     <img src="assets/images/logout.png" class="art">
   </ng-template>
 
-  <div class="title" *ngIf="!justLoggedOut; else justLoggedOutTitle">
-    Log in to Arisia 2021!
+  <div class="title" *ngIf="!showRealTitle; else realTitle">
+    You're early!
+    <div class="subtitle">
+      Arisia 2021 will open to all attendees Friday at 12pm EST — please check back then!
+    </div>
   </div>
+  <ng-template #realTitle>
+    <div class="title" *ngIf="!justLoggedOut; else justLoggedOutTitle">
+      Log in to Arisia 2021!
+    </div>
+  </ng-template>
   <ng-template #justLoggedOutTitle>
     <div class="title">
       Thank you for attending Arisia&nbsp;2021!
