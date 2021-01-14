@@ -105,8 +105,10 @@ class ZoomServiceImpl(
       .get()
       .map { response =>
         val json = Json.parse(response.body)
-        val status = (json \ "status").as[String]
-        (status == "started")
+        (json \ "status").asOpt[String] match {
+          case Some(status) => (status == "started")
+          case _ => false
+        }
       }
   }
 
