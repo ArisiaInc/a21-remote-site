@@ -10,6 +10,7 @@ import play.api.libs.json.{Format, JsObject, JsArray, JsString, Json}
 import play.api.libs.ws.WSClient
 import play.api.libs.ws.ahc.AhcCurlRequestLogger
 import play.api.{Configuration, Logging, ConfigLoader}
+import com.roundeights.hasher.Hasher
 
 import scala.concurrent.{Future, ExecutionContext}
 
@@ -53,6 +54,8 @@ class DiscordServiceImpl(
   lazy val arisiaGuildId = botConfig[String]("guildId")
   lazy val arisianRoleId = botConfig[String]("arisianRoleId")
   lazy val pageSize = botConfig[Int]("page.size").toString
+
+  lazy val secretKey = config.get[String]("play.http.secret.key")
 
   val lifecycleName = "DiscordService"
 
@@ -205,13 +208,11 @@ class DiscordServiceImpl(
   }
 
   def generateAssistSecret(who: LoginUser): String = {
-    // TODO: figure out the right into for this, and sign it properly
-    s"FakeSecretFor${who.badgeNumber.v}"
+    DiscordService.generateAssistSecret(secretKey)(who)
   }
 
   def validateAssistSecret(secret: String): Boolean = {
-    // TODO: once we have a real secret, do this:
-    true
+    DiscordService.validateAssistSecret(secretKey)(secret)
   }
 
   def addArisianAssisted(creds: DiscordHelpCredentials): Future[Either[String, DiscordMember]] = {
@@ -235,4 +236,22 @@ class DiscordServiceImpl(
     // TODO: in airy theory this should set Roles, but we don't have any interesting ones that change yet:
     setBadgeName(who, discordId)
   }
+}
+
+object DiscordService {
+  // Pulled out to make this testable:
+  def generateAssistSecret(secretKey: String)(who: LoginUser): String = {
+    val hash = Hasher(who.badgeNumber.v).hmac(secretKey).sha512
+    s"${who.badgeNumber.v}:${hash.hex}"
+  }
+
+  def validateAssistSecret(secretKey: String)(secret: String): Boolean = {
+    secret.split(':').toList match {
+      case badgeNumber :: hex :: Nil => {
+        Hasher(badgeNumber).hmac(secretKey).sha512.hash = hex
+      }
+      case _ => false
+    }
+  }
+
 }

@@ -62,7 +62,7 @@ class ScheduleController(
   def getStars(): EssentialAction = withLoggedInAsync { info =>
     starService.getStars(info.who.id).map { stars =>
       val preAssignedStars: List[ProgramItemId] = {
-        val schedule = scheduleService.currentSchedule()
+        val schedule = scheduleService.fullSchedule()
         val myBadgeNumber = info.who.badgeNumber
         if (schedule.participants.contains(myBadgeNumber)) {
           schedule.program
