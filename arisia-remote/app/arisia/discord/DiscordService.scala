@@ -1,6 +1,7 @@
 package arisia.discord
 
 import java.util.concurrent.atomic.AtomicReference
+import java.util.Base64
 
 import arisia.auth.LoginService
 import arisia.general.LifecycleItem
@@ -256,16 +257,24 @@ class DiscordServiceImpl(
 }
 
 object DiscordService {
+  lazy val encoder = Base64.getEncoder
+  lazy val decoder = Base64.getDecoder
+
   // Pulled out to make this testable:
   def generateAssistSecret(secretKey: String)(who: LoginUser): String = {
-    val hash = Hasher(who.badgeNumber.v).hmac(secretKey).sha512
-    s"${who.badgeNumber.v}:${hash.hex}"
+    val hash = Hasher(who.badgeNumber.v).hmac(secretKey).md5
+    val bytes = hash.bytes
+    // Drop the "==" at the end:
+    val base64 = new String(encoder.encode(bytes)).dropRight(2)
+    s"${who.badgeNumber.v}:$base64"
   }
 
   def validateAssistSecret(secretKey: String)(secret: String): Boolean = {
     secret.split(':').toList match {
-      case badgeNumber :: hex :: Nil => {
-        Hasher(badgeNumber).hmac(secretKey).sha512.hash = hex
+      case badgeNumber :: base64 :: Nil => {
+        val bytes = (base64 + "==").getBytes
+        val hashBytes = decoder.decode(bytes)
+        Hasher(badgeNumber).hmac(secretKey).md5.hash = hashBytes
       }
       case _ => false
     }
