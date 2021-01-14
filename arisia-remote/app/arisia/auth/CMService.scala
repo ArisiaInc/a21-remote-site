@@ -91,6 +91,8 @@ class CMServiceImpl(
         if (body.contains("Bad username or password")) {
           // CM says that it's wrong:
           Left(LoginError.NoLogin)
+        } else if (body.contains("Your password has expired")) {
+          Left(LoginError.PasswordReset)
         } else if (body.contains("Please Double-check your name information")) {
           // That indicates that CM thinks it's a legit username/password
           // Parse out the badgename. We're not even going to try and be cute about this
