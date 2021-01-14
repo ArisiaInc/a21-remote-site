@@ -4,11 +4,12 @@
     <img src="assets/images/logout.png" class="art">
   </ng-template>
 
-  <div class="title" *ngIf="!showRealTitle; else realTitle">
-    You're early!
+  <div class="title less-padding" *ngIf="!showRealTitle; else realTitle">
+    You're a bit early!
     <div class="subtitle">
-      Arisia 2021 will open to all attendees Friday at 12pm EST — please check back then!
+Please check back Friday at 12pm EST, when Arisia 2021 will open to attendees!
     </div>
+    <div class="warning">Please do not use the form below, as it will not work until Friday 12pm</div>
   </div>
   <ng-template #realTitle>
     <div class="title" *ngIf="!justLoggedOut; else justLoggedOutTitle">
