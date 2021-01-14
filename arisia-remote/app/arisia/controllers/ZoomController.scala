@@ -95,7 +95,14 @@ class ZoomController(
 
     scheduleQueueService.getRunningMeeting(itemId) match {
       case Some(meeting) => {
-        zoomService.isMeetingRunning(meeting.id).flatMap { running =>
+        val checkRunning: Future[Boolean] =
+          if (meeting.isWebinar)
+            // Sadly, we don't appear to have a way to check this for webinars, so we're just going to cross
+            // our fingers and hope for the best:
+            Future.successful(false)
+          else
+            zoomService.isMeetingRunning(meeting.id)
+        checkRunning.flatMap { running =>
           if (running) {
             // TODO: think about this. If the meeting is running and somebody tries to use this API, should
             // we stomp the existing meeting? It could conceivably happen in case of a takeover. We do have
