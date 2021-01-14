@@ -62,6 +62,9 @@ class LoginServiceImpl(
   lazy val hardcodedAdmin: Seq[LoginId] =
     config.get[Seq[String]]("arisia.dev.admins").map(LoginId(_))
 
+  lazy val hardcodedSuperadmin: Seq[LoginId] =
+    config.get[Seq[String]]("arisia.dev.superadmins").map(LoginId(_))
+
   private def checkPermissions(initialUser: LoginUser): Future[Either[LoginError, LoginUser]] = {
     getPermissions(initialUser.id).map { perms =>
       if (perms.tech)
@@ -200,7 +203,14 @@ class LoginServiceImpl(
         } else {
           withHardcodedEarlyAccess
         }
-      withHardcodedAdmin
+      val withHardcodedSuper =
+        if (hardcodedSuperadmin.contains(id)) {
+          withHardcodedAdmin.copy(superAdmin = true)
+        } else {
+          withHardcodedAdmin
+        }
+
+      withHardcodedSuper
     }
   }
 }
