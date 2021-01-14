@@ -11,12 +11,13 @@ class DiscordServiceSpec extends AnyWordSpec with Matchers {
       val user = LoginUser(
         LoginId("foo"),
         LoginName("Foo Bar"),
-        BadgeNumber("29309"),
+        BadgeNumber("129230"),
         false,
         MembershipType.AdultStandard
       )
       val secretKey = "lsdflisdpisdf;kasd;lkas;lk"
       val secret = DiscordService.generateAssistSecret(secretKey)(user)
+      println(secret)
       DiscordService.validateAssistSecret(secretKey)(secret) shouldBe true
     }
   }
