@@ -9,10 +9,10 @@
         </div>
         <div class="links" [ngSwitch]="credit.links.length">
           <span *ngSwitchCase="0"></span>
-          <a [href]="credit.links[0].url" *ngSwitchCase="1">Check out {{credit.possessive}} {{credit.links[0].text || "website"}} here.</a>
+          <a [href]="credit.links[0].url" target="_blank" *ngSwitchCase="1">Check out {{credit.possessive}} {{credit.links[0].text || "website"}} here.</a>
           <span *ngSwitchDefault>Check out {{credit.possessive}}
             <ng-container *ngFor="let link of credit.links; last as isLast">
-              <a [href]="credit.links[0].url">{{credit.links[0].text || "website"}}</a>
+              <a [href]="link.url" target="_blank">{{link.text || "website"}}</a>
               <ng-container *ngIf="!isLast"> and </ng-container>
             </ng-container>
           </span>
