@@ -3,6 +3,10 @@
   <label for="hour12">12 Hour Time</label>
 </div>
 <div class="flex-item">
+  <input type="checkbox" id="disableAnimations" [(ngModel)]="settingsService.disableAnimations" [ngModelOptions]="{standalone: true}">
+  <label for="disableAnimations">No animations or auto-play</label>
+</div>
+<div class="flex-item">
   <input type="text" id="timeOffset" [(ngModel)]="settingsService.timeOffset" [ngModelOptions]="{standalone: true}">
   <label for="hour12">Time Offset(ms)</label>
 </div>

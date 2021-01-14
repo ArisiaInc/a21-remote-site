@@ -15,12 +15,25 @@ export class SettingsService {
   hour12$ = new BehaviorSubject(this.hour12);
 
   get hour12(): boolean {
+    // Default to true
     return !(this.settings["hour12"] === '0');
   }
 
   set hour12(value: boolean) {
     this.setValue('hour12', value ? '1' : '0');
     this.hour12$.next(value);
+  }
+
+  disableAnimations$ = new BehaviorSubject(this.disableAnimations);
+
+  get disableAnimations(): boolean {
+    // Default to false
+    return this.settings["disableAnimations"] === '1';
+  }
+
+  set disableAnimations(value: boolean) {
+    this.setValue('disableAnimations', value ? '1' : '0');
+    this.disableAnimations$.next(value);
   }
 
   timeOffset$ = new BehaviorSubject(this.timeOffset);
@@ -54,11 +67,13 @@ export class SettingsService {
               this.settings = settings;
               this.hour12$.next(this.hour12);
               this.timeOffset$.next(this.timeOffset);
+              this.disableAnimations$.next(this.disableAnimations);
             });
         } else {
           this.settings = {};
           this.hour12$.next(this.hour12);
           this.timeOffset$.next(this.timeOffset);
+          this.disableAnimations$.next(this.disableAnimations);
         }
       });
   }

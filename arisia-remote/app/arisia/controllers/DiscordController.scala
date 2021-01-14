@@ -75,4 +75,22 @@ class DiscordController(
       case _ => Future.successful(Unauthorized("Shared secret not found in the X-Shared"))
     }
   }
+
+  def sync(id: String): EssentialAction = Action.async { implicit request =>
+    request.headers.get("X-Shared-Secret") match {
+      case Some(secret) if (secret == sharedSecret) => {
+        loginService.fetchUserFromDiscordId(id).flatMap {
+          _ match {
+            case Some(user) => {
+              discordService.syncUser(user, id).map { _ =>
+                Ok("")
+              }
+            }
+            case _ => Future.successful(NotFound("Not a known Discord user!"))
+          }
+        }
+      }
+      case _ => Future.successful(Unauthorized("Shared secret not found in the X-Shared"))
+    }
+  }
 }

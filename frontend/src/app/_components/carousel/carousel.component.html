@@ -1,6 +1,6 @@
 <ngb-carousel #carousel class="carousel" *ngIf="imageBuffer.length > 0"
               [showNavigationArrows]="true" [showNavigationIndicators]="false"
-              [pauseOnHover]="false" [pauseOnFocus]="false" [interval]="20000"
+              [pauseOnHover]="false" [pauseOnFocus]="false" [interval]="autoplayInterval$ | async"
               (slid)="handleSlidEvent($event)">
   <ng-template ngbSlide *ngFor="let image of imageBuffer">
     <div class="image-wrapper">

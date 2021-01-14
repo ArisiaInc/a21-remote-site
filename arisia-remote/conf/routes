@@ -21,6 +21,29 @@ POST    /api/login                   arisia.controllers.LoginController.login()
 
 GET     /api/me                      arisia.controllers.LoginController.me()
 
+###
+#  summary: is this room open?
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/room/open/:name         arisia.controllers.ZoomController.isRoomOpen(name)
+
+###
+#  summary: go to this room
+#  responses:
+#    303:
+#      description: Redirect
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/room/enter/:name        arisia.controllers.ZoomController.goToRoom(name)
 
 ###
 #  summary: fetch the specified frontend config entry
@@ -194,6 +217,22 @@ GET     /api/discord/getAssistSecret arisia.controllers.DiscordController.genera
 #      description: passed-in info not valid
 ###
 POST    /api/discord/assistAddArisian arisia.controllers.DiscordController.assistedAddArisian()
+###
+#  summary: via Lambda, sync this Discord user with their current info
+#  parameters:
+#    - in: header
+#      name: X-Shared-Secret
+#      schema:
+#        type: string
+#  responses:
+#    200:
+#      description: success
+#    401:
+#      description: shared secret header not found
+#    400:
+#      description: passed-in info not valid
+###
+PUT     /api/discord/sync/:id         arisia.controllers.DiscordController.sync(id)
 
 # Admin UI, separate from the attendee-facing site
 GET     /admin                       arisia.controllers.AdminController.home()
@@ -231,7 +270,7 @@ GET     /admin/assets/*file          controllers.Assets.versioned(path="/public"
 # Zambia emulator, providing test data
 GET     /test/fakeschedule           arisia.controllers.FakeZambiaController.getSchedule()
 # TODO: remove
-GET     /test/zoomcall               arisia.controllers.ZoomController.test()
+GET     /test/zoomcall/:id               arisia.controllers.ZoomController.test(id: Long)
 # TODO: remove
 GET     /test/getDiscordMembers      arisia.controllers.DiscordController.test()
 GET     /test/scheduleItem           arisia.controllers.ScheduleTestController.showTestScheduleInput()

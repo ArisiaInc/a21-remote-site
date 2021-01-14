@@ -2,7 +2,7 @@ package arisia.zoom
 
 import arisia.util.Done
 import arisia.zoom.models.{ZoomMeetingType, ZoomUser, ZoomMeeting}
-import play.api.libs.json.{Format, Json, JsObject, JsString}
+import play.api.libs.json._
 import play.api.{Configuration, Logging}
 import play.api.libs.ws._
 import play.api.http.Status
@@ -20,6 +20,9 @@ trait ZoomService {
 
   def startMeeting(topic: String, zoomUserId: String): Future[Either[String, ZoomMeeting]]
   def endMeeting(meetingId: Long): Future[Done]
+
+  def isMeetingRunning(meetingId: Long): Future[Boolean]
+  def getJoinUrl(meetingId: Long): Future[String]
 }
 
 private[zoom] case class ZoomMeetingParams(
@@ -96,10 +99,32 @@ class ZoomServiceImpl(
         Done
       }
   }
+
+  def isMeetingRunning(meetingId: Long): Future[Boolean] = {
+    urlWithJwt(s"/meetings/$meetingId")
+      .get()
+      .map { response =>
+        val json = Json.parse(response.body)
+        val status = (json \ "status").as[String]
+        (status == "started")
+      }
+  }
+
+  def getJoinUrl(meetingId: Long): Future[String] = {
+    urlWithJwt(s"/meetings/$meetingId")
+      .get()
+      .map { response =>
+        val json = Json.parse(response.body)
+        val result = (json \ "join_url").as[String]
+        result
+      }
+  }
 }
 
 class DisabledZoomService() extends ZoomService {
   def getUsers(): Future[List[ZoomUser]] = ???
   def startMeeting(topic: String, zoomUserId: String): Future[Either[String, ZoomMeeting]] = ???
   def endMeeting(meetingId: Long): Future[Done] = ???
+  def isMeetingRunning(meetingId: Long): Future[Boolean] = ???
+  def getJoinUrl(meetingId: Long): Future[String] = ???
 }

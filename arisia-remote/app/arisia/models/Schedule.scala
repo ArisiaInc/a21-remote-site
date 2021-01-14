@@ -9,13 +9,27 @@ import scala.language.postfixOps
  */
 case class Schedule(program: List[ProgramItem], people: List[ProgramPerson]) {
   lazy val json: String = Json.toJson(this).toString()
+
   // Note that we do *not* care about a cryptographically-sound hash here -- we just need something large and
   // well-enough-distributed to make hash collisions unlikely. So MD5 should suffice -- we don't need to waste
   // extra cycles on SHA256 or BCrypt:
   lazy val hash: String = json.md5.hex
+
   // Map of items by ID, for quicker lookup:
   lazy val byItemId: Map[ProgramItemId, ProgramItem] =
     program.map(item => (item.id) -> item).toMap
+
+  // Who are the participants? They need customized Schedules. We convert this to BadgeNumber, because that's what
+  // we need to look it up by:
+  lazy val participants: Set[BadgeNumber] = {
+    val idList = for {
+      item <- program
+      person <- item.people
+    }
+      yield BadgeNumber(person.id.v)
+
+    idList.toSet
+  }
 }
 
 object Schedule {

@@ -33,11 +33,14 @@ trait LoginService {
   def addDiscordInfo(who: LoginUser, discordMember: DiscordMember): Future[Int]
 
   /**
-   * Get the
-   * @param badgeNumber
-   * @return
+   * Get the user from their badge number.
    */
   def fetchUserInfo(badgeNumber: BadgeNumber): Future[Option[LoginUser]]
+
+  /**
+   * Get the user from their Discord ID.
+   */
+  def fetchUserFromDiscordId(memberId: String): Future[Option[LoginUser]]
 }
 
 class LoginServiceImpl(
@@ -151,6 +154,27 @@ class LoginServiceImpl(
         .update
         .run
     )
+  }
+
+  def fetchUserFromDiscordId(memberId: String): Future[Option[LoginUser]] = {
+    dbService.run(
+      sql"""
+           SELECT username, badge_name, badge_number, membership_type
+             FROM user_info
+            WHERE discord_id = $memberId"""
+        .query[(String, String, String, String)]
+        .option
+    ).map {
+      _.map { case (username, badgeName, badgeNumber, membershipType) =>
+        LoginUser(
+          LoginId(username),
+          LoginName(badgeName),
+          BadgeNumber(badgeNumber),
+          false,
+          MembershipType.withValue(membershipType)
+        )
+      }
+    }
   }
 
   def fetchPermissionsQuery(id: LoginId): ConnectionIO[Option[Permissions]] =
