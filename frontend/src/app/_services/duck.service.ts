@@ -33,15 +33,9 @@ export class DuckService {
     );
   }
 
-  get_duck(id: number) : Observable<Duck | undefined> {
+  getDuck(id: number) : Observable<Duck | undefined> {
     return this.ducks$.pipe(
       map(ducks => ducks.find(({id: duckId}) => id === duckId)),
-    );
-  }
-
-  award_duck(id: number) {
-    return this.http.post<any>(`${environment.backend}/ducks/${id}`, {}, {withCredentials: true}).pipe(
-      catchError(e => of(false))
     );
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, shareReplay } from 'rxjs/operators';
+import { map, tap, shareReplay, catchError } from 'rxjs/operators';
 import { of, Observable, BehaviorSubject, ReplaySubject } from 'rxjs';
 
 import { environment } from '@environments/environment';
@@ -22,6 +22,7 @@ export class AccountService {
     this.http.get<User>(`${environment.backend}/me`, {withCredentials: true}).subscribe(
       user => {
         this.user = user;
+        this.user.self = true;
         this.user$.next(this.user);
       },
       err => {
@@ -41,6 +42,7 @@ export class AccountService {
     loginRequest.subscribe(
       user => {
         this.user = user;
+        this.user.self = true;
         this.user$.next(this.user);
       });
     return loginRequest;
@@ -58,7 +60,7 @@ export class AccountService {
     return loginRequest;
   }
 
-  getUser(badgeNumber: string) : Observable<User> {
+  getUser(badgeNumber: string) : Observable<User | undefined> {
       // This is for testing.
       /*
     if (this.user?.badgeNumber === badgeNumber) {
@@ -69,12 +71,28 @@ export class AccountService {
       return of({id: 'joe', name: 'Joe', badgeNumber: badgeNumber, zoomHost: false, ducks: [1,3], self: false});
     }
     */
-    // below is the real one
-    return this.http.get<User>(`${environment.backend}/user/${badgeNumber}`, {withCredentials: true}).pipe(
-      map(user => {
-        user && this.user?.badgeNumber === badgeNumber ? user.self = true : user.self = false;
-        return user;
-      })
+    if (this.user?.badgeNumber === badgeNumber) {
+      return this.user$;
+    } else {
+      return this.http.get<User>(`${environment.backend}/user/${badgeNumber}`, {withCredentials: true}).pipe(
+        tap(user => user.self = false),
+        catchError(e => of(undefined)),
+      );
+    }
+  }
+
+  awardDuck(id: number): Observable<boolean> {
+    if (!this.user) {
+      return of(false);
+    }
+    if(this.user.ducks.includes(id)) {
+      return of(true);
+    }
+    this.user.ducks.push(id);
+    this.user$.next(this.user);
+    return this.http.post<any>(`${environment.backend}/ducks/${id}`, {}, {withCredentials: true}).pipe(
+      map(_ => true),
+      catchError(e => of(false))
     );
   }
 }

@@ -3,6 +3,6 @@ export interface User {
   name: string;
   badgeNumber: string;
   zoomHost: boolean;
-  ducks?: number[];
+  ducks: number[];
   self?: boolean;
 }
