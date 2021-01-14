@@ -9,6 +9,7 @@ import { Duck } from '@app/_models';
 export class ProfileDuckComponent implements OnInit {
   @Input() duck!: Duck;
   @Input() isSelf: boolean = false
+  @Input() hidden: boolean = false
 
   constructor() { }
 

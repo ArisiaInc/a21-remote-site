@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, shareReplay } from 'rxjs/operators';
+import { map, tap, shareReplay, catchError } from 'rxjs/operators';
 import { of, Observable, BehaviorSubject, ReplaySubject } from 'rxjs';
 
 import { environment } from '@environments/environment';
@@ -42,6 +42,7 @@ export class AccountService {
     loginRequest.subscribe(
       user => {
         this.user = user;
+        this.user.self = true;
         this.user$.next(this.user);
       });
     return loginRequest;
@@ -59,23 +60,30 @@ export class AccountService {
     return loginRequest;
   }
 
-  getUser(badgeNumber: string) : Observable<User> {
-      // This is for testing.
-      /*
-    if (this.user?.badgeNumber === badgeNumber) {
-      this.user.self = true;
-      this.user.ducks = [1];
-      return of(this.user);
-    } else {
-      return of({id: 'joe', name: 'Joe', badgeNumber: badgeNumber, zoomHost: false, ducks: [1,3], self: false});
+  getUser(badgeNumber: string) : Observable<User | undefined> {
+    // Add this code when me returns all the information we need.
+//    if (this.user?.badgeNumber === badgeNumber) {
+//      return this.user$;
+//    } else {
+      return this.http.get<User>(`${environment.backend}/user/${badgeNumber}`, {withCredentials: true}).pipe(
+        tap(user => user.self = this.user?.badgeNumber === badgeNumber),
+        catchError(e => of(undefined)),
+      );
+//    }
+  }
+
+  awardDuck(id: number): Observable<boolean> {
+    if (!this.user) {
+      return of(false);
     }
-    */
-    // below is the real one
-    return this.http.get<User>(`${environment.backend}/user/${badgeNumber}`, {withCredentials: true}).pipe(
-      map(user => {
-        user && this.user?.badgeNumber === badgeNumber ? user.self = true : user.self = false;
-        return user;
-      })
+    if(this.user.ducks.includes(id)) {
+      return of(true);
+    }
+    this.user.ducks.push(id);
+    this.user$.next(this.user);
+    return this.http.post<any>(`${environment.backend}/ducks/${id}`, {}, {withCredentials: true}).pipe(
+      map(_ => true),
+      catchError(e => of(false))
     );
   }
 }

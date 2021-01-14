@@ -1,9 +1,13 @@
-<div class="duck col-12 col-sm-6 col-md-4 col-lg-3" *ngIf="duck.hidden">
-    <img src="/assets/images/duck_silhouette.png" [alt]="duck.hint" placement="bottom" [ngbTooltip]="duck.hint"/>
-</div>
-<div class="duck col-12 col-sm-6 col-md-4 col-lg-3" *ngIf="!duck.hidden">
-    <a [href]="duck.link" *ngIf="isSelf">
+<div class="duck col-12 col-sm-6 col-md-4 col-lg-3" *ngIf="!hidden; else hiddenDuck">
+    <a [href]="duck.link" *ngIf="isSelf; else otherDuck">
         <img [src]="duck.imageUrl" [alt]="duck.alt">
     </a>
-    <img [src]="duck.imageUrl" [alt]="duck.alt" *ngIf="!isSelf">
+    <ng-template #otherDuck>
+      <img [src]="duck.imageUrl" [alt]="duck.alt">
+    </ng-template>
 </div>
+<ng-template #hiddenDuck>
+  <div class="duck col-12 col-sm-6 col-md-4 col-lg-3">
+    <img src="/assets/images/duck_silhouette.png" [alt]="duck.hint" placement="bottom" [ngbTooltip]="duck.hint"/>
+  </div>
+</ng-template>

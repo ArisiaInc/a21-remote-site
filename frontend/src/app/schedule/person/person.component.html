@@ -1,4 +1,4 @@
-<div class="content" (click)="expanded = !expanded" [ngClass]="{'expanded': expanded}">
+<div class="content" (click)="expanded = !expanded || alwaysExpanded" [ngClass]="{'expanded': expanded}">
   <div class="base_item">
     <div class="name">{{person.name}}</div>
     <div class="floating expando">
@@ -13,6 +13,6 @@
   <div class="extra" *ngIf="expanded">
     <p [innerHTML] = "person.bio | sanitizeHtml | linkify"></p>
     <app-item-list [events]="person.events$ | async"></app-item-list>
-    <app-duck duckId="4" *ngIf="person.id === '108383'"></app-duck>
+    <app-duck [duckId]="4" *ngIf="person.id === '108383'"></app-duck>
   </div>
 </div>

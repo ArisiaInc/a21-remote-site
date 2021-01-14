@@ -20,6 +20,7 @@ export class AlphabetLinksComponent implements OnChanges {
   @Input() search: string = '';
   @Input() includeGoh = false;
   @Input() urlPrefix = '/';
+  @Input() allUrl = '';
   links?: Link[] = [];
 
   constructor() { }
@@ -27,7 +28,7 @@ export class AlphabetLinksComponent implements OnChanges {
   ngOnChanges(): void {
     if (this.initials) {
       this.links = [];
-      this.links.push({link: this.urlPrefix, searchCompare: '', display: 'All', active: true});
+      this.links.push({link: this.allUrl || this.urlPrefix, searchCompare: '', display: 'All', active: true});
       if (this.includeGoh) {
         this.links.push({link: `${this.urlPrefix}/goh`, searchCompare: 'goh', display: 'GOH', active: true});
       }

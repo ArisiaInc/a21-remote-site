@@ -91,12 +91,17 @@ $coffee-text-left: 3.4375rem;
     padding-top: 1.25rem;
 }
 
+.xl-text {
+    font-size: 3rem;
+}
+
 .large-text {
     font-size: 2.25rem;
 }
 
 .medium-text {
     font-size: 1.5rem;
+    line-height: 1.75rem;
 }
 
 .small-medium-text {
@@ -105,6 +110,7 @@ $coffee-text-left: 3.4375rem;
 
 .small-text {
     font-size: 1.25rem;
+    line-height: 1.5rem;
 }
 
 @include media-breakpoint-up(sm) {
