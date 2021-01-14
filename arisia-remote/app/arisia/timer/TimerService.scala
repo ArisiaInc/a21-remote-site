@@ -40,7 +40,7 @@ class TimerServiceImpl(
     cb: Instant => Unit
   ) extends Runnable {
     def run(): Unit = {
-      logger.info(s"Tick: running $name")
+      logger.debug(s"Tick: running $name")
       cb(time.now())
     }
 
