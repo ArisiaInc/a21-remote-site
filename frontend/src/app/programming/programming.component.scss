@@ -1,30 +1,76 @@
+@import "node_modules/bootstrap/scss/functions";
+@import "node_modules/bootstrap/scss/variables";
+@import "node_modules/bootstrap/scss/mixins/_breakpoints";
+$name-height: 1.5rem;
+$name-line-height: 1.5 * $name-height;
+
+$door-width: 9rem;
+$door-height: 14.5rem;
+$xl-door-scale: 0.9;
+$room-padding-top: 1.25rem;
+
+$title-line-height: 1.3125rem;
 
 .room {
-  position: relative;
-  width: 100%;
+    display: flex;
+    height: $door-height;
+    @include media-breakpoint-only(xl) {
+        height: $xl-door-scale * $door-height;
+    }
+    margin-bottom: 1rem;
+}
 
-  &::before {
-    display: block;
-    padding-top: 50%;
-    content: "";
-  }
-
-  > * {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
+.events {
+    padding-left: 0.5rem;
+    overflow: hidden;
+    margin-top: ($door-height - 5 * $title-line-height - $name-line-height) / 2;
+    @include media-breakpoint-only(xl) {
+        margin-top: ($xl-door-scale * $door-height - 5 * $title-line-height - $name-line-height) / 2;
+    }
+    align-self: flex-start;
+    max-height: 9 * $title-line-height;
 }
 
 .event-title {
     overflow: hidden;
+    width: 100%;
+    font-size: 0.875rem;
+    line-height: $title-line-height;
+
+
+    height: 2 * $title-line-height;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
 
-.room-box {
+.events:hover > .event-title.real {
+    height: initial;
+    white-space: normal;
+}
+
+.event-title:not(:last-child) {
+    margin-bottom: $title-line-height;
+}
+
+
+.door {
+    height: $door-height;
+    @include media-breakpoint-only(xl) {
+        height: $xl-door-scale * $door-height;
+    }
+}
+
+.door, door-box {
+    width: $door-width;
+    @include media-breakpoint-only(xl) {
+        width: $xl-door-scale * $door-width;
+    }
+}
+.name {
+    padding-top: $room-padding-top;
+    text-align: center;
+    font-size: $name-height;
+    line-height: $name-line-height;
+    white-space: nowrap;
     width: 100%;
-    height: 100%;
 }
