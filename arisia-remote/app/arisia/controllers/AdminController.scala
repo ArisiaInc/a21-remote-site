@@ -52,7 +52,7 @@ class AdminController (
    */
   def startMeeting(): EssentialAction = adminsOnlyAsync("Started test meeting") { info =>
     val userId = config.get[String]("arisia.zoom.api.userId")
-    zoomService.startMeeting("Ad hoc meeting", userId).map { errorOrMeeting =>
+    zoomService.startMeeting("Ad hoc meeting", userId, false).map { errorOrMeeting =>
       errorOrMeeting match {
         case Right(meeting) => Ok(Json.toJson(meeting).toString())
         case Left(error) => InternalServerError(error)
@@ -63,7 +63,7 @@ class AdminController (
   def endMeeting(meetingIdStr: String): EssentialAction = adminsOnlyAsync("Ended meeting manually") { info =>
     meetingIdStr.toLongOption match {
       case Some(meetingId) => {
-        zoomService.endMeeting(meetingId).map { _ =>
+        zoomService.endMeeting(meetingId, false).map { _ =>
           Ok(s"Meeting $meetingId ended")
         }
       }

@@ -12,8 +12,11 @@ import play.api.libs.json.{Format, Json}
 case class ZoomMeeting(
   id: Long,
   start_url: String,
-  join_url: String
-)
+  join_url: String,
+  `type`: Int
+) {
+  def isWebinar: Boolean = `type` == ZoomMeetingType.Webinar
+}
 object ZoomMeeting {
   implicit val fmt: Format[ZoomMeeting] = Json.format
 }
@@ -22,5 +25,8 @@ object ZoomMeetingType {
   final val Instant = 1
   final val Scheduled = 2
   final val RecurringUnfixed = 3
+  final val Webinar = 5
+  final val WebinarRecurringUnfixed = 6
   final val RecurringFixed = 8
+  final val WebinarRecurringFixed = 9
 }
