@@ -1,4 +1,4 @@
 <!-- for testing -->
 <div class="row">
-    <app-profile-duck [duck]="duck" [isSelf]="isSelf" *ngFor="let duck of (ducks$ | async)"></app-profile-duck>
+    <app-profile-duck [duck]="duckState.duck" [isSelf]="isSelf" [hidden]="duckState.hidden" *ngFor="let duckState of (ducks$ | async)"></app-profile-duck>
 </div>
