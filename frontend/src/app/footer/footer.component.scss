@@ -1,0 +1,39 @@
+a {
+    color: black;
+}
+
+:host {
+    background: #74ABF4;
+    padding-top: 1rem;
+    padding-bottom: 0.5rem;
+    font-size: 0.75rem;
+}
+
+.text-box {
+    font-weight: bold;
+    flex-basis: 0;
+    flex-grow: 1;
+    position: relative;
+}
+
+.right-side {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.content {
+    display: flex;
+}
+
+.discord {
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: 0 1rem;
+}
+
+.arisia {
+    width: 2.9375rem;
+    height: 2.3125rem;
+    margin: 0 1rem;
+}
