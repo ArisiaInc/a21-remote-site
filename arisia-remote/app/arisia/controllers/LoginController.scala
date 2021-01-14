@@ -15,7 +15,7 @@ case class ProfileInfo(
   name: LoginName,
   badgeNumber: BadgeNumber,
   zoomHost: Boolean,
-  ducks: List[String]
+  ducks: List[Int],
 )
 object ProfileInfo {
   implicit val fmt: Format[ProfileInfo] = Json.format
@@ -50,7 +50,7 @@ class LoginController (
         user.name,
         user.badgeNumber,
         user.zoomHost,
-        ducks.map(_.toString)
+        ducks
       )
       Ok(Json.toJson(info).toString)
     }

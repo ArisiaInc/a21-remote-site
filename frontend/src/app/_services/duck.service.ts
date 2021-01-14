@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@environments/environment';
-import { Observable, ReplaySubject, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Duck, DuckState } from '@app/_models';
-import { tap, catchError, mapTo, map, filter } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 
 import { MetadataCacher } from './metadata-cacher';
 
