@@ -7,6 +7,8 @@ import { tap } from 'rxjs/operators'
 
 import { DoorDragonComponent } from '@app/_components';
 
+const START_TIME =  1610730000000;
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -19,6 +21,7 @@ export class LoginComponent implements OnInit {
   submitted = false;
   submissionError?: string;
   justLoggedOut = false;
+  showRealTitle = false;
 
   constructor(
     private accountService: AccountService,
@@ -26,7 +29,13 @@ export class LoginComponent implements OnInit {
     private route: ActivatedRoute,
     private formBuilder: FormBuilder,
     private modalService: NgbModal,
-  ) { }
+  ) {
+    const now = Date.now();
+    this.showRealTitle = now >= START_TIME;
+    if (!this.showRealTitle) {
+      setTimeout(() => this.showRealTitle = true, START_TIME - now);
+    }
+  }
 
   ngOnInit(): void {
     this.form = this.formBuilder.group({
