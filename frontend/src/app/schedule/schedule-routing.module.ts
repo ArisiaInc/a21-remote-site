@@ -6,6 +6,7 @@ import { ProgramComponent } from './program/program.component';
 import { PersonComponent } from './person/person.component';
 import { LayoutComponent } from './layout/layout.component';
 import { PeopleComponent } from './people/people.component';
+import { PersonPageComponent } from './person-page/person-page.component';
 import { StarredComponent } from './starred/starred.component';
 
 const routes: Routes = [
@@ -13,7 +14,8 @@ const routes: Routes = [
    children: [
      { path: '', redirectTo: 'program', pathMatch: 'full' },
      { path: 'starred', component: StarredComponent, canActivate: [AuthGuard] },
-     { path: 'people/:search', component: PeopleComponent },
+     { path: 'people/person/:id', component: PersonPageComponent },
+     { path: 'people/search/:search', component: PeopleComponent },
      { path: 'people', component: PeopleComponent },
      { path: 'program', component: ProgramComponent },
    ]

@@ -1,0 +1,28 @@
+.secret-directions {
+    font-size: 0.75rem;
+    font-style: italic;
+}
+
+.secret-box {
+    height: 5.25rem;
+    max-width: 42rem;
+    width: 100%;
+    border: 0.25rem solid black;
+    font-size: 1.125rem;
+    padding: 0 1rem;
+    position: relative;
+}
+
+.secret-text {
+    position: absolute;
+    top: 50%;
+    transform: translate(0, -50%);
+}
+
+.secret-button {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translate(0, -50%);
+    min-width: 5rem;
+}

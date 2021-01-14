@@ -1,4 +1,4 @@
-<div class="content" (click)="expanded = !expanded" [ngClass]="{'expanded': expanded}">
+<div class="content" (click)="expanded = !expanded || alwaysExpanded" [ngClass]="{'expanded': expanded}">
   <div class="base_item">
     <div class="name">{{person.name}}</div>
     <div class="floating expando">
