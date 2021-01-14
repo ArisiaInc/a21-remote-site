@@ -194,15 +194,32 @@ class DiscordServiceImpl(
   }
 
   def addArisian(who: LoginUser, creds: DiscordUserCredentials): Future[Either[String, DiscordMember]] = {
-    // TODO: check whether this discord user ID (not username#discriminator) is already claimed, and return a message if so
-    // TODO: If it is claimed by *this* user, then update it is success -- should we resync?
-    findMember(creds).flatMap {
-      _  match {
-        case Some(member) => {
-          addArisianCore(who, member)
+    loginService.userFromCredentials(creds).flatMap {
+      _ match {
+        case None => {
+          // The normal path: these credentials have not been claimed yet
+          findMember(creds).flatMap {
+            _  match {
+              case Some(member) => {
+                addArisianCore(who, member)
+              }
+              case _ =>
+                Future.successful(Left("Please join the Arisia Discord server first, then come back and try again!"))
+            }
+          }
         }
-        case _ =>
-          Future.successful(Left("Please join the Arisia Discord server first, then come back and try again!"))
+        case Some((userId, discordId)) => {
+          // Hmm. These credentials have already been claimed. Is it the same user?
+          if (userId == who.id) {
+            // It's the same person
+            // TODO: should we consider this a resync?
+            Future.successful(Left(s"You have already connected your Discord account."))
+          } else {
+            val msg = s"${who.id.v} attempting to claim already-claimed Discord account $discordId, which belongs to ${userId.v}!"
+            logger.warn(msg)
+            Future.successful(Left(s"Those Discord credentials are already claimed."))
+          }
+        }
       }
     }
   }
