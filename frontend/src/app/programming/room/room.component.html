@@ -12,7 +12,12 @@
         <ng-container *ngIf="runningEvents.current as currentEvent">
           <div class="description current-name row">Happening now: {{currentEvent.title}}</div>
 
-          <div class="description current-panelists row">{{currentEvent | programItemPanelists}}</div>
+          <div class="description current-panelists row">
+            <ng-container *ngFor="let person of currentEvent.people; last as isLast">
+              <a href="/schedule/people/person/{{person.person.id}}">{{person.person.name}}<ng-container *ngIf="person.isModerator">&ngsp;(M)</ng-container></a>
+              <ng-container *ngIf="!isLast">,&nbsp;</ng-container>
+            </ng-container>
+          </div>
 
           <div class="description current-description row">{{currentEvent.description}}</div>
 

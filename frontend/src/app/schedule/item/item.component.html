@@ -35,7 +35,7 @@
       <div class="item_tag text-muted">Type: <span>{{type}}</span></div>
       <div class="item-people mt-2">
         <ng-container *ngFor="let person of event.people; last as isLast">
-          <a href="/schedule/people/{{person.person.id}}"
+          <a href="/schedule/people/person/{{person.person.id}}"
              >{{person.person.name}}<ng-container *ngIf="person.isModerator"
                                                   > (moderator)</ng-container>
           </a>
