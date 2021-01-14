@@ -95,14 +95,14 @@ export class AccountService {
   }
 
   awardDuck(id: number): Observable<boolean> {
-//    if (!this.user) {
-//      return of(false);
-//    }
-//    if(this.user.ducks.includes(id)) {
-//      return of(true);
-//    }
-//    this.user.ducks.push(id);
-//    this.user$.next(this.user);
+    if (!this.user) {
+      return of(false);
+    }
+    if(this.user.ducks.includes(id)) {
+      return of(true);
+    }
+    this.user.ducks.push(id);
+    this.user$.next(this.user);
     return this.http.post<any>(`${environment.backend}/ducks/${id}`, {}, {withCredentials: true}).pipe(
       map(_ => true),
       catchError(e => of(false))
