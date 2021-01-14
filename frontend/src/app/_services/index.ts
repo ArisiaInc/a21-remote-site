@@ -5,3 +5,4 @@ export * from './stars.service';
 export * from './artist.service';
 export * from './dealer.service';
 export * from './discord.service';
+export * from './zoom-rooms.service';

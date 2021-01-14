@@ -21,6 +21,7 @@ import { RoomLinkComponent } from './room-link/room-link.component';
 import { RoomLinkOtherComponent } from './room-link-other/room-link-other.component';
 import { AlphabetLinksComponent } from './alphabet-links/alphabet-links.component';
 import { DuckComponent } from './duck/duck.component';
+import { PersistentRoomLinkDirective } from './persistent-room-link.directive';
 
 @NgModule({
   declarations: [
@@ -41,6 +42,7 @@ import { DuckComponent } from './duck/duck.component';
     RoomLinkOtherComponent,
     AlphabetLinksComponent,
     DuckComponent,
+    PersistentRoomLinkDirective,
   ],
   imports: [
     CommonModule,
@@ -66,6 +68,7 @@ import { DuckComponent } from './duck/duck.component';
     RoomLinkOtherComponent,
     AlphabetLinksComponent,
     DuckComponent,
+    PersistentRoomLinkDirective,
   ]
 })
 export class SharedModule { }

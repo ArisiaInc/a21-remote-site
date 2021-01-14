@@ -8,6 +8,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 })
 export class DoorDragonComponent {
   @Input() style?: string;
+  actionButtonActivated = true;
   linkText!: string;
 
   constructor(public activeModal: NgbActiveModal) { }
@@ -23,6 +24,9 @@ export class DoorDragonComponent {
         break;
       case 'reset':
         this.linkText = 'Continue to Registration page';
+        break;
+      case 'zoom-room-closed':
+        this.actionButtonActivated = false;
         break;
       default:
         this.linkText = '';

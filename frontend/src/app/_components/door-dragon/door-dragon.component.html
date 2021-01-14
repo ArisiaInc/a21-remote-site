@@ -3,6 +3,7 @@
   <h4 class="modal-title" *ngSwitchCase="'social'">Door dragon says: please log in to join social spaces</h4>
   <h4 class="modal-title" *ngSwitchCase="'discord'">Door dragon says: you might need to connect your Discord account</h4>
   <h4 class="modal-title" *ngSwitchCase="'reset'">Door dragon says: you will be re-directed to Registration to re-set your password</h4>
+  <h4 class="modal-title" *ngSwitchCase="'zoom-room-closed'">Door dragon says: that zoom room isn't currently open</h4>
   <h4 class="modal-title" *ngSwitchDefault>Someone forgot to set a door dragon style. This is a bug.</h4>
 </div>
 <div class="modal-body py-0">
@@ -33,6 +34,9 @@
       window will show you the login screen for reg.arisia.org -
       please click the Reset Password button to continue.
     </div>
+    <div *ngSwitchCase="'zoom-room-closed'">
+      That zoom room is currently not open. Sorry.
+    </div>
   </div>
   <div class="comments-dragon" [ngSwitch]="style">
     <div class="comments" *ngSwitchCase="'social'">
@@ -52,11 +56,13 @@
     <div class="comments" *ngSwitchCase="'reset'">
       If you need help, please contact Registration here.
     </div>
+    <div class="comments" *ngSwitchDefault>
+    </div>
     <img src="assets/images/door-dragon.png" class="dragon">
   </div>
 </div>
 <div class="modal-footer justify-content-between">
-  <button type="button" class="btn btn-outline-dark" (click)="activeModal.close('success')">
+  <button type="button" class="btn btn-outline-dark" *ngIf="actionButtonActivated" (click)="activeModal.close('success')">
     {{linkText}}
   </button>
   <button type="button" class="btn btn-outline-dark" aria-label="Close" (click)="activeModal.dismiss('Close click')">
