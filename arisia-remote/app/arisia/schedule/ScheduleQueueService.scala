@@ -27,6 +27,8 @@ trait ScheduleQueueService {
   def setSchedule(schedule: Schedule): Future[Done]
 
   def getRunningMeeting(id: ProgramItemId): Option[ZoomMeeting]
+
+  def restartMeeting(id: ProgramItemId): Future[Done]
 }
 
 class ScheduleQueueServiceImpl(
@@ -116,9 +118,12 @@ class ScheduleQueueServiceImpl(
     )
   }
 
+  val _schedule: AtomicReference[Schedule] = new AtomicReference(Schedule.empty)
+
   def setSchedule(schedule: Schedule): Future[Done] = {
     // Make sure that the schedule cursor is loaded before we try to compute the queue:
     logger.info(s"Setting the Schedule Queue...")
+    _schedule.set(schedule)
     val dbFut =
       if (_scheduleCursor.get() == -1L) {
         fetchCursorFromDatabase()
@@ -200,10 +205,12 @@ class ScheduleQueueServiceImpl(
       yield Done
   }
 
-  private def endRunningItem(item: RunningItem): Future[Done] = {
+  private def endRunningItem(item: RunningItem, premature: Boolean = false): Future[Done] = {
     for {
       _ <- zoomService.endMeeting(item.meeting.id)
-      _ = _currentlyRunningItems.getAndUpdate(_.tail)
+      _ = _currentlyRunningItems.getAndUpdate { items =>
+            items - item.itemId
+          }
       _ <- dbService.run(
         sql"""
               DELETE FROM active_program_items
@@ -224,6 +231,24 @@ class ScheduleQueueServiceImpl(
 
   def getRunningMeeting(id: ProgramItemId): Option[ZoomMeeting] = {
     _currentlyRunningItems.get.get(id).map(_.meeting)
+  }
+
+  def restartMeeting(id: ProgramItemId): Future[Done] = {
+    _currentlyRunningItems.get().get(id) match {
+      case Some(runningItem) => {
+        for {
+          _ <- endRunningItem(runningItem, true)
+          _ = _runningItemsQueue.getAndUpdate {
+            _.filterNot(_.itemId == id)
+          }
+          item = _schedule.get().program.find(_.id.v == s"$id-prep").get
+          _ <- startProgramItem(item)
+        }
+          yield Done
+      }
+      // Someone seems to be confused:
+      case _ => Future.successful(Done)
+    }
   }
 
   private def recordMeetingAsActive(item: ProgramItem, meeting: ZoomMeeting): Future[Int] = {
