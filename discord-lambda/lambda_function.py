@@ -13,6 +13,9 @@ SAFER_SPACE_CHANNELS = {
     'lgbtqiap': os.getenv('DISCORD_LGBTQ_SS')
 }
 
+def get_api_headers():
+    return {'X-Shared-Secret': os.getenv('API_SECRET')}
+
 def bad_signature(event):
     PUBLIC_KEY = os.getenv('DISCORD_PUBKEY')
     verify_key = VerifyKey(bytes.fromhex(PUBLIC_KEY))
@@ -51,8 +54,8 @@ def handle_command(body):
         # TODO send message to api server here (include token)
         return command.respond(f"<@{command.user_id}> your request has been entered. Linking your accounts now...")
     if command.name == "sync":
-        # TODO send message to api server here
-        return command.respond()
+        requests.put(f"https://online.arisia.org/api/discord/sync/{command.target_user}", headers=get_api_headers())
+        return command.respond("sync worked!")
     if command.name == "saferspace":
         channel_id = SAFER_SPACE_CHANNELS[command.options["channel"]]
         if command.verify_arisian():
@@ -115,8 +118,9 @@ class DiscordCommand:
     def __init__(self, payload):
         self.name = payload["data"]["name"]
         self.options = {}
-        for option in payload["data"]["options"]:
-            self.options[option["name"]] = option["value"]
+        if "options" in payload["data"]:
+            for option in payload["data"]["options"]:
+                self.options[option["name"]] = option["value"]
         self.user_id = payload["member"]["user"]["id"]
         self.user_roles = payload["member"]["roles"]
         self.token = payload["token"]
@@ -127,9 +131,11 @@ class DiscordCommand:
 
     def verify_user(self):
         helper_role = os.getenv("DISCORD_HELPER_ROLE_ID")
+        print(f"target user: {self.target_user}, user_id: {self.user_id}")
         if self.target_user != self.user_id:
             if helper_role not in self.user_roles:
                 return False
+        return True
 
     def verify_arisian(self):
         arisian = os.getenv('DISCORD_ROLE_ID')
