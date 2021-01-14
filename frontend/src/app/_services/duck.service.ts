@@ -5,26 +5,19 @@ import { Observable, ReplaySubject, of } from 'rxjs';
 import { Duck, DuckState } from '@app/_models';
 import { tap, catchError, mapTo, map, filter } from 'rxjs/operators';
 
+import { MetadataCacher } from './metadata-cacher';
+
 @Injectable({
   providedIn: 'root'
 })
 
 export class DuckService {
-
-  ducks: Duck[] = [];
-  ducks$ = new ReplaySubject<Duck[]>(1);
+  private metadataCacher: MetadataCacher<Duck[]>;
+  ducks$: Observable<Duck[]>;
 
   constructor(private http: HttpClient) {
-    this.load();
-  }
-
-  load(): void {
-    this.http.get<Duck[]>(`${environment.backend}/ducks`).subscribe(response => this.handleResponse(response));
-  }
-
-  handleResponse(response: Duck[]): void {
-    this.ducks = response;
-    this.ducks$.next(this.ducks);
+    this.metadataCacher = new MetadataCacher<Duck[]>(http, `${environment.backend}/ducks`, []);
+    this.ducks$ = this.metadataCacher.data$;
   }
 
   getDuckStates(ids: Set<number>, config: {includeHidden: boolean}) : Observable<DuckState[]> {
@@ -41,7 +34,9 @@ export class DuckService {
   }
 
   get_duck(id: number) : Observable<Duck | undefined> {
-    return this.http.get<Duck|undefined>(`${environment.backend}/ducks/${id}`);
+    return this.ducks$.pipe(
+      map(ducks => ducks.find(({id: duckId}) => id === duckId)),
+    );
   }
 
   award_duck(id: number) {
