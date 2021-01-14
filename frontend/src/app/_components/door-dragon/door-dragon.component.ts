@@ -17,6 +17,7 @@ export class DoorDragonComponent {
     switch (this.style) {
       case 'programming':
       case 'social':
+      case 'login-for-zoom':
         this.linkText = 'Log in to Arisia';
         break;
       case 'discord':

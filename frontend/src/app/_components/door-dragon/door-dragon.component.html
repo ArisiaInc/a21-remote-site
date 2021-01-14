@@ -1,6 +1,7 @@
 <div class="modal-header" [ngSwitch]="style">
   <h4 class="modal-title" *ngSwitchCase="'programming'">Door dragon says: please log in to access Arisia programming and events</h4>
   <h4 class="modal-title" *ngSwitchCase="'social'">Door dragon says: please log in to join social spaces</h4>
+  <h4 class="modal-title" *ngSwitchCase="'login-for-zoom'">Door dragon says: please log in to access Arisia Zoom Rooms</h4>
   <h4 class="modal-title" *ngSwitchCase="'discord'">Door dragon says: you might need to connect your Discord account</h4>
   <h4 class="modal-title" *ngSwitchCase="'reset'">Door dragon says: you will be re-directed to Registration to re-set your password</h4>
   <h4 class="modal-title" *ngSwitchCase="'zoom-room-closed'">Door dragon says: that zoom room isn't currently open</h4>
@@ -17,6 +18,13 @@
     </div>
     <div *ngSwitchCase="'programming'">
       To access Arisia programs and events, you need to be logged into
+      the site so that we know you have a badge and have signed the
+      Code of Conduct. If you still need to
+      register, <a href="https://reg.arisia.org/kiosk/web_reg/"
+      target="_blank">you can do so here</a>.
+    </div>
+    <div *ngSwitchCase="'login-for-zoom'">
+      To access Arisia Zoom Rooms, you need to be logged into
       the site so that we know you have a badge and have signed the
       Code of Conduct. If you still need to
       register, <a href="https://reg.arisia.org/kiosk/web_reg/"
@@ -40,12 +48,23 @@
   </div>
   <div class="comments-dragon" [ngSwitch]="style">
     <div class="comments" *ngSwitchCase="'social'">
-      If you already have a badge and need help, the Info Desk is
-      available on Zoom here!
+      If you already have a badge and need help,
+      <a class="link"
+         appPersistentRoomLink="info"
+         [appOpenToPublic]="true">the Info Desk is available on Zoom here</a>!
     </div>
     <div class="comments" *ngSwitchCase="'programming'">
-      If you already have a badge and need help, the Info Desk is
-      available on Zoom here!
+      If you already have a badge and need help,
+      <a class="link"
+         appPersistentRoomLink="info"
+         [appOpenToPublic]="true">the Info Desk is available on Zoom here</a>!
+      If you already have a badge and need help,
+    </div>
+    <div class="comments" *ngSwitchCase="'login-for-zoom'">
+      If you already have a badge and need help,
+      <a class="link"
+         appPersistentRoomLink="info"
+         [appOpenToPublic]="true">the Info Desk is available on Zoom here</a>!
     </div>
     <div class="comments" *ngSwitchCase="'discord'">
       Don’t have a Discord account? Head over to Discord using this

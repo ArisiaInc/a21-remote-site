@@ -10,6 +10,7 @@ import { DoorDragonComponent } from './door-dragon/door-dragon.component';
 })
 export class PersistentRoomLinkDirective {
   @Input('appPersistentRoomLink') room = '';
+  @Input('appOpenToPublic') openToPublic = false;
 
   constructor(private accountService: AccountService,
               private zoomRoomsService: ZoomRoomsService,
@@ -20,7 +21,7 @@ export class PersistentRoomLinkDirective {
   /** @nodoc */
   @HostListener('click')
   onClick(): boolean {
-    if (this.accountService.user) {
+    if (this.accountService.user || this.openToPublic) {
       this.zoomRoomsService.checkRoom(this.room).subscribe(
         running => {
           if (running) {
@@ -34,7 +35,7 @@ export class PersistentRoomLinkDirective {
     } else {
       const modalRef = this.modalService.open(DoorDragonComponent, {size: 'lg'});
       const doorDragon = modalRef.componentInstance as DoorDragonComponent;
-      doorDragon.style = 'social';
+      doorDragon.style = 'login-for-zoom';
       modalRef.closed.subscribe(
         result => {
           if (result == "success") {
