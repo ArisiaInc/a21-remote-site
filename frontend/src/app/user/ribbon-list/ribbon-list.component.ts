@@ -1,4 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
+import { Observable } from 'rxjs';
+import { Ribbon } from '@app/_models/ribbon';
+import { RibbonService } from '@app/_services/ribbon.service';
 
 @Component({
   selector: 'app-ribbon-list',
@@ -6,11 +9,13 @@ import { Component, OnInit, Input } from '@angular/core';
   styleUrls: ['./ribbon-list.component.scss']
 })
 export class RibbonListComponent implements OnInit {
-  @Input() isSelf: boolean = false;
+  ribbons$!: Observable<Ribbon[]>;
+  @Input() ribbonIds: number[] = [];
 
-  constructor() { }
+  constructor(private ribbonService: RibbonService) { }
 
   ngOnInit(): void {
+    this.ribbons$ = this.ribbonService.getRibbonsById(this.ribbonIds);
   }
 
 }

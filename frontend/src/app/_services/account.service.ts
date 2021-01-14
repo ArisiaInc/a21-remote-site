@@ -22,6 +22,7 @@ export class AccountService {
     this.http.get<User>(`${environment.backend}/me`, {withCredentials: true}).subscribe(
       user => {
         this.user = user;
+        this.user.self = true;
         this.user$.next(this.user);
       },
       err => {

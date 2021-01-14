@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
+import { Ribbon } from '@app/_models/ribbon';
 
 @Component({
   selector: 'app-ribbon',
@@ -6,6 +7,7 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./ribbon.component.scss']
 })
 export class RibbonComponent implements OnInit {
+  @Input() ribbon!: Ribbon;
 
   constructor() { }
 

@@ -1,1 +1,3 @@
-<p>ribbon-list works!</p>
+<div class="row">
+    <app-ribbon [ribbon]="ribbon" *ngFor="let ribbon of (ribbons$ | async)"></app-ribbon>
+</div>
