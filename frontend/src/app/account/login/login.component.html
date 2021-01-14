@@ -27,14 +27,7 @@
         <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
           <div *ngIf="f.password.errors.required">Password is required</div>
         </div>
-        <div *ngIf="submitted && submissionError" class="invalid-feedback" [ngSwitch]="submissionError.status">
-          <ng-container *ngSwitchCase="401">
-            Your Username or Password was incorrect. Please try again.
-          </ng-container>
-          <ng-container *ngSwitchDefault>
-            Login error: {{submissionError.statusText}}.
-          </ng-container>
-          &ngsp;If the problem persists, email <a href="mailto:registration@arisia.org">registration@arisia.org</a>.
+        <div *ngIf="submitted && submissionError" class="invalid-feedback" [innerHtml]="submissionError | sanitizeHtml | linkify" >
         </div>
       </div>
       <div class="form-group">

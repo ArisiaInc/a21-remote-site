@@ -7,17 +7,19 @@ import { AccountRoutingModule } from './account-routing.module';
 
 import { SharedModule } from '@app/_components';
 import { ForgotComponent } from './forgot/forgot.component';
+import { PipesModule } from '../pipes/pipes.module';
 
 @NgModule({
   declarations: [
-    LoginComponent, 
+    LoginComponent,
     LayoutComponent, ForgotComponent
   ],
   imports: [
     CommonModule,
     AccountRoutingModule,
     SharedModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    PipesModule
   ]
 })
 export class AccountModule { }

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { map, shareReplay } from 'rxjs/operators';
-import { of, Observable, BehaviorSubject, ReplaySubject } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { map, shareReplay, catchError } from 'rxjs/operators';
+import { of, Observable, BehaviorSubject, ReplaySubject, throwError } from 'rxjs';
 
 import { environment } from '@environments/environment';
 import { User } from '@app/_models';
@@ -36,6 +36,13 @@ export class AccountService {
   // TODO: stop sending password in plain text
   login(id: string, password: string) {
     const loginRequest = this.http.post<User>(`${environment.backend}/login`, {id, password}, {withCredentials: true}).pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error?.error?.message) {
+          return throwError(error.error.message);
+        } else {
+          return throwError(`Login error: ${error.statusText}`);
+        }
+      }),
       shareReplay(),
     );
     loginRequest.subscribe(
