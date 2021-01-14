@@ -24,6 +24,7 @@ trait ZoomService {
   // Note that this can't be used with Webinars!
   def isMeetingRunning(meetingId: Long): Future[Boolean]
   def getJoinUrl(meetingId: Long): Future[String]
+  def getStartUrl(meetingId: Long): Future[String]
 }
 
 private[zoom] case class ZoomMeetingParams(
@@ -135,6 +136,16 @@ class ZoomServiceImpl(
         result
       }
   }
+
+  def getStartUrl(meetingId: Long): Future[String] = {
+    urlWithJwt(s"/meetings/$meetingId")
+      .get()
+      .map { response =>
+        val json = Json.parse(response.body)
+        val result = (json \ "start_url").as[String]
+        result
+      }
+  }
 }
 
 class DisabledZoomService() extends ZoomService {
@@ -143,4 +154,5 @@ class DisabledZoomService() extends ZoomService {
   def endMeeting(meetingId: Long, isWebinar: Boolean): Future[Done] = ???
   def isMeetingRunning(meetingId: Long): Future[Boolean] = ???
   def getJoinUrl(meetingId: Long): Future[String] = ???
+  def getStartUrl(meetingId: Long): Future[String] = ???
 }
