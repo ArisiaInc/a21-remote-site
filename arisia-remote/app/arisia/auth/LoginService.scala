@@ -1,7 +1,7 @@
 package arisia.auth
 
 import arisia.db.DBService
-import arisia.discord.DiscordMember
+import arisia.discord.{DiscordMember, DiscordUserCredentials}
 
 import scala.concurrent.duration._
 import arisia.models.{LoginUser, LoginId, BadgeNumber, Permissions, LoginName}
@@ -41,6 +41,13 @@ trait LoginService {
    * Get the user from their Discord ID.
    */
   def fetchUserFromDiscordId(memberId: String): Future[Option[LoginUser]]
+
+  /**
+   * For checking whether this user already has Discord connected.
+   *
+   * Returns their loginId, and their Discord ID.
+   */
+  def userFromCredentials(creds: DiscordUserCredentials): Future[Option[(LoginId, String)]]
 }
 
 class LoginServiceImpl(
@@ -176,6 +183,22 @@ class LoginServiceImpl(
           false,
           MembershipType.withValue(membershipType)
         )
+      }
+    }
+  }
+
+  def userFromCredentials(creds: DiscordUserCredentials): Future[Option[(LoginId, String)]] = {
+    dbService.run(
+      sql"""
+            SELECT username, discord_id
+              FROM user_info
+             WHERE discord_username = ${creds.username} AND discord_discriminator = ${creds.discriminator}
+           """
+        .query[(String, String)]
+        .option
+    ).map {
+      _.map { case (usernameStr, discordId) =>
+        (LoginId(usernameStr), discordId)
       }
     }
   }
