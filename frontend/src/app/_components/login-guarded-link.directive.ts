@@ -38,7 +38,7 @@ export class LoginGuardedLinkDirective {
   /** @nodoc */
   @HostListener('click')
   onClick(): boolean {
-    if (this.accountService.user) {
+    if (this.accountService.me) {
       this.router.navigateByUrl(this.urlTree);
     } else {
       const modalRef = this.modalService.open(DoorDragonComponent, {size: 'lg'});

@@ -14,8 +14,8 @@ export class UserPageRedirectGuard implements CanActivate {
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-    return this.accountService.user$.pipe(
-      map(user => user ? this.router.parseUrl(`/user/${user.badgeNumber}`) : false),
+    return this.accountService.me$.pipe(
+      map(me => me ? this.router.parseUrl(`/me/${me.badgeNumber}`) : false),
     );
   }
 }

@@ -15,7 +15,7 @@ export class RoomLinkHostComponent implements OnInit {
   constructor(private accountService: AccountService) { }
 
   ngOnInit(): void {
-    this.isZoomHost = this.accountService.user?.zoomHost;
+    this.isZoomHost = this.accountService.me?.zoomHost;
   }
 
 }

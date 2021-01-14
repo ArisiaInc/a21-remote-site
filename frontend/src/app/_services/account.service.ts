@@ -10,18 +10,44 @@ import { User } from '@app/_models';
   providedIn: 'root'
 })
 export class AccountService {
+  me?: User = undefined;
+  readonly me$ = new ReplaySubject<User | undefined>(1);
   user?: User = undefined;
   readonly user$ = new ReplaySubject<User | undefined>(1);
   readonly loggedIn$!: Observable<boolean>;
 
   get loggedIn(): boolean {
-    return !!this.user;
+    return !!this.me;
   }
 
   constructor( private http: HttpClient,) {
     this.http.get<User>(`${environment.backend}/me`, {withCredentials: true}).subscribe(
-      user => {
-        this.user = user;
+      me => {
+        this.me = me;
+        this.me.self = true;
+        this.me$.next(this.me);
+      },
+      err => {
+        this.me = undefined;
+        this.me$.next(this.me);
+      });
+    this.me$.subscribe(me => {
+      if (me) {
+        this.loadUser();
+      } else {
+        this.user = undefined;
+        this.user$.next(this.user);
+      }
+    });
+    this.loggedIn$ = this.me$.pipe(
+      map(me => !!me),
+    );
+  }
+
+  loadUser() {
+    return this.http.get<User>(`${environment.backend}/user`, {withCredentials: true}).subscribe(
+      response => {
+        this.user = response;
         this.user.self = true;
         this.user$.next(this.user);
       },
@@ -29,9 +55,6 @@ export class AccountService {
         this.user = undefined;
         this.user$.next(this.user);
       });
-    this.loggedIn$ = this.user$.pipe(
-      map(user => !!user),
-    );
   }
 
   // TODO: stop sending password in plain text
@@ -40,10 +63,10 @@ export class AccountService {
       shareReplay(),
     );
     loginRequest.subscribe(
-      user => {
-        this.user = user;
-        this.user.self = true;
-        this.user$.next(this.user);
+      me => {
+        this.me = me;
+        this.me.self = true;
+        this.me$.next(this.me);
       });
     return loginRequest;
   }
@@ -53,34 +76,33 @@ export class AccountService {
       shareReplay(),
     );
     loginRequest.subscribe(
-      user => {
-        this.user = undefined;
-        this.user$.next(this.user);
+      me => {
+        this.me = undefined;
+        this.me$.next(this.me);
       });
     return loginRequest;
   }
 
   getUser(badgeNumber: string) : Observable<User | undefined> {
-    // Add this code when me returns all the information we need.
-//    if (this.user?.badgeNumber === badgeNumber) {
-//      return this.user$;
-//    } else {
+    if (this.user?.badgeNumber === badgeNumber) {
+      return this.user$;
+    } else {
       return this.http.get<User>(`${environment.backend}/user/${badgeNumber}`, {withCredentials: true}).pipe(
-        tap(user => user.self = this.user?.badgeNumber === badgeNumber),
-        catchError(e => of(undefined)),
+        tap(user => user.self = false),
+        catchError(_ => of(undefined)),
       );
-//    }
+    }
   }
 
   awardDuck(id: number): Observable<boolean> {
-    if (!this.user) {
-      return of(false);
-    }
-    if(this.user.ducks.includes(id)) {
-      return of(true);
-    }
-    this.user.ducks.push(id);
-    this.user$.next(this.user);
+//    if (!this.user) {
+//      return of(false);
+//    }
+//    if(this.user.ducks.includes(id)) {
+//      return of(true);
+//    }
+//    this.user.ducks.push(id);
+//    this.user$.next(this.user);
     return this.http.post<any>(`${environment.backend}/ducks/${id}`, {}, {withCredentials: true}).pipe(
       map(_ => true),
       catchError(e => of(false))
