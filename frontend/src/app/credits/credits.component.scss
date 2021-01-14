@@ -1,0 +1,21 @@
+.title {
+    padding: 2.25rem 0;
+    font-size: 2.25rem;
+    width: 100%;
+    text-align: center;
+}
+
+.credit {
+    display: flex;
+    padding-bottom: 2rem;
+}
+
+.picture {
+    width: 8.75rem;
+    height: 8.75rem;
+    margin-right: 2.25rem;
+}
+
+.text-box {
+    flex-grow: 1;
+}

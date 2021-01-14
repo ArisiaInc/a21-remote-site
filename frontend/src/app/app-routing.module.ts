@@ -19,6 +19,7 @@ import { HelpComponent } from './help/help.component';
 import { SetupComponent } from './help/setup/setup.component';
 import { PerformanceComponent } from './performance/performance.component';
 import { SocialComponent } from './social/social.component';
+import { CreditsComponent } from './credits/credits.component';
 
 const accountModule = () => import('./account/account.module').then(x => x.AccountModule);
 const scheduleModule = () => import('./schedule/schedule.module').then(x => x.ScheduleModule);
@@ -50,6 +51,7 @@ const routes: Routes = [
   {path: 'setup', component: SetupComponent},
   {path: 'performance', component: PerformanceComponent, canActivate: [AuthGuard]},
   {path: 'social', component: SocialComponent, canActivate: [AuthGuard]},
+  {path: 'credits', component: CreditsComponent},
 
   //redirect home
   {path: '**', redirectTo: '/map'}

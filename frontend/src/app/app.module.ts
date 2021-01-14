@@ -36,6 +36,7 @@ import { SocialComponent } from './social/social.component';
 import { DuckListComponent } from './user/duck-list/duck-list.component';
 import { ProfileDuckComponent } from './user/profile-duck/profile-duck.component';
 import { DiscordComponent } from './discord/discord.component';
+import { CreditsComponent } from './credits/credits.component';
 
 @NgModule({
   declarations: [
@@ -68,6 +69,7 @@ import { DiscordComponent } from './discord/discord.component';
     DuckListComponent,
     ProfileDuckComponent,
     DiscordComponent,
+    CreditsComponent,
   ],
   imports: [
     BrowserModule,
