@@ -70,6 +70,7 @@ import { RibbonModalComponent } from './ribbon-modal/ribbon-modal.component';
     RoomLinkOtherComponent,
     AlphabetLinksComponent,
     DuckComponent,
+    RibbonComponent,
   ]
 })
 export class SharedModule { }

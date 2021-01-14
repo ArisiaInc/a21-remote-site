@@ -37,10 +37,13 @@ class RibbonController(
     } else if (headers.get("selfServe").isDefined) {
       fut(Ok(Json.toJson(ribbonService.getSelfServeRibbons())))
     } else {
-      // All of the ribbons for this user
-      ribbonService.getRibbonsFor(userRequest.user.id).map ( results =>
+      // All of the ribbons
+      logger.info("getting all ribbons")
+      ribbonService.getRibbons().map ( results => {
+        logger.info("all ribbons gotten")
+        logger.info(Json.toJson(results).toString())
         Ok(Json.toJson(results))
-      )
+      })
     }
   }
 

@@ -2,6 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Ribbon } from '@app/_models/ribbon';
 import { RibbonService } from '@app/_services/ribbon.service';
+import { tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-ribbon-list',

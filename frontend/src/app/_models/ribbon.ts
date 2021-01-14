@@ -1,5 +1,5 @@
 export interface Ribbon {
-    ribbonid: number;
+    id: number;
     ribbonText: string;
     colorFg?: string;
     colorBg?: string;

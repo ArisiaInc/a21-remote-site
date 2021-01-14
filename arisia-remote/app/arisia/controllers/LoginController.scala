@@ -1,7 +1,7 @@
 package arisia.controllers
 
 import arisia.auth.{LoginError, LoginService}
-import arisia.fun.DuckService
+import arisia.fun.{DuckService, RibbonService}
 import arisia.models.{LoginRequest, LoginUser, LoginId, BadgeNumber, LoginName}
 import play.api.Configuration
 import play.api.http._
@@ -16,6 +16,7 @@ case class ProfileInfo(
   badgeNumber: BadgeNumber,
   zoomHost: Boolean,
   ducks: List[Int],
+  ribbons: List[Int],
 )
 object ProfileInfo {
   implicit val fmt: Format[ProfileInfo] = Json.format
@@ -25,7 +26,8 @@ class LoginController (
   val controllerComponents: ControllerComponents,
   config: Configuration,
   loginService: LoginService,
-  duckService: DuckService
+  duckService: DuckService,
+  ribbonService: RibbonService
 )(
   implicit ec: ExecutionContext
 )
@@ -44,15 +46,19 @@ class LoginController (
   }
 
   def getProfileInfoCore(user: LoginUser): Future[Result] = {
-    duckService.getDucksFor(user.id).map { ducks =>
-      val info = ProfileInfo(
-        user.id,
-        user.name,
-        user.badgeNumber,
-        user.zoomHost,
-        ducks
-      )
-      Ok(Json.toJson(info).toString)
+    duckService.getDucksFor(user.id).flatMap { ducks =>
+      ribbonService.getRibbonsFor(user.id).map { ribbons => 
+        val info = ProfileInfo(
+          user.id,
+          user.name,
+          user.badgeNumber,
+          user.zoomHost,
+          ducks,
+          ribbons
+        )
+
+        Ok(Json.toJson(info).toString)
+      }
     }
   }
 

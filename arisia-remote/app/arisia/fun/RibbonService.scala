@@ -27,7 +27,8 @@ trait RibbonService {
   def getSelfServeRibbons(): List[Ribbon]
   def getRibbon(secret: String): Option[Ribbon]
   def getRibbon(id: Int): Option[Ribbon]
-  def getRibbonsFor(who: LoginId): Future[List[Ribbon]]
+  def getRibbonsFor(who: LoginId): Future[List[Int]]
+  def getRibbons(): Future[List[Ribbon]]
 
   // CRUD endpoints
   def getAllRibbons(): List[Ribbon]
@@ -55,6 +56,10 @@ class RibbonServiceImpl(
       _ribbonCache.set(ribbons)
       ribbons
     }
+  }
+
+  def getRibbons(): Future[List[Ribbon]] = {
+    loadRibbons()
   }
 
   // API endpoints
@@ -108,19 +113,17 @@ class RibbonServiceImpl(
     _ribbonCache.get().find(_.secret == secret)
   }
 
-  def getRibbonsFor(who: LoginId): Future[List[Ribbon]] = {
+  def getRibbonsFor(who: LoginId): Future[List[Int]] = {
     dbService.run(
       sql"""
             SELECT ribbonid
               FROM member_ribbons
-             ORDER BY display_order
              WHERE username = ${who.lower}
+             ORDER BY display_order
            """
         .query[Int]
         .to[List]
-    ).map { ribbonIds =>
-      ribbonIds.map(getRibbon(_)).flatten
-    }
+    )
   }
 
   // CRUD endpoints

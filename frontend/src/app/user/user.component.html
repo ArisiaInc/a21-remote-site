@@ -1,5 +1,7 @@
 <div class="user" *ngIf="(user$ | async) as user">
     <h1>User Page for {{user.name}}</h1>
     <app-duck-list [duckIds]="user.ducks" [isSelf]="user.self"></app-duck-list>
+    <app-ribbon-list [ribbonIds]="user.ribbons"></app-ribbon-list>
+    <hr>
     <app-discord *ngIf="user.self"></app-discord>
 </div>

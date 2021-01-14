@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, ReplaySubject } from 'rxjs';
 import { Ribbon } from '@app/_models/ribbon';
 import { environment } from '@environments/environment';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +24,7 @@ export class RibbonService {
   }
 
   fetchData() {
-    return this.http.get<Ribbon[]>(`${environment.backend}/ribbons`).subscribe(response => this.handleResponse(response));
+    return this.http.get<Ribbon[]>(`${environment.backend}/ribbons`, {withCredentials: true}).subscribe(response => this.handleResponse(response));
   }
 
   handleResponse(response: Ribbon[]) {
@@ -32,7 +32,7 @@ export class RibbonService {
     this.ribbonMap = {};
     this.secretMap = {};
     this.ribbons.forEach(ribbon => {
-      this.ribbonMap[ribbon.ribbonid] = ribbon;
+      this.ribbonMap[ribbon.id] = ribbon;
       this.secretMap[ribbon.secret] = ribbon;
     });
     this.ribbons$.next(this.ribbons);
@@ -42,8 +42,8 @@ export class RibbonService {
 
   getRibbonsById(ids: number[]) : Observable<Ribbon[]> {
     return this.ribbonMap$.pipe(
-      map(ribbonMap => ids.map(id => ribbonMap[id]).filter(ribbon => ribbon))
-    )
+      map(ribbonMap => ids.map(id => ribbonMap[id]).filter(ribbon => ribbon)),
+    );
   }
 
   getRibbon(secret: string) : Observable<Ribbon | undefined> {
