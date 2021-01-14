@@ -275,6 +275,7 @@ export class Room {
   constructor(public id: string,
               public name: string,
               public art: string,
+              public doorArt: string,
               private scheduleService: ScheduleService) {
     this.runningEvents$ = scheduleService.getNextEvents(name);
   }
@@ -613,15 +614,15 @@ export class ScheduleService {
   }
 
   getRooms(): Observable<Room[]> {
-    return of([{ id: 'zoom_room_1', name: 'Zoom Room 1', art: 'room-1.png' },
-               { id: 'zoom_room_2', name: 'Zoom Room 2', art: 'room-2.png'  },
-               { id: 'zoom_room_3', name: 'Zoom Room 3', art: 'room-3.png'  },
-               { id: 'zoom_room_4', name: 'Zoom Room 4', art: 'room-4.png'  },
-               { id: 'zoom_room_5', name: 'Zoom Room 5', art: 'room-5.png'  },
-               { id: 'zoom_room_6', name: 'Zoom Room 6', art: 'room-6.png'  },
-               { id: 'zoom_room_7', name: 'Zoom Room 7', art: 'room-7.png'  },
-               { id: 'zoom_room_fasttrack', name: 'FastTrack Zoom', art: 'room-8.png'  },
-              ].map(({id, name, art}) => new Room(id, name, `/assets/images/programming/${art}`, this)));
+    return of([{ id: 'zoom_room_1', name: 'Zoom Room 1', idx: 1},
+               { id: 'zoom_room_2', name: 'Zoom Room 2', idx: 2  },
+               { id: 'zoom_room_3', name: 'Zoom Room 3', idx: 3  },
+               { id: 'zoom_room_4', name: 'Zoom Room 4', idx: 4  },
+               { id: 'zoom_room_5', name: 'Zoom Room 5', idx: 5  },
+               { id: 'zoom_room_6', name: 'Zoom Room 6', idx: 6  },
+               { id: 'zoom_room_7', name: 'Zoom Room 7', idx: 7  },
+               { id: 'fast_track', name: 'Fast Track', idx: 8  },
+              ].map(({id, name, idx}) => new Room(id, name, `/assets/images/programming/room-${idx}.png`, `/assets/images/programming/door-${idx}.png`, this)));
   }
 
   getRoom(id: string): Observable<Room | undefined> {

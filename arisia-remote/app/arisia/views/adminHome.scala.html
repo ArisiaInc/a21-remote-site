@@ -3,6 +3,15 @@
 @main("Arisia Admin") {
   <h1>Arisia Site Admin</h1>
 
+  <p>This is the Admin UI for Arisia. If you are here, you have serious power. Use it wisely.</p>
+
+  <p>In particular: <b>only use pages and features for your designated area</b>. We don't have time to build
+  a whole fancy permissioning system, so all Admins have access to most functionality. If you don't know what
+  a page does, you probably shouldn't be using it.</p>
+
+  <p>Abuse of this interface
+  will be investigated and reported. (We maintain an audit trail of exactly what all Admins do here.)</p>
+
   @if(permissions.superAdmin) {
     <h2><a href="/admin/manageAdmins">Manage Admins</a></h2>
     <h2><a href="/admin/rooms">Manage Zoom Rooms</a></h2>
@@ -13,4 +22,5 @@
   <h2><a href="/admin/ducks">Manage Ducks</a></h2>
   <h2><a href="/test/scheduleItem">Add Test Schedule Item</a></h2>
   <h2><a href="/admin/manageMetadata">Manage Metadata</a></h2>
+  <h2><a href="/admin/restart">Restart Meeting</a></h2>
 }

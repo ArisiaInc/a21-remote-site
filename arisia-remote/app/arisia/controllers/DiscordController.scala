@@ -57,40 +57,46 @@ class DiscordController(
     Future.successful(Ok(discordService.generateAssistSecret(userRequest.user)))
   }
 
-  def assistedAddArisian(): EssentialAction = Action.async(controllerComponents.parsers.tolerantJson)  { implicit request =>
+  def assistedAddArisian(): EssentialAction = Action(controllerComponents.parsers.tolerantJson)  { implicit request =>
     request.headers.get("X-Shared-Secret") match {
       case Some(secret) if (secret == sharedSecret) => {
         request.body.asOpt[DiscordHelpCredentials] match {
           case Some(creds) => {
-            discordService.addArisianAssisted(creds).map {
-              _ match {
-                case Right(member) => Ok("")
-                case Left(error) => BadRequest(error)
+            Future {
+              discordService.addArisianAssisted(creds).map {
+                _ match {
+                  case Right(member) => {}
+                  case Left(error) => logger.error(s"Got error trying to add Arisian assisted: $error")
+                }
               }
             }
+            Ok("")
           }
-          case _ => Future.successful(BadRequest("Malformed request to help add an Arisian"))
+          case _ => BadRequest("Malformed request to help add an Arisian")
         }
       }
-      case _ => Future.successful(Unauthorized("Shared secret not found in the X-Shared"))
+      case _ => Unauthorized("Shared secret not found in the X-Shared")
     }
   }
 
-  def sync(id: String): EssentialAction = Action.async { implicit request =>
+  def sync(id: String): EssentialAction = Action { implicit request =>
     request.headers.get("X-Shared-Secret") match {
       case Some(secret) if (secret == sharedSecret) => {
-        loginService.fetchUserFromDiscordId(id).flatMap {
-          _ match {
-            case Some(user) => {
-              discordService.syncUser(user, id).map { _ =>
-                Ok("")
+        // Lambda needs a fast response, and doesn't give a damn about the value of that response. So do the
+        // standard webhook fire-and-forget:
+        Future {
+          loginService.fetchUserFromDiscordId(id).map {
+            _ match {
+              case Some(user) => {
+                discordService.syncUser(user, id)
               }
+              case _ => logger.warn(s"Got a sync request for unknown Discord user $id!")
             }
-            case _ => Future.successful(NotFound("Not a known Discord user!"))
           }
         }
+        Ok("")
       }
-      case _ => Future.successful(Unauthorized("Shared secret not found in the X-Shared"))
+      case _ => Unauthorized("Shared secret not found in the X-Shared")
     }
   }
 }
