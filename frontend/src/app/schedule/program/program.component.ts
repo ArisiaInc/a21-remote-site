@@ -19,7 +19,6 @@ export class ProgramComponent implements OnInit {
   }
 
   updateItems(filters: ProgramFilter) {
-    console.log('updating')
     this.events$ = this.scheduleService.getSchedule(filters);
   }
 

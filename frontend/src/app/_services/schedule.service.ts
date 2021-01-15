@@ -281,7 +281,8 @@ export class Room {
   }
 }
 
-const RELOAD_TIMER = 10 * 1000;
+const RELOAD_SECONDS = 60;
+const RELOAD_TIMER = RELOAD_SECONDS * 1000;
 const USE_FAKE_DATA = false;
 
 @Injectable({
