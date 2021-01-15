@@ -14,10 +14,11 @@ import { PipesModule } from '../pipes/pipes.module';
 import { SharedModule } from '../_components';
 import { StarredComponent } from './starred/starred.component';
 import { PersonPageComponent } from './person-page/person-page.component';
+import { EventPageComponent } from './event-page/event-page.component';
 
 
 @NgModule({
-  declarations: [ProgramComponent, PersonComponent, ItemComponent, LayoutComponent, MenuComponent, PeopleComponent, FiltersComponent, ItemListComponent, StarredComponent, PersonPageComponent],
+  declarations: [ProgramComponent, PersonComponent, ItemComponent, LayoutComponent, MenuComponent, PeopleComponent, FiltersComponent, ItemListComponent, StarredComponent, PersonPageComponent, EventPageComponent],
   providers: [],
   imports: [
     CommonModule,

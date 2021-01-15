@@ -8,6 +8,7 @@ import { LayoutComponent } from './layout/layout.component';
 import { PeopleComponent } from './people/people.component';
 import { PersonPageComponent } from './person-page/person-page.component';
 import { StarredComponent } from './starred/starred.component';
+import { EventPageComponent } from './event-page/event-page.component';
 
 const routes: Routes = [
   {path: '', component: LayoutComponent,
@@ -17,6 +18,7 @@ const routes: Routes = [
      { path: 'people/person/:id', component: PersonPageComponent },
      { path: 'people/search/:search', component: PeopleComponent },
      { path: 'people', component: PeopleComponent },
+     { path: 'program/event/:id', component: EventPageComponent },
      { path: 'program', component: ProgramComponent },
    ]
   },

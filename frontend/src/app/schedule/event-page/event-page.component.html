@@ -1,0 +1,3 @@
+<ng-container *ngIf="event$ | async as event">
+  <app-item [openDoors]="scheduleService.openDoors$ | async" [event]="event" [alwaysExpanded]="true"></app-item>
+</ng-container>
