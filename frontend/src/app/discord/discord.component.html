@@ -39,9 +39,22 @@
       <ng-template #hiddenSecret>
         ********
       </ng-template>
-      </div>
-    <button [disabled]="secretLoading" class="secret-button btn btn-dark" *ngIf="!secretDisplayed" (click)="display()">Display</button>
-    <button [disabled]="secretLoading"  class="secret-button btn btn-dark" *ngIf="secretDisplayed" (click)="hide()">Hide</button>
+    </div>
+    <div>
+        <button [disabled]="secretLoading"  class="secret-button btn btn-dark" *ngxClipboardIfSupported (click)="copy()">
+          <ng-container *ngIf="!secretCopied && !(secretLoading && showSecretLoading)">Copy</ng-container>
+          <ng-container *ngIf="secretCopied && !(secretLoading && showSecretLoading)">Copied</ng-container>
+          <ng-container *ngIf="secretLoading && showSecretLoading">Loading</ng-container>
+        </button>
+    </div>
+
+    <div><button [disabled]="secretLoading"  class="secret-button btn btn-dark" *ngIf="secretDisplayed; else secretHidden" (click)="hide()">Hide</button></div>
+    <ng-template #secretHidden>
+      <div><button [disabled]="secretLoading" class="secret-button btn btn-dark" (click)="display()">
+          <ng-container *ngIf="secretLoading && showSecretLoading">Loading</ng-container>
+          <ng-container *ngIf="!(secretLoading && showSecretLoading)">Display</ng-container>
+      </button></div>
+    </ng-template>
   </div>
   <div>{{secretError}}</div>
 </div>

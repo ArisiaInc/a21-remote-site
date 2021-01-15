@@ -4,6 +4,7 @@
 }
 
 .secret-box {
+    display: flex;
     height: 5.25rem;
     max-width: 42rem;
     width: 100%;
@@ -11,18 +12,15 @@
     font-size: 1.125rem;
     padding: 0 1rem;
     position: relative;
+    align-items: center;
 }
 
 .secret-text {
-    position: absolute;
-    top: 50%;
-    transform: translate(0, -50%);
+    overflow: hidden;
+    flex-grow: 1;
 }
 
 .secret-button {
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translate(0, -50%);
+    margin-left: 1rem;
     min-width: 5rem;
 }

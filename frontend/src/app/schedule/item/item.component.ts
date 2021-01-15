@@ -12,8 +12,6 @@ export class ItemComponent implements OnChanges {
   @Input() openDoors!: Set<string>;
   showDoors = false;
   expanded: boolean = false;
-  track!: string;
-  type!: string;
 
   constructor() { }
 

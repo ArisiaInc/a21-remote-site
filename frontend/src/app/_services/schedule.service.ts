@@ -26,6 +26,12 @@ export interface ScheduleStatus {
   lastUpdate?: Date;
 }
 
+export enum KidsStatus {
+  UNKNOWN,
+  WELCOME,
+  DIRECTED
+}
+
 const tzoffset: number = new Date().getTimezoneOffset();
 
 let hour12: boolean = false;
@@ -36,7 +42,38 @@ export class ScheduleEvent {
     this.id = item.id;
     this.title = item.title;
     this.description = item.desc;
-    this.tags = item.tags || [];
+    for (const tag of item.tags) {
+      switch(tag) {
+        case 'Featured':
+          this.featured = true;
+          break;
+        case 'Captioned':
+          this.captioned = true;
+          break;
+        default:
+          const split = tag.split(':', 2);
+          if (split.length == 2) {
+            switch(split[0]) {
+              case 'kids':
+                switch (split[1]) {
+                  case 'Welcome':
+                    this.kids = KidsStatus.WELCOME;
+                    break;
+                  case 'Directed':
+                    this.kids = KidsStatus.DIRECTED;
+                    break;
+                }
+                break;
+              case 'type':
+                this.type = split[1];
+                break;
+              case 'track':
+                this.track = split[1];
+                break;
+            }
+          }
+      }
+    }
     this.start = new Date(item.timestamp);
     this.mins = parseInt(item.mins, 10);
     this.location = item.loc;
@@ -49,6 +86,12 @@ export class ScheduleEvent {
       this.doors = {start: new Date(this.start.getTime() - 5 * 60 * 1000), end: new Date(this.start.getTime() + this.mins * 60 * 1000)};
     }
   }
+
+  featured = false;
+  captioned = false;
+  kids = KidsStatus.UNKNOWN;
+  type = '';
+  track = '';
 
   link(peopleMap: {[_: string]: SchedulePerson}): void {
     if (this.tempPeople) {
@@ -82,7 +125,6 @@ export class ScheduleEvent {
   id: string;
   title: string;
   description: string;
-  tags: string[];
   start: Date;
   mins: number;
   location: string[];
@@ -288,7 +330,8 @@ export class Room {
   }
 }
 
-const RELOAD_TIMER = 10 * 1000;
+const RELOAD_SECONDS = 60;
+const RELOAD_TIMER = RELOAD_SECONDS * 1000;
 const USE_FAKE_DATA = false;
 
 @Injectable({
@@ -434,14 +477,12 @@ export class ScheduleService {
 
     this.events.forEach((event) => {
       event.link(this.peopleMap);
-      event.tags.forEach(tag => {
-        if (tag.startsWith(TRACK_TAG)) {
-          tracks.add(tag.substring(TRACK_TAG.length));
-        }
-        if (tag.startsWith(TYPE_TAG)) {
-          types.add(tag.substring(TYPE_TAG.length));
-        }
-      });
+      if (event.track) {
+        tracks.add(event.track);
+      }
+      if (event.type) {
+        types.add(event.type);
+      }
     });
 
     this.people.forEach((person) => {
@@ -521,12 +562,23 @@ export class ScheduleService {
     let dateRanges: DateRange[] | undefined;
 
     const munged_filters: ((scheduleEvent: ScheduleEvent) => boolean)[] = [];
-    if (filters.tags && filters.tags.length > 0) {
-      const tags = filters.tags;
+    if (filters.types && filters.types.length > 0) {
+      const types = filters.types;
       munged_filters.push(
-        scheduleEvent => tags.every(
-          category => category.length === 0 || category.some(
-            filterString => scheduleEvent.tags.includes(filterString))))
+        scheduleEvent => types.some(
+          filterString => scheduleEvent.type === filterString));
+    }
+    if (filters.tracks && filters.tracks.length > 0) {
+      const tracks = filters.tracks;
+      munged_filters.push(
+        scheduleEvent => tracks.some(
+          filterString => scheduleEvent.track === filterString));
+    }
+    if (filters.captionedOnly) {
+      munged_filters.push(scheduleEvent => scheduleEvent.captioned);
+    }
+    if (filters.featuredOnly) {
+      munged_filters.push(scheduleEvent => scheduleEvent.featured);
     }
     if (filters.loc && filters.loc.length > 0) {
       const loc = filters.loc;
@@ -598,7 +650,10 @@ export class ScheduleService {
         if (filters) {
           scheduleFilters.loc = filters.loc;
           scheduleFilters.date = filters.date;
-          scheduleFilters.tags = filters.tags
+          scheduleFilters.types = filters.types;
+          scheduleFilters.tracks = filters.tracks;
+          scheduleFilters.captionedOnly = filters.captionedOnly;
+          scheduleFilters.featuredOnly = filters.featuredOnly;
         }
         return this.getSchedule(scheduleFilters)
       }),
@@ -643,7 +698,7 @@ export class ScheduleService {
   get_featured_events(): Observable<StructuredEvents> {
     // for testing:
     // return this.getSchedule({id: ['23', '45', '17']});
-    return this.getSchedule({tags: [['featured']]});
+    return this.getSchedule({featuredOnly: true});
   }
 
 

@@ -14,10 +14,10 @@ export interface ProgramFilter {
   loc?: string[];
   /** Matches if any of the Date Ranges match. */
   date?: DateRange[];
-  /** filter by tag. This is a list of lists. The inner lists of tags
-   * are ORed together and the outer lists of lists are ANDed
-   * together. */
-  tags?: string[][];
+  types?: string[];
+  tracks?: string[];
+  captionedOnly?: boolean;
+  featuredOnly?: boolean;
   /** Matches if any of the ids match the id of the event. */
   id?: string[];
 }
