@@ -8,7 +8,7 @@ import arisia.zoom.ZoomService
 import play.api.Logging
 import play.api.data._
 import play.api.data.Forms._
-import play.api.mvc.{BaseController, ControllerComponents, EssentialAction}
+import play.api.mvc.{BaseController, ControllerComponents, EssentialAction, Result}
 import play.api.i18n.I18nSupport
 
 import scala.concurrent.{Future, ExecutionContext}
@@ -50,24 +50,26 @@ class ZoomController(
     ProgramItemId(itemStr)
   }
 
-  def enterItemBase(rawItemStr: String)(lookupUrl: (LoginUser, ProgramItemId) => Option[String]): EssentialAction = Action { implicit request =>
+  def enterItemBase(rawItemStr: String)(lookupUrl: (LoginUser, ProgramItemId) => Future[Option[String]]): EssentialAction = Action.async { implicit request =>
     val itemId = getItemId(rawItemStr)
 
-    val redirectOpt = for {
-      // Only logged in users are allowed to join meetings:
-      user <- LoginController.loggedInUser()
-      attendeeUrl <- lookupUrl(user, itemId)
-      // If we get here, they're allowed in:
-    }
-      yield Found(attendeeUrl)
-
-    // TODO: what should we return if this fails? This is effectively a system error: it shouldn't be possible for them
-    // to get into this state, but we should probably provide a better error.
-    redirectOpt.getOrElse(NotFound(
+    lazy val error: Result = NotFound(
       arisia.views.html.errorPage(
         "Meeting Not Running",
         "That isn't a meeting that is currently running and open. Please check the schedule. Sorry!"
-      )))
+      ))
+
+    // Only logged in users are allowed to join meetings:
+    LoginController.loggedInUser() match {
+      case Some(user) => {
+        lookupUrl(user, itemId).map {
+          // Okay, here we go. Redirect them to the meeting:
+          _.map(Found(_)).getOrElse(error)
+        }
+      }
+      // Not logged in:
+      case _ => Future.successful(error)
+    }
   }
 
   def enterItem(rawItemStr: String): EssentialAction =

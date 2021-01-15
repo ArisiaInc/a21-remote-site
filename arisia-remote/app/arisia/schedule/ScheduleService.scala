@@ -5,6 +5,8 @@ import java.util.concurrent.atomic.AtomicReference
 
 import arisia.admin.RoomService
 
+import cats.data.{OptionT}
+import cats.implicits._
 import scala.jdk.DurationConverters._
 import scala.concurrent.duration._
 import arisia.db.DBService
@@ -12,6 +14,7 @@ import arisia.general.{LifecycleService, LifecycleItem}
 import arisia.models.{ProgramItemTime, LoginUser, BadgeNumber, ProgramItem, ProgramItemTimestamp, Schedule, ProgramItemId, ProgramItemLoc, ProgramItemTitle}
 import arisia.timer.{TimerService, TimeService}
 import arisia.util.Done
+import arisia.zoom.ZoomService
 import doobie._
 import doobie.implicits._
 import play.api.{Configuration, Logging}
@@ -44,15 +47,18 @@ trait ScheduleService {
    * This will return None if the prep session is running, but this person isn't allowed to enter.
    *
    * Note that, since we require a LoginUser, we already know by type that this isn't anonymous.
+   *
+   * Note that, while this is technically a Future (to deal with the weird Fast Track edge case), it
+   * will usually run synchronously.
    */
-  def getAttendeeUrlFor(who: LoginUser, which: ProgramItemId): Option[String]
+  def getAttendeeUrlFor(who: LoginUser, which: ProgramItemId): Future[Option[String]]
 
   /**
    * Similar to getAttendeeUrlFor, but provides the Host URL, which has lots of special powers.
    *
    * Only specially-designed users (broadly speaking, Tech and Safety) have access to this.
    */
-  def getHostUrlFor(who: LoginUser, which: ProgramItemId): Option[String]
+  def getHostUrlFor(who: LoginUser, which: ProgramItemId): Future[Option[String]]
 
   /**
    * Adds this item to the Schedule, purely in-memory, so that we can test.
@@ -68,7 +74,8 @@ class ScheduleServiceImpl(
   config: Configuration,
   queueService: ScheduleQueueService,
   val lifecycleService: LifecycleService,
-  roomService: RoomService
+  roomService: RoomService,
+  zoomService: ZoomService
 )(
   implicit ec: ExecutionContext
 ) extends ScheduleService with LifecycleItem with Logging {
@@ -84,6 +91,9 @@ class ScheduleServiceImpl(
   lazy val zambiaLoginUrl = config.get[String]("arisia.zambia.loginUrl")
   lazy val zambiaBadgeId = config.get[String]("arisia.zambia.badgeId")
   lazy val zambiaPassword = config.get[String]("arisia.zambia.password")
+
+  lazy val fastTrackZambiaName = config.get[String]("arisia.fasttrack.zambia.name")
+  lazy val fastTrackZoomName = config.get[String]("arisia.fasttrack.zoom.name")
 
   val lifecycleName = "ScheduleService"
   lifecycleService.register(this)
@@ -291,10 +301,39 @@ class ScheduleServiceImpl(
     _scheduleWithPrep.get
   }
 
-  def getAttendeeUrlFor(who: LoginUser, which: ProgramItemId): Option[String] = {
+  // Reduce the noise of using the monad transformer:
+  def fromOpt[T](f: => Option[T]): OptionT[Future, T] = OptionT.fromOption[Future](f)
+
+  def getAttendeeUrlFor(who: LoginUser, which: ProgramItemId): Future[Option[String]] = {
+    val result = for {
+      item <- fromOpt(_baseSchedule.get.byItemId.get(which))
+      loc <- fromOpt(item.loc.headOption)
+      result <-
+        if (loc.v == fastTrackZambiaName) {
+          // This is a Fast Track session, so head off in that direction instead:
+          getFastTrackUrl()
+        } else {
+          // Normal case
+          fromOpt(getNormalAttendeeUrl(item, which, who))
+        }
+    }
+      yield result
+
+    result.value
+  }
+
+  def getFastTrackUrl(): OptionT[Future, String] = {
     for {
-      // Is this item real?
-      item <- _baseSchedule.get.byItemId.get(which)
+      meeting <- fromOpt(roomService.getManualRoom(fastTrackZoomName))
+      meetingRunning <- OptionT.liftF(zoomService.isMeetingRunning(meeting.zoomId.toLong))
+      if (meetingRunning)
+      url <- OptionT.liftF(zoomService.getJoinUrl(meeting.zoomId.toLong))
+    }
+      yield url
+  }
+
+  def getNormalAttendeeUrl(item: ProgramItem, which: ProgramItemId, who: LoginUser): Option[String] = {
+    for {
       // Is the meeting running?
       meeting <- queueService.getRunningMeeting(which)
       // Are they allowed to join yet?
@@ -324,8 +363,8 @@ class ScheduleServiceImpl(
   }
 
 
-  def getHostUrlFor(who: LoginUser, which: ProgramItemId): Option[String] = {
-    for {
+  def getHostUrlFor(who: LoginUser, which: ProgramItemId): Future[Option[String]] = {
+    val result = for {
       // Is this item real?
       item <- _baseSchedule.get.byItemId.get(which)
       // Is the meeting running?
@@ -334,6 +373,8 @@ class ScheduleServiceImpl(
       if (who.zoomHost)
     }
       yield meeting.start_url
+
+    Future.successful(result)
   }
 
   def addTestItem(item: ProgramItem): Unit = {
