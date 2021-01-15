@@ -17,8 +17,6 @@ export class ItemComponent implements OnChanges {
 
   ngOnChanges(): void {
     this.showDoors = this.openDoors && this.openDoors.has(this.event.id);
-    this.track = this.event.tags.filter(s => s.startsWith('track'))[0].split(':')[1];
-    this.type = this.event.tags.filter(s => s.startsWith('type'))[0].split(':')[1];
   }
 
   toggleExpand(event: Event) {
