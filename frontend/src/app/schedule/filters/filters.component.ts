@@ -7,8 +7,6 @@ enum Property {
 };
 
 const NOW_HOURS = 12;
-const TRACK_TAG = 'track:';
-const TYPE_TAG = 'type:'
 
 @Component({
   selector: 'app-filters',
@@ -113,7 +111,8 @@ export class FiltersComponent implements OnInit {
   }
 
   updateTagFilters(): void {
-    this.filters.tags = [this.trackFilters.map (track => TRACK_TAG + track), this.typeFilters.map (typ => TYPE_TAG + typ)];
+    this.filters.tracks = this.trackFilters;
+    this.filters.types = this.typeFilters;
     this.filtersChanged.emit(this.filters);
   }
 

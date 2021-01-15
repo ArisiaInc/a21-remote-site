@@ -10,14 +10,10 @@ export class ItemComponent implements OnInit {
   @Input() event!: ScheduleEvent;
   @Input() showStar = false;
   expanded: boolean = false;
-  track!: string;
-  type!: string;
 
   constructor() { }
 
   ngOnInit(): void {
-    this.track = this.event.tags.filter(s => s.startsWith('track'))[0].split(':')[1];
-    this.type = this.event.tags.filter(s => s.startsWith('type'))[0].split(':')[1];
   }
 
   toggleExpand(event: Event) {
