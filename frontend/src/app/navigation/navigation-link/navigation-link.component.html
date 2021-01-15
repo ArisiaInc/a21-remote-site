@@ -1,3 +1,9 @@
-<li class="item" [ngbNavItem]="link">
-  <a ngbNavLink [routerLink]="link" [queryParams]="returnUrl ? ({returnUrl: returnUrl}) : undefined" (click)="activated.emit()" class="py-md-0 link">{{title}}</a>
+<li class="item nav-item">
+  <a class="nav-link py-md-0 link"
+     [routerLink]="link"
+     [queryParams]="returnUrl ? ({returnUrl: returnUrl}) : undefined"
+     (click)="activated.emit()"
+     [ngClass]="{'submenu': submenu, 'active': selected }"
+     [attr.aria-selected]="selected"
+     >{{title}}</a>
 </li>

@@ -15,17 +15,39 @@ export class NavigationComponent implements OnDestroy {
   @HostBinding('class') class = 'sticky-top';
   currentRoute: string = '';
   subscription: Subscription;
+  selectedKey: string;
 
   public isMenuCollapsed = true;
 
   constructor(public route: ActivatedRoute,
               private router: Router,
               public accountService: AccountService) {
+    this.selectedKey = '/map';
 
     this.subscription =
       router.events.pipe(
         filter(event => event instanceof NavigationEnd),
-      ).subscribe(event => this.currentRoute = (event as NavigationEnd).url);
+      ).subscribe(event => {
+        this.currentRoute = (event as NavigationEnd).url;
+        if (this.currentRoute.startsWith('/schedule/program')) {
+          this.selectedKey = '/schedule/program';
+        } else if (this.currentRoute.startsWith('/schedule/people')) {
+          this.selectedKey = '/schedule/people';
+        } else if (this.currentRoute.startsWith('/schedule/starred')) {
+          this.selectedKey = '/schedule/starred';
+        } else if (this.currentRoute.startsWith('/schedule')) {
+          this.selectedKey = '/schedule';
+        } else if (this.currentRoute.startsWith('/user')) {
+          this.selectedKey = '/user';
+        } else if (this.currentRoute.startsWith('/account/login')) {
+          this.selectedKey = '/account/login';
+        } else if (this.currentRoute.startsWith('/help')) {
+          this.selectedKey = '/help';
+        } else {
+          this.selectedKey = '/map';
+        }
+      });
+
   }
 
   ngOnDestroy() {

@@ -8,14 +8,18 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div [ngbCollapse]="isMenuCollapsed" class="collapse navbar-collapse" id="navbarContent" *ngFor="let loggedIn of [accountService.loggedIn$ | async]">
-      <ul ngbNav [activeId]="route.fragment | async" class="navbar-nav me-auto mb-2 mb-md-0 list">
-        <app-navigation-link (activated)="isMenuCollapsed=true" title="Con Hub" link="/map"></app-navigation-link>
-        <app-navigation-link (activated)="isMenuCollapsed=true" title="Schedule" link="/schedule"></app-navigation-link>
-        <app-navigation-link (activated)="isMenuCollapsed=true" title="Profile" link="/user"></app-navigation-link>
-        <app-navigation-link (activated)="isMenuCollapsed=true" title="Info" link="/help"></app-navigation-link>
+      <ul ngbNav class="navbar-nav me-auto mb-2 mb-md-0 list">
+        <app-navigation-link (activated)="isMenuCollapsed=true" title="Con Hub" link="/map" [selectedKey]="selectedKey"></app-navigation-link>
+        <app-navigation-link (activated)="isMenuCollapsed=true" title="Schedule" link="/schedule/program" id="/schedule" class="d-none d-md-block" [selectedKey]="selectedKey"></app-navigation-link>
+        <app-navigation-link (activated)="isMenuCollapsed=true" title="Schedule" link="/schedule/program" class="d-md-none"></app-navigation-link>
+        <app-navigation-link (activated)="isMenuCollapsed=true" title="My Schedule" link="/schedule/starred" class="d-md-none" [submenu]=true [selectedKey]="selectedKey"></app-navigation-link>
+        <app-navigation-link (activated)="isMenuCollapsed=true" title="All Programming" link="/schedule/program" class="d-md-none" [submenu]=true [selectedKey]="selectedKey"></app-navigation-link>
+        <app-navigation-link (activated)="isMenuCollapsed=true" title="Participant Bios" link="/schedule/people" class="d-md-none" [submenu]=true [selectedKey]="selectedKey"></app-navigation-link>
+        <app-navigation-link (activated)="isMenuCollapsed=true" title="Profile" link="/user" [selectedKey]="selectedKey"></app-navigation-link>
+        <app-navigation-link (activated)="isMenuCollapsed=true" title="Info" link="/help" [selectedKey]="selectedKey"></app-navigation-link>
         <app-navigation-link *ngIf="accountService.loggedIn$ | async; else login" (activated)="onLogout()" title="Log Out"></app-navigation-link>
         <ng-template #login>
-          <app-navigation-link (activated)="isMenuCollapsed=true" title="Log In" link="/account/login" [returnUrl]="currentRoute"></app-navigation-link>
+          <app-navigation-link (activated)="isMenuCollapsed=true" title="Log In" link="/account/login" [returnUrl]="currentRoute" [selectedKey]="selectedKey"></app-navigation-link>
         </ng-template>
       </ul>
     </div>
