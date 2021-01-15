@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { ClipboardModule } from 'ngx-clipboard';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -79,6 +80,7 @@ import { CreditsComponent } from './credits/credits.component';
     NgbModule,
     PipesModule,
     FormsModule,
+    ClipboardModule,
   ],
   bootstrap: [AppComponent],
   entryComponents: [InfodeskComponent, SafetyComponent, IrtComponent],
