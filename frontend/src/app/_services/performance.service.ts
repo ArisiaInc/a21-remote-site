@@ -3,6 +3,7 @@ import { HttpClient, HttpResponse, HttpErrorResponse } from '@angular/common/htt
 import { ReplaySubject } from 'rxjs';
 
 import { Performance } from '@app/_models';
+import { environment } from '@environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,7 @@ export class PerformanceService {
 
   constructor(private http: HttpClient) {
     this.http.get<Performance[]>
-      ('/assets/data/performances.json').subscribe({
+      (`${environment.backend}/metadata/events`).subscribe({
         next: (response) => this.handleResponse(response),
         error: (error) => this.handleError(error)
       });
