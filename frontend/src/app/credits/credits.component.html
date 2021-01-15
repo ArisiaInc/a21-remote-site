@@ -1,0 +1,23 @@
+<div class="title">This Site Brought to You by the Arisia Remote Division</div>
+
+<div class="row">
+  <div class="col-12 col-lg-6" *ngFor="let column of columns">
+    <div class="credit" *ngFor="let credit of column">
+      <img [src]="credit.picture" class="picture">
+      <div class="text-box">
+        <div class="bio" [innerHtml]="credit.bio|sanitizeHtml">
+        </div>
+        <div class="links" [ngSwitch]="credit.links.length">
+          <span *ngSwitchCase="0"></span>
+          <a [href]="credit.links[0].url" target="_blank" *ngSwitchCase="1">Check out {{credit.possessive}} {{credit.links[0].text || "website"}} here.</a>
+          <span *ngSwitchDefault>Check out {{credit.possessive}}
+            <ng-container *ngFor="let link of credit.links; last as isLast">
+              <a [href]="link.url" target="_blank">{{link.text || "website"}}</a>
+              <ng-container *ngIf="!isLast"> and </ng-container>
+            </ng-container>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

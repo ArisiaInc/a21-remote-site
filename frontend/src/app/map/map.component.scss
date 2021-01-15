@@ -76,7 +76,6 @@
 $coffee-text-left: 3.4375rem;
 
 .coffee-text {
-    font-size: 1.5rem;
     width: calc(100% - #{$coffee-text-left});
     position: absolute;
     left: $coffee-text-left;
@@ -91,20 +90,75 @@ $coffee-text-left: 3.4375rem;
     padding-top: 1.25rem;
 }
 
+.xl-text {
+    font-size: 3rem;
+    @include media-breakpoint-only(lg) {
+        font-size: 2rem;
+    }
+    @include media-breakpoint-only(md) {
+        font-size: 1.5rem;
+    }
+    @include media-breakpoint-only(sm) {
+        font-size: 2.5rem;
+    }
+}
+
 .large-text {
     font-size: 2.25rem;
+    @include media-breakpoint-only(lg) {
+        font-size: 2rem;
+    }
+    @include media-breakpoint-only(md) {
+        font-size: 1.5rem;
+    }
+    @include media-breakpoint-only(sm) {
+        font-size: 2rem;
+    }
 }
 
 .medium-text {
     font-size: 1.5rem;
+    line-height: 1.75rem;
+    @include media-breakpoint-only(lg) {
+        font-size: 1.25rem;
+        line-height: 1.5rem;
+    }
+    @include media-breakpoint-only(md) {
+        font-size: 1rem;
+        line-height: 1rem;
+    }
+    @include media-breakpoint-only(sm) {
+        line-height: 1.5rem;
+    }
 }
 
 .small-medium-text {
     font-size: 1.375rem;
+    @include media-breakpoint-only(lg) {
+        font-size: 1.125rem;
+    }
+    @include media-breakpoint-only(md) {
+        font-size: 0.8rem;
+    }
+    @include media-breakpoint-only(sm) {
+        font-size: 1.25rem;
+    }
 }
 
 .small-text {
     font-size: 1.25rem;
+    line-height: 1.5rem;
+    @include media-breakpoint-only(lg) {
+        font-size: 1.125rem;
+        line-height: 1.25rem;
+    }
+    @include media-breakpoint-only(md) {
+        font-size: 0.8rem;
+        line-height: 1rem;
+    }
+    @include media-breakpoint-only(sm) {
+        font-size: 1.25rem;
+    }
 }
 
 @include media-breakpoint-up(sm) {

@@ -24,6 +24,6 @@ export class ArtistService extends CreatorService {
   }
 
   protected gohSearch(): Observable<Creator[]> {
-    return this.getCreatorsById(["112042"]);
+    return this.getCreatorsById(["40"]);
   }
 }

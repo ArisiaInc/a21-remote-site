@@ -4,9 +4,18 @@
     <img src="assets/images/logout.png" class="art">
   </ng-template>
 
-  <div class="title" *ngIf="!justLoggedOut; else justLoggedOutTitle">
-    Log in to Arisia 2021!
+  <div class="title less-padding" *ngIf="!showRealTitle; else realTitle">
+    You're a bit early!
+    <div class="subtitle">
+Please check back Friday at 12pm EST, when Arisia 2021 will open to attendees!
+    </div>
+    <div class="warning">Please do not use the form below, as it will not work until Friday 12pm</div>
   </div>
+  <ng-template #realTitle>
+    <div class="title" *ngIf="!justLoggedOut; else justLoggedOutTitle">
+      Log in to Arisia 2021!
+    </div>
+  </ng-template>
   <ng-template #justLoggedOutTitle>
     <div class="title">
       Thank you for attending Arisia&nbsp;2021!
@@ -27,14 +36,7 @@
         <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
           <div *ngIf="f.password.errors.required">Password is required</div>
         </div>
-        <div *ngIf="submitted && submissionError" class="invalid-feedback" [ngSwitch]="submissionError.status">
-          <ng-container *ngSwitchCase="401">
-            Your Username or Password was incorrect. Please try again.
-          </ng-container>
-          <ng-container *ngSwitchDefault>
-            Login error: {{submissionError.statusText}}.
-          </ng-container>
-          &ngsp;If the problem persists, email <a href="mailto:registration@arisia.org">registration@arisia.org</a>.
+        <div *ngIf="submitted && submissionError" class="invalid-feedback" [innerHtml]="submissionError | sanitizeHtml | linkify" >
         </div>
       </div>
       <div class="form-group">

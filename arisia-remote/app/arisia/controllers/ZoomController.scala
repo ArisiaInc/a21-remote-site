@@ -3,7 +3,7 @@ package arisia.controllers
 import arisia.admin.RoomService
 import arisia.auth.LoginService
 import arisia.models.{ProgramItemId, LoginUser, ZoomRoom}
-import arisia.schedule.ScheduleService
+import arisia.schedule.{ScheduleService, ScheduleQueueService}
 import arisia.zoom.ZoomService
 import play.api.Logging
 import play.api.data._
@@ -21,6 +21,7 @@ class ZoomController(
   zoomService: ZoomService,
   roomService: RoomService,
   scheduleService: ScheduleService,
+  scheduleQueueService: ScheduleQueueService,
   val loginService: LoginService
 )(
   implicit val ec: ExecutionContext
@@ -40,13 +41,17 @@ class ZoomController(
 //    }
   }
 
-  def enterItemBase(rawItemStr: String)(lookupUrl: (LoginUser, ProgramItemId) => Option[String]): EssentialAction = Action { implicit request =>
+  private def getItemId(rawItemStr: String): ProgramItemId = {
     val itemStr =
       if (rawItemStr.endsWith("-prep"))
         rawItemStr.dropRight(5)
       else
         rawItemStr
-    val itemId = ProgramItemId(itemStr)
+    ProgramItemId(itemStr)
+  }
+
+  def enterItemBase(rawItemStr: String)(lookupUrl: (LoginUser, ProgramItemId) => Option[String]): EssentialAction = Action { implicit request =>
+    val itemId = getItemId(rawItemStr)
 
     val redirectOpt = for {
       // Only logged in users are allowed to join meetings:
@@ -70,6 +75,77 @@ class ZoomController(
 
   def enterItemAsHost(rawItemStr: String): EssentialAction =
     enterItemBase(rawItemStr)(scheduleService.getHostUrlFor)
+
+  val getStartUrlForm = Form(
+    single(
+      "name" -> nonEmptyText
+    )
+  )
+
+  def showGetStartUrl(): EssentialAction = adminsOnly("Show Get Start URL") { info =>
+    implicit val request = info.request
+
+    Ok(arisia.views.html.showMeetingUrlInput(getStartUrlForm.fill("")))
+  }
+
+  def getStartUrl(): EssentialAction = adminsOnlyAsync("Get Start URL") { info =>
+    implicit val request = info.request
+    val roomName = getStartUrlForm.bindFromRequest().get
+
+    roomService.getManualRoom(roomName) match {
+      case Some(room) => {
+        zoomService.getStartUrl(room.zoomId.toLong).map { url =>
+          Ok(arisia.views.html.showMeetingUrl(roomName, url))
+        }
+      }
+      case _ => Future.successful(BadRequest(s"$roomName isn't the name of a known room!"))
+    }
+  }
+
+  val restartForm = Form(
+    single(
+      "itemId" -> nonEmptyText
+    )
+  )
+
+  def showRestart(): EssentialAction = adminsOnly("Show Restart") { info =>
+    implicit val request = info.request
+
+    Ok(arisia.views.html.restartMeeting(restartForm.fill("")))
+  }
+
+  def restartProgramItem(): EssentialAction = adminsOnlyAsync("restart meeting") { info =>
+    implicit val request = info.request
+    val rawItemStr = restartForm.bindFromRequest().get
+    val itemId = getItemId(rawItemStr)
+
+    scheduleQueueService.getRunningMeeting(itemId) match {
+      case Some(meeting) => {
+        val checkRunning: Future[Boolean] =
+          if (meeting.isWebinar)
+            // Sadly, we don't appear to have a way to check this for webinars, so we're just going to cross
+            // our fingers and hope for the best:
+            Future.successful(false)
+          else
+            zoomService.isMeetingRunning(meeting.id)
+        checkRunning.flatMap { running =>
+          if (running) {
+            // TODO: think about this. If the meeting is running and somebody tries to use this API, should
+            // we stomp the existing meeting? It could conceivably happen in case of a takeover. We do have
+            // a fallback in this case, though: the Zoom Admin goes in and manually stomps it, then comes
+            // back here.
+            Future.successful(BadRequest("That meeting is running fine already"))
+          } else {
+            // Okay, we have a meeting that is supposed to be running, but has stopped:
+            scheduleQueueService.restartMeeting(itemId).map { _ =>
+              Redirect("/admin")
+            }
+          }
+        }
+      }
+      case None => Future.successful(BadRequest("That item isn't currently running!"))
+    }
+  }
 
   def isRoomOpen(name: String): EssentialAction = withLoggedInUser { userRequest =>
     roomService.getManualRoom(name) match {
@@ -98,6 +174,7 @@ class ZoomController(
       case _ => Future.successful(BadRequest(""))
     }
   }
+
 
   /* ********************
    *

@@ -1,5 +1,5 @@
 <div class="search-title">Participants by name</div>
-<app-alphabet-links [search]="search$ | async" [initials]="scheduleService.peopleInitials$ | async" [includeGoh]="true" urlPrefix="/schedule/people"></app-alphabet-links>
+<app-alphabet-links [search]="search$ | async" [initials]="scheduleService.peopleInitials$ | async" [includeGoh]="true" urlPrefix="/schedule/people/search" allUrl="/schedule/people"></app-alphabet-links>
 <ul class="people-box list-group">
   <li *ngFor="let person of people$ | async" class="list-group-item list-group-item-action">
     <app-person [person]="person"></app-person>

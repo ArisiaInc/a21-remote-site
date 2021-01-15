@@ -5,12 +5,12 @@ import java.util.concurrent.atomic.{AtomicLong, AtomicReference}
 
 import arisia.admin.RoomService
 import arisia.db.DBService
-import arisia.general.{LifecycleItem, LifecycleService}
+import arisia.general.{LifecycleService, LifecycleItem}
 import arisia.models.{ProgramItem, ZoomRoom, Schedule, ProgramItemId, ProgramItemLoc}
 import arisia.timer.{TimerService, TimeService}
 import arisia.util.Done
 import arisia.zoom.ZoomService
-import arisia.zoom.models.ZoomMeeting
+import arisia.zoom.models.{ZoomMeeting, ZoomMeetingType}
 import play.api.{Configuration, Logging}
 import doobie._
 import doobie.implicits._
@@ -27,6 +27,8 @@ trait ScheduleQueueService {
   def setSchedule(schedule: Schedule): Future[Done]
 
   def getRunningMeeting(id: ProgramItemId): Option[ZoomMeeting]
+
+  def restartMeeting(id: ProgramItemId): Future[Done]
 }
 
 class ScheduleQueueServiceImpl(
@@ -59,17 +61,17 @@ class ScheduleQueueServiceImpl(
 
     dbService.run(
       sql"""
-            SELECT end_at, program_item_id, zoom_meeting_id, host_url, attendee_url
+            SELECT end_at, program_item_id, zoom_meeting_id, host_url, attendee_url, webinar
               FROM active_program_items
            """
-        .query[(Long, String, Long, String, String)]
+        .query[(Long, String, Long, String, String, Boolean)]
         .to[List]
     ).map { rawItems =>
-      val items = rawItems.map { case (endAt, itemId, zoomId, hostUrl, attendeeUrl) =>
+      val items = rawItems.map { case (endAt, itemId, zoomId, hostUrl, attendeeUrl, isWebinar) =>
         RunningItem(
           Instant.ofEpochMilli(endAt),
           ProgramItemId(itemId),
-          ZoomMeeting(zoomId, hostUrl, attendeeUrl)
+          ZoomMeeting(zoomId, hostUrl, attendeeUrl, if (isWebinar) ZoomMeetingType.Webinar else ZoomMeetingType.Instant)
         )
       }
       _runningItemsQueue.set(SortedSet(items:_*))
@@ -116,9 +118,12 @@ class ScheduleQueueServiceImpl(
     )
   }
 
+  val _schedule: AtomicReference[Schedule] = new AtomicReference(Schedule.empty)
+
   def setSchedule(schedule: Schedule): Future[Done] = {
     // Make sure that the schedule cursor is loaded before we try to compute the queue:
     logger.info(s"Setting the Schedule Queue...")
+    _schedule.set(schedule)
     val dbFut =
       if (_scheduleCursor.get() == -1L) {
         fetchCursorFromDatabase()
@@ -192,7 +197,7 @@ class ScheduleQueueServiceImpl(
       roomOpt <- roomService.getRoomForZambia(item.loc.head)
       if (roomOpt.isDefined)
       room = roomOpt.get
-      meetingEither <- zoomService.startMeeting(title, room.zoomId)
+      meetingEither <- zoomService.startMeeting(title, room.zoomId, room.isWebinar)
       if (meetingEither.isRight)
       Right(meeting) = meetingEither
       _ <- recordMeetingAsActive(item, meeting)
@@ -200,10 +205,12 @@ class ScheduleQueueServiceImpl(
       yield Done
   }
 
-  private def endRunningItem(item: RunningItem): Future[Done] = {
+  private def endRunningItem(item: RunningItem, premature: Boolean = false): Future[Done] = {
     for {
-      _ <- zoomService.endMeeting(item.meeting.id)
-      _ = _currentlyRunningItems.getAndUpdate(_.tail)
+      _ <- zoomService.endMeeting(item.meeting.id, item.meeting.isWebinar)
+      _ = _currentlyRunningItems.getAndUpdate { items =>
+            items - item.itemId
+          }
       _ <- dbService.run(
         sql"""
               DELETE FROM active_program_items
@@ -212,6 +219,9 @@ class ScheduleQueueServiceImpl(
           .update
           .run
       )
+      _ = _schedule.get().byItemId.get(item.itemId).foreach { programItem =>
+        logger.info(s"Stopped Program Item ${programItem.title}")
+      }
     }
       yield Done
   }
@@ -224,6 +234,24 @@ class ScheduleQueueServiceImpl(
 
   def getRunningMeeting(id: ProgramItemId): Option[ZoomMeeting] = {
     _currentlyRunningItems.get.get(id).map(_.meeting)
+  }
+
+  def restartMeeting(id: ProgramItemId): Future[Done] = {
+    _currentlyRunningItems.get().get(id) match {
+      case Some(runningItem) => {
+        for {
+          _ <- endRunningItem(runningItem, true)
+          _ = _runningItemsQueue.getAndUpdate {
+            _.filterNot(_.itemId == id)
+          }
+          item = _schedule.get().program.find(_.id.v == s"$id-prep").get
+          _ <- startProgramItem(item)
+        }
+          yield Done
+      }
+      // Someone seems to be confused:
+      case _ => Future.successful(Done)
+    }
   }
 
   private def recordMeetingAsActive(item: ProgramItem, meeting: ZoomMeeting): Future[Int] = {
@@ -244,9 +272,9 @@ class ScheduleQueueServiceImpl(
     dbService.run(
       sql"""
            INSERT INTO active_program_items
-           (end_at, program_item_id, zoom_meeting_id, host_url, attendee_url)
+           (end_at, program_item_id, zoom_meeting_id, host_url, attendee_url, webinar)
            VALUES
-           (${endAt.toLong}, ${actualItemId.v}, ${meeting.id}, ${meeting.start_url}, ${meeting.join_url})"""
+           (${endAt.toLong}, ${actualItemId.v}, ${meeting.id}, ${meeting.start_url}, ${meeting.join_url}, ${meeting.isWebinar})"""
         .update
         .run
     )

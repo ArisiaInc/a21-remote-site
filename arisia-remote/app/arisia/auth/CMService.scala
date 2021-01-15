@@ -91,6 +91,8 @@ class CMServiceImpl(
         if (body.contains("Bad username or password")) {
           // CM says that it's wrong:
           Left(LoginError.NoLogin)
+        } else if (body.contains("Your password has expired")) {
+          Left(LoginError.PasswordReset)
         } else if (body.contains("Please Double-check your name information")) {
           // That indicates that CM thinks it's a legit username/password
           // Parse out the badgename. We're not even going to try and be cute about this
@@ -230,7 +232,15 @@ class CMServiceImpl(
           raw.active == Some("Y"),
           // The way the query is structured, this should be NULL if they don't have a current membership
           // (Folks are welcome to check my math here: this one was hard to figure out.)
-          raw.membershipTypeStr.map(MembershipType.withValue(_)).getOrElse(MembershipType.NoMembership),
+          raw.membershipTypeStr.map { tpeStr =>
+            MembershipType.withValueOpt(tpeStr) match {
+              case Some(tpe) => tpe
+              case _ => {
+                logger.error(s"Member ${username.v} trying to log in with unknown membership type $tpeStr!")
+                MembershipType.NoMembership
+              }
+            }
+          }.getOrElse(MembershipType.NoMembership),
           // Similarly, the Version ID of the CoC should only be set iff they have signed it.
           // (Again, checking this would be welcome.)
           raw.versionId.isDefined

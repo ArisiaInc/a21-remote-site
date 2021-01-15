@@ -171,6 +171,18 @@ GET     /api/metadata/gaming        arisia.controllers.FileController.getGamingM
 GET     /api/metadata/events        arisia.controllers.FileController.getEventsMetadata()
 
 ###
+#  summary: fetch the metadata for Coffee Shop Line
+#  responses:
+#    200:
+#      description: OK
+#      content:
+#        text/plain:
+#          schema:
+#            type: string
+###
+GET     /api/metadata/coffee        arisia.controllers.FileController.getCoffeeMetadata()
+
+###
 #  summary: make this person an Arisian
 #  parameters:
 #    - name: body
@@ -247,11 +259,18 @@ DELETE  /admin/rooms/:id             arisia.controllers.ZoomController.removeRoo
 POST    /admin/meeting               arisia.controllers.AdminController.startMeeting()
 DELETE  /admin/meeting/:meetingId    arisia.controllers.AdminController.endMeeting(meetingId)
 
+GET     /admin/restart               arisia.controllers.ZoomController.showRestart()
+POST    /admin/restart               arisia.controllers.ZoomController.restartProgramItem()
+
+GET     /admin/showStartUrl          arisia.controllers.ZoomController.showGetStartUrl()
+POST    /admin/showStartUrl          arisia.controllers.ZoomController.getStartUrl()
+
 GET     /admin/manageMetadata        arisia.controllers.FileController.manageMetadata()
 POST    /admin/uploadArtshowMetadata arisia.controllers.FileController.uploadArtshowMetadata()
 POST    /admin/uploadDealersMetadata arisia.controllers.FileController.uploadDealersMetadata()
 POST    /admin/uploadGamingMetadata  arisia.controllers.FileController.uploadGamingMetadata()
 POST    /admin/uploadEventsMetadata  arisia.controllers.FileController.uploadEventsMetadata()
+POST    /admin/uploadCoffeeMetadata  arisia.controllers.FileController.uploadCoffeeMetadata()
 
 # Note the non-standard path, which is configured in application.conf, so that frontend
 # can own /assets

@@ -1,6 +1,7 @@
 package arisia.discord
 
 import java.util.concurrent.atomic.AtomicReference
+import java.util.Base64
 
 import arisia.auth.LoginService
 import arisia.general.LifecycleItem
@@ -10,6 +11,7 @@ import play.api.libs.json.{Format, JsObject, JsArray, JsString, Json}
 import play.api.libs.ws.WSClient
 import play.api.libs.ws.ahc.AhcCurlRequestLogger
 import play.api.{Configuration, Logging, ConfigLoader}
+import com.roundeights.hasher.Hasher
 
 import scala.concurrent.{Future, ExecutionContext}
 
@@ -53,6 +55,8 @@ class DiscordServiceImpl(
   lazy val arisiaGuildId = botConfig[String]("guildId")
   lazy val arisianRoleId = botConfig[String]("arisianRoleId")
   lazy val pageSize = botConfig[Int]("page.size").toString
+
+  lazy val secretKey = config.get[String]("play.http.secret.key")
 
   val lifecycleName = "DiscordService"
 
@@ -191,27 +195,42 @@ class DiscordServiceImpl(
   }
 
   def addArisian(who: LoginUser, creds: DiscordUserCredentials): Future[Either[String, DiscordMember]] = {
-    // TODO: check whether this discord user ID (not username#discriminator) is already claimed, and return a message if so
-    // TODO: If it is claimed by *this* user, then update it is success -- should we resync?
-    findMember(creds).flatMap {
-      _  match {
-        case Some(member) => {
-          addArisianCore(who, member)
+    loginService.userFromCredentials(creds).flatMap {
+      _ match {
+        case None => {
+          // The normal path: these credentials have not been claimed yet
+          findMember(creds).flatMap {
+            _  match {
+              case Some(member) => {
+                addArisianCore(who, member)
+              }
+              case _ =>
+                Future.successful(Left("Please join the Arisia Discord server first, then come back and try again!"))
+            }
+          }
         }
-        case _ =>
-          Future.successful(Left("Please join the Arisia Discord server first, then come back and try again!"))
+        case Some((userId, discordId)) => {
+          // Hmm. These credentials have already been claimed. Is it the same user?
+          if (userId == who.id) {
+            // It's the same person
+            // TODO: should we consider this a resync?
+            Future.successful(Left(s"You have already connected your Discord account."))
+          } else {
+            val msg = s"${who.id.v} attempting to claim already-claimed Discord account $discordId, which belongs to ${userId.v}!"
+            logger.warn(msg)
+            Future.successful(Left(s"Those Discord credentials are already claimed."))
+          }
+        }
       }
     }
   }
 
   def generateAssistSecret(who: LoginUser): String = {
-    // TODO: figure out the right into for this, and sign it properly
-    s"FakeSecretFor${who.badgeNumber.v}"
+    DiscordService.generateAssistSecret(secretKey)(who)
   }
 
   def validateAssistSecret(secret: String): Boolean = {
-    // TODO: once we have a real secret, do this:
-    true
+    DiscordService.validateAssistSecret(secretKey)(secret)
   }
 
   def addArisianAssisted(creds: DiscordHelpCredentials): Future[Either[String, DiscordMember]] = {
@@ -235,4 +254,30 @@ class DiscordServiceImpl(
     // TODO: in airy theory this should set Roles, but we don't have any interesting ones that change yet:
     setBadgeName(who, discordId)
   }
+}
+
+object DiscordService {
+  lazy val encoder = Base64.getEncoder
+  lazy val decoder = Base64.getDecoder
+
+  // Pulled out to make this testable:
+  def generateAssistSecret(secretKey: String)(who: LoginUser): String = {
+    val hash = Hasher(who.badgeNumber.v).hmac(secretKey).md5
+    val bytes = hash.bytes
+    // Drop the "==" at the end:
+    val base64 = new String(encoder.encode(bytes)).dropRight(2)
+    s"${who.badgeNumber.v}:$base64"
+  }
+
+  def validateAssistSecret(secretKey: String)(secret: String): Boolean = {
+    secret.split(':').toList match {
+      case badgeNumber :: base64 :: Nil => {
+        val bytes = (base64 + "==").getBytes
+        val hashBytes = decoder.decode(bytes)
+        Hasher(badgeNumber).hmac(secretKey).md5.hash = hashBytes
+      }
+      case _ => false
+    }
+  }
+
 }

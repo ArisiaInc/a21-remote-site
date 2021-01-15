@@ -92,6 +92,28 @@ $art-padding: 28.75rem;
     }
 }
 
+.title.less-padding {
+    padding-top: 2rem;
+    padding-bottom: 1rem;
+    @include media-breakpoint-only(xs) {
+        padding-top: 1rem;
+        padding-bottom: 0;
+    }
+    @include media-breakpoint-only(lg) {
+        padding-top: 2rem;
+        padding-bottom: 0.5rem;
+    }
+}
+
+.subtitle {
+    font-size: 1.5rem;
+    padding: 0 4rem;
+}
+
+.warning {
+    padding: 0 2rem;
+}
+
 .content, .footer {
     padding-left: 4.75rem + $art-padding;
     padding-right: 4.75rem;

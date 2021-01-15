@@ -1,7 +1,7 @@
 package arisia.auth
 
 import arisia.db.DBService
-import arisia.discord.DiscordMember
+import arisia.discord.{DiscordMember, DiscordUserCredentials}
 
 import scala.concurrent.duration._
 import arisia.models.{LoginUser, LoginId, BadgeNumber, Permissions, LoginName}
@@ -41,6 +41,13 @@ trait LoginService {
    * Get the user from their Discord ID.
    */
   def fetchUserFromDiscordId(memberId: String): Future[Option[LoginUser]]
+
+  /**
+   * For checking whether this user already has Discord connected.
+   *
+   * Returns their loginId, and their Discord ID.
+   */
+  def userFromCredentials(creds: DiscordUserCredentials): Future[Option[(LoginId, String)]]
 }
 
 class LoginServiceImpl(
@@ -61,6 +68,9 @@ class LoginServiceImpl(
 
   lazy val hardcodedAdmin: Seq[LoginId] =
     config.get[Seq[String]]("arisia.dev.admins").map(LoginId(_))
+
+  lazy val hardcodedSuperadmin: Seq[LoginId] =
+    config.get[Seq[String]]("arisia.dev.superadmins").map(LoginId(_))
 
   private def checkPermissions(initialUser: LoginUser): Future[Either[LoginError, LoginUser]] = {
     getPermissions(initialUser.id).map { perms =>
@@ -177,6 +187,22 @@ class LoginServiceImpl(
     }
   }
 
+  def userFromCredentials(creds: DiscordUserCredentials): Future[Option[(LoginId, String)]] = {
+    dbService.run(
+      sql"""
+            SELECT username, discord_id
+              FROM user_info
+             WHERE discord_username = ${creds.username} AND discord_discriminator = ${creds.discriminator}
+           """
+        .query[(String, String)]
+        .option
+    ).map {
+      _.map { case (usernameStr, discordId) =>
+        (LoginId(usernameStr), discordId)
+      }
+    }
+  }
+
   def fetchPermissionsQuery(id: LoginId): ConnectionIO[Option[Permissions]] =
     sql"""SELECT super_admin, admin, early_access, tech
          |FROM permissions
@@ -200,7 +226,14 @@ class LoginServiceImpl(
         } else {
           withHardcodedEarlyAccess
         }
-      withHardcodedAdmin
+      val withHardcodedSuper =
+        if (hardcodedSuperadmin.contains(id)) {
+          withHardcodedAdmin.copy(superAdmin = true)
+        } else {
+          withHardcodedAdmin
+        }
+
+      withHardcodedSuper
     }
   }
 }

@@ -1,0 +1,15 @@
+@(
+  form: Form[String]
+)(implicit request: RequestHeader, messagesProvider: MessagesProvider)
+
+@main("Restart Meeting") {
+  <h1>Restart Meeting</h1>
+
+  <p>This should only be used in the extreme case where a Zoom Host has accidentally shut a Program Item down
+  prematurely. In that case, put the item's ID (the number identifying it in the schedule) here, to reboot
+  the Zoom meeting.</p>
+
+  @b4.horizontal.form(arisia.controllers.routes.ZoomController.restartProgramItem(), "col-md-2", "col-md-10") { implicit hfc =>
+    @b4.text(form("itemId"), Symbol("_label") -> "Program Item ID")
+  }
+}

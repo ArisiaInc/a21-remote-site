@@ -18,11 +18,13 @@ import scala.util.Random
 trait ZoomService {
   def getUsers(): Future[List[ZoomUser]]
 
-  def startMeeting(topic: String, zoomUserId: String): Future[Either[String, ZoomMeeting]]
-  def endMeeting(meetingId: Long): Future[Done]
+  def startMeeting(topic: String, zoomUserId: String, isWebinar: Boolean): Future[Either[String, ZoomMeeting]]
+  def endMeeting(meetingId: Long, isWebinar: Boolean): Future[Done]
 
+  // Note that this can't be used with Webinars!
   def isMeetingRunning(meetingId: Long): Future[Boolean]
   def getJoinUrl(meetingId: Long): Future[String]
+  def getStartUrl(meetingId: Long): Future[String]
 }
 
 private[zoom] case class ZoomMeetingParams(
@@ -65,16 +67,24 @@ class ZoomServiceImpl(
       }
   }
 
-  def startMeeting(topic: String, zoomUserId: String): Future[Either[String, ZoomMeeting]] = {
+  def startMeeting(topic: String, zoomUserId: String, isWebinar: Boolean): Future[Either[String, ZoomMeeting]] = {
     logger.info(s"Starting meeting $topic")
     // Generate a random password for this meeting:
     val password = Random.alphanumeric.take(10).mkString
     val params = ZoomMeetingParams(
       topic,
-      ZoomMeetingType.Instant,
+      if (isWebinar)
+        ZoomMeetingType.Webinar
+      else
+        ZoomMeetingType.Instant,
       password
     )
-    urlWithJwt(s"/users/$zoomUserId/meetings")
+    val url =
+      if (isWebinar)
+        s"/users/$zoomUserId/webinars"
+      else
+        s"/users/$zoomUserId/meetings"
+    urlWithJwt(url)
       .post(Json.toJson(params))
       .map { response =>
         if (response.status == Status.CREATED) {
@@ -88,8 +98,13 @@ class ZoomServiceImpl(
       }
   }
 
-  def endMeeting(meetingId: Long): Future[Done] = {
-    urlWithJwt(s"/meetings/$meetingId/status")
+  def endMeeting(meetingId: Long, isWebinar: Boolean): Future[Done] = {
+    val url =
+      if (isWebinar)
+        s"/webinars/$meetingId/status"
+      else
+        s"/meetings/$meetingId/status"
+    urlWithJwt(url)
       // This one is so simple, we're not even bothering to make a data structure yet:
       .put(JsObject(Seq(("action", JsString("end")))))
       .map { response =>
@@ -105,8 +120,10 @@ class ZoomServiceImpl(
       .get()
       .map { response =>
         val json = Json.parse(response.body)
-        val status = (json \ "status").as[String]
-        (status == "started")
+        (json \ "status").asOpt[String] match {
+          case Some(status) => (status == "started")
+          case _ => false
+        }
       }
   }
 
@@ -119,12 +136,23 @@ class ZoomServiceImpl(
         result
       }
   }
+
+  def getStartUrl(meetingId: Long): Future[String] = {
+    urlWithJwt(s"/meetings/$meetingId")
+      .get()
+      .map { response =>
+        val json = Json.parse(response.body)
+        val result = (json \ "start_url").as[String]
+        result
+      }
+  }
 }
 
 class DisabledZoomService() extends ZoomService {
   def getUsers(): Future[List[ZoomUser]] = ???
-  def startMeeting(topic: String, zoomUserId: String): Future[Either[String, ZoomMeeting]] = ???
-  def endMeeting(meetingId: Long): Future[Done] = ???
+  def startMeeting(topic: String, zoomUserId: String, isWebinar: Boolean): Future[Either[String, ZoomMeeting]] = ???
+  def endMeeting(meetingId: Long, isWebinar: Boolean): Future[Done] = ???
   def isMeetingRunning(meetingId: Long): Future[Boolean] = ???
   def getJoinUrl(meetingId: Long): Future[String] = ???
+  def getStartUrl(meetingId: Long): Future[String] = ???
 }

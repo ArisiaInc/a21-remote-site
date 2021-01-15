@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { AccountService } from '@app/_services';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { tap } from 'rxjs/operators'
 
 import { DoorDragonComponent } from '@app/_components';
+
+const START_TIME =  1610730000000;
 
 @Component({
   selector: 'app-login',
@@ -18,8 +19,9 @@ export class LoginComponent implements OnInit {
   form!: FormGroup;
   loading = false;
   submitted = false;
-  submissionError?: HttpErrorResponse;
+  submissionError?: string;
   justLoggedOut = false;
+  showRealTitle = false;
 
   constructor(
     private accountService: AccountService,
@@ -27,7 +29,13 @@ export class LoginComponent implements OnInit {
     private route: ActivatedRoute,
     private formBuilder: FormBuilder,
     private modalService: NgbModal,
-  ) { }
+  ) {
+    const now = Date.now();
+    this.showRealTitle = now >= START_TIME;
+    if (!this.showRealTitle) {
+      setTimeout(() => this.showRealTitle = true, START_TIME - now);
+    }
+  }
 
   ngOnInit(): void {
     this.form = this.formBuilder.group({

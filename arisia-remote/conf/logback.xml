@@ -32,7 +32,7 @@
   </appender>
 
   <logger name="play" level="INFO" />
-  <logger name="arisia" level="DEBUG" />
+  <logger name="arisia" level="INFO" />
 
   <root level="WARN">
     <appender-ref ref="ASYNCFILE" />

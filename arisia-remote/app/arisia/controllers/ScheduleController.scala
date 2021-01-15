@@ -61,7 +61,21 @@ class ScheduleController(
 
   def getStars(): EssentialAction = withLoggedInAsync { info =>
     starService.getStars(info.who.id).map { stars =>
-      Ok(Json.toJson(stars).toString())
+      val preAssignedStars: List[ProgramItemId] = {
+        val schedule = scheduleService.fullSchedule()
+        val myBadgeNumber = info.who.badgeNumber
+        if (schedule.participants.contains(myBadgeNumber)) {
+          schedule.program
+            .filter { item =>
+              item.people.exists(_.id.matches(myBadgeNumber))
+            }
+            .map(_.id)
+        } else {
+          List.empty
+        }
+      }
+      val allStars: Set[ProgramItemId] = stars.toSet ++ preAssignedStars
+      Ok(Json.toJson(allStars).toString())
     }
   }
 }
