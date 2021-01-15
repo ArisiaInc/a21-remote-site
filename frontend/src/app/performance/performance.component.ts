@@ -18,7 +18,6 @@ export class PerformanceComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   performance?: Performance;
   runningEvents?: RunningEvents;
-  pauses = false;
 
   @ViewChild('iframe') iframe?: ElementRef<HTMLIFrameElement>;
 
@@ -38,7 +37,6 @@ export class PerformanceComponent implements OnInit, OnDestroy {
       if (performance) {
         this.url = undefined;
         this.platform = undefined;
-        this.pauses = false;
 
         let params: string[] = [];
         let paramString: string = '';
@@ -56,7 +54,6 @@ export class PerformanceComponent implements OnInit, OnDestroy {
             paramString = params.length > 0 ? '?' + params.join('&') : '';
             url = `https://www.youtube.com/embed/${performance.streamId}${paramString}`;
             this.platform = "YouTube";
-            this.pauses = true;
             break;
           case 'twitchChannel':
             if (autoPlay) {
@@ -92,7 +89,6 @@ export class PerformanceComponent implements OnInit, OnDestroy {
             paramString = params.length > 0 ? '&' + params.join('&') : '';
             url = `https://player.vimeo.com/video/${performance.streamId}?title=0&byline=0&portrait=0${paramString}${hash}`;
             this.platform = "Vimeo";
-            this.pauses = true;
             break;
         }
       }
@@ -106,7 +102,14 @@ export class PerformanceComponent implements OnInit, OnDestroy {
   pauseYouTube(): void {
     const iframe = this.iframe?.nativeElement;
     if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*')
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+    }
+  }
+
+  pauseTwitch(): void {
+    const iframe = this.iframe?.nativeElement;
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({eventName:2, params: null, namespace: 'twitch-embed-player-proxy'}, '*');
     }
   }
 
@@ -140,6 +143,7 @@ export class PerformanceComponent implements OnInit, OnDestroy {
           }
           paramString = params.length > 0 ? '?' + params.join('&') : '';
           externalUrl = `https://twitch.tv/${this.performance.streamId}${paramString}`;
+          this.pauseTwitch();
           break;
         case 'twitchVideo':
           if (autoPlay) {
@@ -152,6 +156,7 @@ export class PerformanceComponent implements OnInit, OnDestroy {
           }
           paramString = params.length > 0 ? '?' + params.join('&') : '';
           externalUrl = `https://twitch.tv/videos/${this.performance.streamId}${paramString}`;
+          this.pauseTwitch();
           break;
         case 'vimeoVideo':
           if (autoPlay) {
