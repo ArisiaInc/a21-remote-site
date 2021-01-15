@@ -190,7 +190,14 @@ class ScheduleQueueServiceImpl(
   }
 
   private def startProgramItem(item: ProgramItem): Future[Done] = {
-    val title = item.title.map(_.v).getOrElse("UNNAMED")
+    val actualItemOpt = for {
+      prepFor <- item.prepFor
+      i <- _schedule.get().byItemId.get(prepFor)
+    }
+      yield i
+    val actualItem = actualItemOpt.getOrElse(item)
+
+    val title = actualItem.title.map(_.v).getOrElse("UNNAMED")
     logger.info(s"Starting Program Item $title")
     // TODO: logging for the failure cases here:
     for {
