@@ -18,7 +18,13 @@ class ScheduleController(
 {
   def getSchedule(): EssentialAction = Action { implicit request =>
     val userOpt = LoginController.loggedInUser()
-    val currentSchedule = scheduleService.currentSchedule()
+    val isHost = userOpt.map(_.zoomHost).getOrElse(false)
+    val currentSchedule =
+      if (isHost)
+        scheduleService.fullSchedule()
+      else
+        scheduleService.currentSchedule()
+
     // The HTTP standard says that the hash should be in double-quotes in both directions:
     //   https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
     // Note that the hash is always derived from the current schedule -- the others are based on it, so we
