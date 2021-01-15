@@ -19,8 +19,9 @@ export class PersistentRoomLinkDirective {
   }
 
   /** @nodoc */
-  @HostListener('click')
-  onClick(): boolean {
+  @HostListener('click', ['$event'])
+  onClick(event: Event): boolean {
+    event.preventDefault();
     if (this.accountService.user || this.openToPublic) {
       this.zoomRoomsService.checkRoom(this.room).subscribe(
         running => {
