@@ -18,12 +18,16 @@
 
           <div class="description present-zoom-link"><app-room-link [id]="currentEvent.id">Join the panel in Zoom</app-room-link></div>
 
-          <img class="discord-logo" src="/assets/images/Discord-Logo+Wordmark-Color.svg">
-          <div class="description present-discord">Ask questions on Discord: {{room.name | titlecase}}</div>
+          <ng-container *ngIf="room.name !== 'Fast Track'">
+            <img class="discord-logo" src="/assets/images/Discord-Logo+Wordmark-Color.svg">
+            <div class="description present-discord">Ask questions on Discord: {{room.name | titlecase}}</div>
+          </ng-container>
           <div class="description"><app-room-link-host id="currentEvent.id">Join as co-host</app-room-link-host></div>
         </ng-container>
+        <ng-container *ngIf="!runningEvents.current as currentEvent">
+        </ng-container>
       </ng-container>
-      </div>
+    </div>
   </ng-container>
 </div>
 <div>
