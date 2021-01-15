@@ -47,15 +47,18 @@ trait ScheduleService {
    * This will return None if the prep session is running, but this person isn't allowed to enter.
    *
    * Note that, since we require a LoginUser, we already know by type that this isn't anonymous.
+   *
+   * Note that, while this is technically a Future (to deal with the weird Fast Track edge case), it
+   * will usually run synchronously.
    */
-  def getAttendeeUrlFor(who: LoginUser, which: ProgramItemId): Option[String]
+  def getAttendeeUrlFor(who: LoginUser, which: ProgramItemId): Future[Option[String]]
 
   /**
    * Similar to getAttendeeUrlFor, but provides the Host URL, which has lots of special powers.
    *
    * Only specially-designed users (broadly speaking, Tech and Safety) have access to this.
    */
-  def getHostUrlFor(who: LoginUser, which: ProgramItemId): Option[String]
+  def getHostUrlFor(who: LoginUser, which: ProgramItemId): Future[Option[String]]
 
   /**
    * Adds this item to the Schedule, purely in-memory, so that we can test.
@@ -298,16 +301,20 @@ class ScheduleServiceImpl(
     _scheduleWithPrep.get
   }
 
+  // Reduce the noise of using the monad transformer:
+  def fromOpt[T](f: => Option[T]): OptionT[Future, T] = OptionT.fromOption[Future](f)
+
   def getAttendeeUrlFor(who: LoginUser, which: ProgramItemId): Future[Option[String]] = {
     val result = for {
-      item <- OptionT.fromOption(_baseSchedule.get.byItemId.get(which))
-      loc <- OptionT.fromOption(item.loc.headOption)
+      item <- fromOpt(_baseSchedule.get.byItemId.get(which))
+      loc <- fromOpt(item.loc.headOption)
       result <-
         if (loc.v == fastTrackZambiaName) {
-          // This is a Zambia session, so head off in that direction instead:
+          // This is a Fast Track session, so head off in that direction instead:
           getFastTrackUrl()
         } else {
-          OptionT.fromOption(getNormalAttendeeUrl(item, which, who))
+          // Normal case
+          fromOpt(getNormalAttendeeUrl(item, which, who))
         }
     }
       yield result
@@ -317,10 +324,10 @@ class ScheduleServiceImpl(
 
   def getFastTrackUrl(): OptionT[Future, String] = {
     for {
-      meeting <- OptionT.fromOption(roomService.getManualRoom(fastTrackZoomName))
-      meetingRunning <- OptionT.liftF(zoomService.isMeetingRunning(meeting.id))
+      meeting <- fromOpt(roomService.getManualRoom(fastTrackZoomName))
+      meetingRunning <- OptionT.liftF(zoomService.isMeetingRunning(meeting.zoomId.toLong))
       if (meetingRunning)
-      url <- OptionT.liftF(zoomService.getJoinUrl(meeting.id))
+      url <- OptionT.liftF(zoomService.getJoinUrl(meeting.zoomId.toLong))
     }
       yield url
   }
@@ -356,8 +363,8 @@ class ScheduleServiceImpl(
   }
 
 
-  def getHostUrlFor(who: LoginUser, which: ProgramItemId): Option[String] = {
-    for {
+  def getHostUrlFor(who: LoginUser, which: ProgramItemId): Future[Option[String]] = {
+    val result = for {
       // Is this item real?
       item <- _baseSchedule.get.byItemId.get(which)
       // Is the meeting running?
@@ -366,6 +373,8 @@ class ScheduleServiceImpl(
       if (who.zoomHost)
     }
       yield meeting.start_url
+
+    Future.successful(result)
   }
 
   def addTestItem(item: ProgramItem): Unit = {
