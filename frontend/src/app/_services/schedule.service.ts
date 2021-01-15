@@ -315,6 +315,7 @@ function filterEventsByDate(events: ScheduleEvent[], dateRanges: DateRange[], co
 }
 
 export interface RunningEvents {
+  started?: boolean;
   current?: ScheduleEvent;
   next?: ScheduleEvent;
 }
@@ -675,12 +676,13 @@ export class ScheduleService {
             if (events[0].doors.start > currentTime) {
               return {next: events[0]};
             } else {
-              return {current: events[0], next: events[1]};
+              return {started: events[0].start <= currentTime, current: events[0], next: events[1]};
             }
           }),
           /* emit runningEvents, and then calculate the time (based on the current time) until the next change and wait that long (but don't emit the timer event) */
           mergeMap(runningEvents => concat(of(runningEvents), defer(() => {
-            const nextStartTime = runningEvents.next ? runningEvents.next.doors.start.getTime() - currentTime.getTime() : Infinity;
+            const nextStartTime = runningEvents.started ? (runningEvents.next ? runningEvents.next.doors.start.getTime() - currentTime.getTime() : Infinity) :
+              (runningEvents.current ? runningEvents.current.start.getTime() - currentTime.getTime() : Infinity);
             const nextEndTime = (runningEvents.current && runningEvents.current.doors.end) ? runningEvents.current.doors.end.getTime() - currentTime.getTime() : Infinity;
             const delayTime = Math.min(nextStartTime, nextEndTime);
             return timer(delayTime).pipe(ignoreElements());

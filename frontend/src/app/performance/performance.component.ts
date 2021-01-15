@@ -31,7 +31,7 @@ export class PerformanceComponent implements OnInit, OnDestroy {
 
   setRunningEvents(runningEvents: RunningEvents) {
     this.runningEvents = runningEvents;
-    const performance = runningEvents?.current?.performance;
+    const performance = runningEvents.started ? (runningEvents?.current?.performance) : undefined;
     if (this.performance !== performance) {
       let url: string | undefined;
       if (performance) {
