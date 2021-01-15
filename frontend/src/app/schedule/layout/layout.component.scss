@@ -1,9 +1,27 @@
+@import "node_modules/bootstrap/scss/functions";
+@import "node_modules/bootstrap/scss/variables";
+@import "node_modules/bootstrap/scss/mixins/_breakpoints";
+
 .layout-container {
     margin-top: 1rem;
 }
 
+.menu {
+    @include media-breakpoint-only(lg) {
+        padding-right: 2rem;
+    }
+}
 .content {
-    margin-left: 2rem;
-    margin-right: 6rem;
+    @include media-breakpoint-down(sm) {
+        margin: 0 1rem;
+    }
+
+    @include media-breakpoint-up(md) {
+        margin-left: 2rem;
+        margin-right: 6rem;
+    }
     width: 100%;
+    @include media-breakpoint-only(lg) {
+        margin-left: 0rem;
+    }
 }
