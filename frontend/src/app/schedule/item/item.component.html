@@ -31,8 +31,8 @@
       </div>
     </div>
     <div class="extra" *ngIf="expanded">
-      <div class="item_tag text-muted">Track: <span>{{track}}</span></div>
-      <div class="item_tag text-muted">Type: <span>{{type}}</span></div>
+      <div class="item_tag text-muted" *ngIf="event.track">Track: <span>{{event.track}}</span></div>
+      <div class="item_tag text-muted" *ngIf="event.type">Type: <span>{{event.type}}</span></div>
       <div class="item-people mt-2">
         <ng-container *ngFor="let person of event.people; last as isLast">
           <a href="/schedule/people/person/{{person.person.id}}"
