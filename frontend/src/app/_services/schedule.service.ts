@@ -130,7 +130,7 @@ export class ScheduleEvent {
   location: string[];
   people: {person: SchedulePerson, isModerator: boolean}[];
 
-  doors?: DateRange;
+  doors: DateRange;
 
   performance?: Performance;
 
@@ -681,7 +681,7 @@ export class ScheduleService {
           /* emit runningEvents, and then calculate the time (based on the current time) until the next change and wait that long (but don't emit the timer event) */
           mergeMap(runningEvents => concat(of(runningEvents), defer(() => {
             const nextStartTime = runningEvents.next ? runningEvents.next.doors.start.getTime() - currentTime.getTime() : Infinity;
-            const nextEndTime = runningEvents.current ? runningEvents.current.doors.end.getTime() - currentTime.getTime() : Infinity;
+            const nextEndTime = (runningEvents.current && runningEvents.current.doors.end) ? runningEvents.current.doors.end.getTime() - currentTime.getTime() : Infinity;
             const delayTime = Math.min(nextStartTime, nextEndTime);
             return timer(delayTime).pipe(ignoreElements());
           }))),
