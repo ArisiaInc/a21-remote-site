@@ -26,7 +26,7 @@ const scheduleModule = () => import('./schedule/schedule.module').then(x => x.Sc
 const mapModule = () => import('./map/map.module').then(x => x.MapModule);
 
 const routes: Routes = [
-  {path: '', redirectTo: 'map'},
+  {path: '', redirectTo: 'map', pathMatch:'full'},
   {path: 'account', loadChildren: accountModule},
   {path: 'schedule', loadChildren: scheduleModule},
   {path: 'map', loadChildren: mapModule},
