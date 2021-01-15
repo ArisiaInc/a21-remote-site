@@ -16,7 +16,7 @@ export class FeaturedEventsComponent implements OnInit {
   constructor( private scheduleService: ScheduleService) { }
 
   ngOnInit(): void {
-    this.events$ = this.scheduleService.get_featured_events()
+    this.events$ = this.scheduleService.get_featured_events(2);
   }
 
 }
