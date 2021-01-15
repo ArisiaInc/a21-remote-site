@@ -45,6 +45,8 @@ export class ScheduleEvent {
     this.starCache = this.starsService.has(this.id);
     if (item.doorsOpen && item.doorsClose) {
       this.doors = {start: new Date(item.doorsOpen), end: new Date(item.doorsClose)};
+    } else {
+      this.doors = {start: new Date(this.start.getTime() - 5 * 60 * 1000), end: new Date(this.start.getTime() + this.mins * 60 * 1000)};
     }
   }
 
@@ -615,7 +617,7 @@ export class ScheduleService {
             if (events.length == 0) {
               return {};
             }
-            if (events[0].start > this.settingsService.currentTime) {
+            if (events[0].doors.start > currentTime) {
               return {next: events[0]};
             } else {
               return {current: events[0], next: events[1]};
@@ -623,8 +625,8 @@ export class ScheduleService {
           }),
           /* emit runningEvents, and then calculate the time (based on the current time) until the next change and wait that long (but don't emit the timer event) */
           mergeMap(runningEvents => concat(of(runningEvents), defer(() => {
-            const nextStartTime = runningEvents.next ? runningEvents.next.start.getTime() - currentTime.getTime() : Infinity;
-            const nextEndTime = runningEvents.current ? runningEvents.current.start.getTime() + runningEvents.current.mins * 60 * 1000 - currentTime.getTime() : Infinity;
+            const nextStartTime = runningEvents.next ? runningEvents.next.doors.start.getTime() - currentTime.getTime() : Infinity;
+            const nextEndTime = runningEvents.current ? runningEvents.current.doors.end.getTime() - currentTime.getTime() : Infinity;
             const delayTime = Math.min(nextStartTime, nextEndTime);
             return timer(delayTime).pipe(ignoreElements());
           }))),
