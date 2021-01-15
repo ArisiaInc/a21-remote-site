@@ -34,6 +34,11 @@
         display: inline-block;
     }
 
+    .submenu.nav-link {
+        margin-left: 2rem;
+        padding: 0;
+    }
+
     .nav-link.active {
         border-bottom: white solid 0.125rem;
         margin-bottom: -0.125rem;
