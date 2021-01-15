@@ -4,8 +4,9 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.Base64
 
 import arisia.auth.LoginService
-import arisia.general.LifecycleItem
-import arisia.models.{LoginUser, BadgeNumber}
+import arisia.general.{LifecycleItem, LifecycleService}
+import arisia.models.{BadgeNumber, LoginUser}
+import arisia.timer.TimerService
 import arisia.util.Done
 import play.api.libs.json.{Format, JsObject, JsArray, JsString, Json}
 import play.api.libs.ws.WSClient
@@ -13,6 +14,7 @@ import play.api.libs.ws.ahc.AhcCurlRequestLogger
 import play.api.{Configuration, Logging, ConfigLoader}
 import com.roundeights.hasher.Hasher
 
+import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{Future, ExecutionContext}
 
 /**
@@ -43,7 +45,9 @@ object DiscordHelpCredentials {
 class DiscordServiceImpl(
   config: Configuration,
   ws: WSClient,
-  loginService: LoginService
+  loginService: LoginService,
+  timerService: TimerService,
+  val lifecycleService: LifecycleService
 )(
   implicit ec: ExecutionContext
 ) extends DiscordService with LifecycleItem with Logging {
@@ -55,10 +59,20 @@ class DiscordServiceImpl(
   lazy val arisiaGuildId = botConfig[String]("guildId")
   lazy val arisianRoleId = botConfig[String]("arisianRoleId")
   lazy val pageSize = botConfig[Int]("page.size").toString
+  lazy val loadMembersInterval = botConfig[FiniteDuration]("load.members.interval")
 
   lazy val secretKey = config.get[String]("play.http.secret.key")
 
   val lifecycleName = "DiscordService"
+  lifecycleService.register(this)
+  override def init(): Future[Done] = {
+    timerService.register("Load Discord Member List", loadMembersInterval) { now =>
+      // Note that this is fire-and-forget
+      loadMembers()
+      ()
+    }
+    Future.successful(Done)
+  }
 
   val memberCache: AtomicReference[List[DiscordMember]] = new AtomicReference(List.empty)
 
@@ -111,10 +125,8 @@ class DiscordServiceImpl(
   }
 
   def getMembers(): Future[Done] = {
-    loadMembers().map { members =>
-      pprint.pprintln(members)
-      Done
-    }
+    pprint.pprintln(memberCache.get())
+    Future.successful(Done)
   }
 
   def findMemberIn(credentials: DiscordUserCredentials, members: List[DiscordMember]): Option[DiscordMember] = {
@@ -123,18 +135,8 @@ class DiscordServiceImpl(
     }
   }
 
-  def findMember(credentials: DiscordUserCredentials): Future[Option[DiscordMember]] = {
-    findMemberIn(credentials, memberCache.get()) match {
-      case Some(member) => {
-        // We already had them loaded, so we're set:
-        Future.successful(Some(member))
-      }
-      case _ => {
-        loadMembers().map { members =>
-          findMemberIn(credentials, members)
-        }
-      }
-    }
+  def findMember(credentials: DiscordUserCredentials): Option[DiscordMember] = {
+    findMemberIn(credentials, memberCache.get())
   }
 
   def setDiscordRoles(member: DiscordMember): Future[Done] = {
@@ -199,14 +201,14 @@ class DiscordServiceImpl(
       _ match {
         case None => {
           // The normal path: these credentials have not been claimed yet
-          findMember(creds).flatMap {
-            _  match {
-              case Some(member) => {
-                addArisianCore(who, member)
-              }
-              case _ =>
-                Future.successful(Left("Please join the Arisia Discord server first, then come back and try again!"))
+          findMember(creds) match {
+            case Some(member) => {
+              addArisianCore(who, member)
             }
+            case _ =>
+              Future.successful(
+                Left(
+                  "Please join the Arisia Discord server first. If you have already done so, please wait five minutes and try this again -- it takes time for things to catch up."))
           }
         }
         case Some((userId, discordId)) => {

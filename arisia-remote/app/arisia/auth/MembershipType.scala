@@ -46,6 +46,7 @@ object MembershipType extends StringEnum[MembershipType] {
   case object Student extends MembershipType("STDNT", UnknownAge)
   case object StudentYA extends MembershipType("STDYA", Teen)
   case object TTYA extends MembershipType("TTYA", Teen)
+  case object AdultRollover extends MembershipType("ADROLL", Adult)
 
   // Comps:
   case object EarnedComp extends MembershipType("CMPERN", Comp)
