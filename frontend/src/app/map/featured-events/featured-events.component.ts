@@ -1,7 +1,7 @@
 import { Component, OnInit, HostBinding } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { ScheduleService, StructuredEvents } from '@app/_services';
+import { ScheduleService, StructuredEvents, ScheduleEvent } from '@app/_services';
 
 @Component({
   selector: 'app-featured-events',
@@ -9,7 +9,7 @@ import { ScheduleService, StructuredEvents } from '@app/_services';
   styleUrls: ['./featured-events.component.scss']
 })
 export class FeaturedEventsComponent implements OnInit {
-  events$!: Observable<StructuredEvents>;
+  events$!: Observable<ScheduleEvent[]>;
 
   @HostBinding('class') class = 'm-2';
 

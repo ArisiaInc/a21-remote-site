@@ -10,6 +10,7 @@ export class ItemComponent implements OnChanges {
   @Input() event!: ScheduleEvent;
   @Input() showStar = false;
   @Input() openDoors!: Set<string>;
+  @Input() alwaysExpanded = false;
   showDoors = false;
   expanded: boolean = false;
 
@@ -17,10 +18,15 @@ export class ItemComponent implements OnChanges {
 
   ngOnChanges(): void {
     this.showDoors = this.openDoors && this.openDoors.has(this.event.id);
+    if (this.alwaysExpanded) {
+      this.expanded = true;
+    }
   }
 
   toggleExpand(event: Event) {
-    this.expanded = !this.expanded;
+    if (!this.alwaysExpanded) {
+      this.expanded = !this.expanded;
+    }
     event.stopPropagation();
   }
 
