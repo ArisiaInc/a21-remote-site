@@ -175,3 +175,57 @@ $coffee-text-left: 3.4375rem;
         order: 4;
     }
 }
+
+.hall-box {
+    height: 100%;
+    width: 100%;
+    border: 1px solid #006382;
+    border-top: none;
+    position: relative;
+    background: rgba(56, 167, 202, 0.25);
+}
+
+.hall-text {
+    text-align: center;
+    width: 100%;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translate(0, -50%);
+    font-size: 1rem;
+    @include media-breakpoint-only(lg) {
+        font-size: 0.8rem;
+    }
+    @include media-breakpoint-only(md) {
+        font-size: 0.6rem;
+    }
+    @include media-breakpoint-only(sm) {
+        font-size: 0.8rem;
+    }
+}
+
+.hall-title {
+    font-size: 1.25rem;
+    @include media-breakpoint-only(lg) {
+        font-size: 1rem;
+    }
+    @include media-breakpoint-only(md) {
+        font-size: 0.8rem;
+    }
+    @include media-breakpoint-only(sm) {
+        font-size: 1rem;
+    }
+}
+
+.hall-legal {
+    font-size: 0.75rem;
+    @include media-breakpoint-only(lg) {
+        font-size: 0.5rem;
+    }
+    @include media-breakpoint-only(md) {
+        font-size: 0.5rem;
+    }
+    @include media-breakpoint-only(sm) {
+        font-size: 0.5rem;
+    }
+}
