@@ -1,5 +1,12 @@
 <div class="user" *ngIf="(user$ | async) as user">
-    <h1>User Page for {{user.name}}</h1>
+    <h1>Profile Page for {{user.name}} ({{user.badgeNumber}})</h1>
     <app-duck-list [duckIds]="user.ducks" [isSelf]="user.self"></app-duck-list>
-    <app-discord *ngIf="user.self"></app-discord>
+    <div *ngIf="user.self">
+      <hr>
+      <div class="note">Note: Your schedule and settings are not visible to others when you share your profile URL..</div>
+      <div class="header">My Setup</div>
+      <app-settings></app-settings>
+      <div class="header">Arisia Discord</div>
+      <app-discord></app-discord>
+    </div>
 </div>
