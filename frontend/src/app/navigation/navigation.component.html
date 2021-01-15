@@ -12,7 +12,7 @@
         <app-navigation-link (activated)="isMenuCollapsed=true" title="Con Hub" link="/map"></app-navigation-link>
         <app-navigation-link (activated)="isMenuCollapsed=true" title="Schedule" link="/schedule"></app-navigation-link>
         <app-navigation-link (activated)="isMenuCollapsed=true" title="Profile" link="/user"></app-navigation-link>
-        <app-navigation-link (activated)="isMenuCollapsed=true" title="Help" link="/help"></app-navigation-link>
+        <app-navigation-link (activated)="isMenuCollapsed=true" title="Info" link="/help"></app-navigation-link>
         <app-navigation-link *ngIf="accountService.loggedIn$ | async; else login" (activated)="onLogout()" title="Log Out"></app-navigation-link>
         <ng-template #login>
           <app-navigation-link (activated)="isMenuCollapsed=true" title="Log In" link="/account/login" [returnUrl]="currentRoute"></app-navigation-link>

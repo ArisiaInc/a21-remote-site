@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { StructuredEvents, StarsService } from '@app/_services';
+import { StructuredEvents, StarsService, ScheduleService } from '@app/_services';
 
 @Component({
   selector: 'app-item-list',
@@ -11,7 +11,7 @@ import { StructuredEvents, StarsService } from '@app/_services';
 export class ItemListComponent implements OnInit {
   @Input() events: StructuredEvents = [];
 
-  constructor(public starsService: StarsService) {
+  constructor(public scheduleService: ScheduleService, public starsService: StarsService) {
   }
 
   ngOnInit(): void {

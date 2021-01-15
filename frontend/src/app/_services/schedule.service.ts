@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, ReplaySubject, Observable, of, zip, OperatorFunction, timer, pipe, defer, concat } from 'rxjs';
-import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck, every, switchMap, repeat, ignoreElements, shareReplay } from 'rxjs/operators';
+import { BehaviorSubject, ReplaySubject, Subject, Observable, of, zip, OperatorFunction, timer, pipe, defer, concat, merge } from 'rxjs';
+import { map, groupBy, mergeMap, toArray, filter, tap, flatMap, pluck, every, switchMap, repeat, ignoreElements, shareReplay, take } from 'rxjs/operators';
 import { HttpClient, HttpResponse, HttpErrorResponse } from '@angular/common/http';
 
 import { PerformanceService } from './performance.service';
@@ -26,6 +26,12 @@ export interface ScheduleStatus {
   lastUpdate?: Date;
 }
 
+export enum KidsStatus {
+  UNKNOWN,
+  WELCOME,
+  DIRECTED
+}
+
 const tzoffset: number = new Date().getTimezoneOffset();
 
 let hour12: boolean = false;
@@ -36,14 +42,56 @@ export class ScheduleEvent {
     this.id = item.id;
     this.title = item.title;
     this.description = item.desc;
-    this.tags = item.tags || [];
+    for (const tag of item.tags) {
+      switch(tag) {
+        case 'Featured':
+          this.featured = true;
+          break;
+        case 'Captioned':
+          this.captioned = true;
+          break;
+        default:
+          const split = tag.split(':', 2);
+          if (split.length == 2) {
+            switch(split[0]) {
+              case 'kids':
+                switch (split[1]) {
+                  case 'Welcome':
+                    this.kids = KidsStatus.WELCOME;
+                    break;
+                  case 'Directed':
+                    this.kids = KidsStatus.DIRECTED;
+                    break;
+                }
+                break;
+              case 'type':
+                this.type = split[1];
+                break;
+              case 'track':
+                this.track = split[1];
+                break;
+            }
+          }
+      }
+    }
     this.start = new Date(item.timestamp);
     this.mins = parseInt(item.mins, 10);
     this.location = item.loc;
     this.people = [];
     this.tempPeople = item.people;
     this.starCache = this.starsService.has(this.id);
+    if (item.doorsOpen && item.doorsClose) {
+      this.doors = {start: new Date(item.doorsOpen), end: new Date(item.doorsClose)};
+    } else {
+      this.doors = {start: new Date(this.start.getTime() - 5 * 60 * 1000), end: new Date(this.start.getTime() + this.mins * 60 * 1000)};
+    }
   }
+
+  featured = false;
+  captioned = false;
+  kids = KidsStatus.UNKNOWN;
+  type = '';
+  track = '';
 
   link(peopleMap: {[_: string]: SchedulePerson}): void {
     if (this.tempPeople) {
@@ -77,11 +125,12 @@ export class ScheduleEvent {
   id: string;
   title: string;
   description: string;
-  tags: string[];
   start: Date;
   mins: number;
   location: string[];
   people: {person: SchedulePerson, isModerator: boolean}[];
+
+  doors?: DateRange;
 
   performance?: Performance;
 
@@ -297,6 +346,8 @@ export class ScheduleService {
   private events: ScheduleEvent[] = [];
   events$ = new ReplaySubject<ScheduleEvent[]>(1);
 
+  public openDoors$: Observable<Set<string>>;
+
   private eventsMap: {[id: string]: ScheduleEvent} = {};
   eventsMap$ = new ReplaySubject<{[id: string]: ScheduleEvent}>(1);
 
@@ -317,6 +368,8 @@ export class ScheduleService {
   private schedule: StructuredEvents = [];
   private scheduleWithoutRelabeling$ = new ReplaySubject<StructuredEvents>(1);
   private schedule$: Observable<StructuredEvents>;
+
+  private update$ = new Subject<1>();
 
   private status: ScheduleStatus = {state: ScheduleState.IDLE};
   status$ = new BehaviorSubject<ScheduleStatus>(this.status);
@@ -341,10 +394,40 @@ export class ScheduleService {
       shareReplay(1),
     );
 
+
     performanceService.performances$.subscribe(performances => {
       this.performances = performances;
       this.combinePerformances(true);
     });
+
+    this.openDoors$ = defer((): Observable<Set<string>>  => {
+      const currentTime = settingsService.currentTime.getTime();
+      const openDoors = new Set<string>();
+      let delay = Infinity;
+      for (const event of this.events) {
+        if (event.doors) {
+          const startDelay = event.doors.start.getTime() - currentTime;
+          const endDelay = event.doors.end ? event.doors.end.getTime() - currentTime : Infinity;
+          if (startDelay <= 0 && endDelay >= 0) {
+            openDoors.add(event.id);
+          }
+          if (startDelay > 0) {
+            delay = Math.min(delay, startDelay);
+          }
+          if (endDelay >= 0) {
+            delay = Math.min(delay, endDelay);
+          }
+        }
+      }
+      if (delay === Infinity) {
+        return concat(of(openDoors), ignoreElements()(this.update$.pipe(take(1))));
+      } else {
+        return concat(of(openDoors), ignoreElements()(merge(this.update$, timer(delay)).pipe(take(1))));
+      }
+    }).pipe(
+      repeat(),
+      shareReplay(1)
+    );
   }
 
   private reload(): void {
@@ -394,14 +477,12 @@ export class ScheduleService {
 
     this.events.forEach((event) => {
       event.link(this.peopleMap);
-      event.tags.forEach(tag => {
-        if (tag.startsWith(TRACK_TAG)) {
-          tracks.add(tag.substring(TRACK_TAG.length));
-        }
-        if (tag.startsWith(TYPE_TAG)) {
-          types.add(tag.substring(TYPE_TAG.length));
-        }
-      });
+      if (event.track) {
+        tracks.add(event.track);
+      }
+      if (event.type) {
+        types.add(event.type);
+      }
     });
 
     this.people.forEach((person) => {
@@ -424,6 +505,7 @@ export class ScheduleService {
     this.peopleMap$.next(this.peopleMap);
     this.tracks$.next(this.tracks);
     this.types$.next(this.types);
+    this.update$.next(1);
     this.scheduleWithoutRelabeling$.next(this.schedule);
 
     this.status.state = ScheduleState.READY;
@@ -480,12 +562,23 @@ export class ScheduleService {
     let dateRanges: DateRange[] | undefined;
 
     const munged_filters: ((scheduleEvent: ScheduleEvent) => boolean)[] = [];
-    if (filters.tags && filters.tags.length > 0) {
-      const tags = filters.tags;
+    if (filters.types && filters.types.length > 0) {
+      const types = filters.types;
       munged_filters.push(
-        scheduleEvent => tags.every(
-          category => category.length === 0 || category.some(
-            filterString => scheduleEvent.tags.includes(filterString))))
+        scheduleEvent => types.some(
+          filterString => scheduleEvent.type === filterString));
+    }
+    if (filters.tracks && filters.tracks.length > 0) {
+      const tracks = filters.tracks;
+      munged_filters.push(
+        scheduleEvent => tracks.some(
+          filterString => scheduleEvent.track === filterString));
+    }
+    if (filters.captionedOnly) {
+      munged_filters.push(scheduleEvent => scheduleEvent.captioned);
+    }
+    if (filters.featuredOnly) {
+      munged_filters.push(scheduleEvent => scheduleEvent.featured);
     }
     if (filters.loc && filters.loc.length > 0) {
       const loc = filters.loc;
@@ -557,7 +650,10 @@ export class ScheduleService {
         if (filters) {
           scheduleFilters.loc = filters.loc;
           scheduleFilters.date = filters.date;
-          scheduleFilters.tags = filters.tags
+          scheduleFilters.types = filters.types;
+          scheduleFilters.tracks = filters.tracks;
+          scheduleFilters.captionedOnly = filters.captionedOnly;
+          scheduleFilters.featuredOnly = filters.featuredOnly;
         }
         return this.getSchedule(scheduleFilters)
       }),
@@ -576,7 +672,7 @@ export class ScheduleService {
             if (events.length == 0) {
               return {};
             }
-            if (events[0].start > this.settingsService.currentTime) {
+            if (events[0].doors.start > currentTime) {
               return {next: events[0]};
             } else {
               return {current: events[0], next: events[1]};
@@ -584,8 +680,8 @@ export class ScheduleService {
           }),
           /* emit runningEvents, and then calculate the time (based on the current time) until the next change and wait that long (but don't emit the timer event) */
           mergeMap(runningEvents => concat(of(runningEvents), defer(() => {
-            const nextStartTime = runningEvents.next ? runningEvents.next.start.getTime() - currentTime.getTime() : Infinity;
-            const nextEndTime = runningEvents.current ? runningEvents.current.start.getTime() + runningEvents.current.mins * 60 * 1000 - currentTime.getTime() : Infinity;
+            const nextStartTime = runningEvents.next ? runningEvents.next.doors.start.getTime() - currentTime.getTime() : Infinity;
+            const nextEndTime = runningEvents.current ? runningEvents.current.doors.end.getTime() - currentTime.getTime() : Infinity;
             const delayTime = Math.min(nextStartTime, nextEndTime);
             return timer(delayTime).pipe(ignoreElements());
           }))),
@@ -602,7 +698,7 @@ export class ScheduleService {
   get_featured_events(): Observable<StructuredEvents> {
     // for testing:
     // return this.getSchedule({id: ['23', '45', '17']});
-    return this.getSchedule({tags: [['featured']]});
+    return this.getSchedule({featuredOnly: true});
   }
 
 

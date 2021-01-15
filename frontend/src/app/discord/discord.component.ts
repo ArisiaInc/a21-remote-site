@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { ClipboardService } from 'ngx-clipboard'
+import { Observable, throwError } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
 
 import { DiscordService } from '@app/_services';
 
@@ -15,10 +18,13 @@ export class DiscordComponent implements OnInit {
 
   private secret = '';
   secretLoading = false;
+  showSecretLoading = false;
   secretDisplayed = false;
   secretError = '';
+  secretCopied = false;
+  secretCopyFailed = false;
 
-  constructor(private discordService: DiscordService) { }
+  constructor(private discordService: DiscordService, private clipboardService: ClipboardService) { }
 
   ngOnInit(): void {
   }
@@ -43,23 +49,32 @@ export class DiscordComponent implements OnInit {
     );
   }
 
+  load(): Observable<any> {
+    this.showSecretLoading = false;
+    window.setTimeout(() => this.showSecretLoading = true, 200);
+    this.secretLoading = true;
+    return this.discordService.getAssistSecret().pipe(
+      tap(resp => {
+        this.secret = resp;
+        this.secretError = '';
+        this.secretLoading = false;
+      }),
+      catchError(err => {
+        this.secret = '';
+        this.secretError = err;
+        this.secretLoading = false;
+        return throwError(err);
+      }),
+    );
+  }
+
   display() {
     if (this.secret) {
       this.secretDisplayed = true;
     } else {
-      this.discordService.getAssistSecret().subscribe(
-      resp => {
-        this.secret = resp;
-        this.secretError = '';
-        this.secretLoading = false;
-        this.secretDisplayed = true;
-      },
-      err => {
-        this.secret = '';
-        this.secretError = err;
-        this.secretLoading = false;
-        this.secretDisplayed = false;
-      });
+      this.load().subscribe(
+        _ => this.secretDisplayed = true,
+        _ => this.secretDisplayed = false);
     }
   }
 
@@ -67,4 +82,19 @@ export class DiscordComponent implements OnInit {
     this.secretDisplayed = false;
   }
 
+  copy() {
+    if (this.secret) {
+      this.doCopy();
+    } else {
+      this.load().subscribe(
+        _ => this.doCopy(),
+        _ => this.secretCopyFailed = true);
+    }
+  }
+
+  doCopy() {
+    this.clipboardService.copy(this.secret)
+    this.secretCopied = true;
+    setTimeout(() => this.secretCopied = false, 1000);
+  }
 }

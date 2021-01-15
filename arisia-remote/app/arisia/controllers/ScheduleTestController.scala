@@ -45,13 +45,13 @@ class ScheduleTestController(
     )(ScheduleInput.apply)(ScheduleInput.unapply)
   )
 
-  def showTestScheduleInput(): EssentialAction = adminsOnly("Show Test Schedule UI") { info =>
+  def showTestScheduleInput(): EssentialAction = superAdminsOnly("Show Test Schedule UI") { info =>
     implicit val request = info.request
 
     Ok(arisia.views.html.addTestScheduleItem(scheduleForm.fill(ScheduleInput.empty)))
   }
 
-  def addTestScheduleItem(): EssentialAction = adminsOnly(s"Add Test Schedule Item") { info =>
+  def addTestScheduleItem(): EssentialAction = superAdminsOnly(s"Add Test Schedule Item") { info =>
     implicit val request = info.request
 
     def toField[T](str: String, f: String => T): Option[T] = {
