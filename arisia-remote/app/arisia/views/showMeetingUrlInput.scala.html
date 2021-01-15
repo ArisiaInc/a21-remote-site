@@ -1,0 +1,16 @@
+@(
+  form: Form[String]
+)(implicit request: RequestHeader, messagesProvider: MessagesProvider)
+
+@main("Show Start Meeting URL") {
+  <h1>Show Start Meeting URL</h1>
+
+  <p>Given the name of an area that has a static room, this lets you grab the Start URL for that room. This URL
+  can then be shared with <b>trusted Hosts</b>, who will then have the power to start that meeting as needed.</p>
+
+  <p><b>IMPORTANT: do not use this for rooms on the Schedule! You can break the site by abusing this!</b></p>
+
+  @b4.horizontal.form(arisia.controllers.routes.ZoomController.getStartUrl(), "col-md-2", "col-md-10") { implicit hfc =>
+    @b4.text(form("name"), Symbol("_label") -> "Room Name")
+  }
+}

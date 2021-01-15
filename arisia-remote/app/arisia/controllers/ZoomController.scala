@@ -76,6 +76,32 @@ class ZoomController(
   def enterItemAsHost(rawItemStr: String): EssentialAction =
     enterItemBase(rawItemStr)(scheduleService.getHostUrlFor)
 
+  val getStartUrlForm = Form(
+    single(
+      "name" -> nonEmptyText
+    )
+  )
+
+  def showGetStartUrl(): EssentialAction = adminsOnly("Show Get Start URL") { info =>
+    implicit val request = info.request
+
+    Ok(arisia.views.html.showMeetingUrlInput(getStartUrlForm.fill("")))
+  }
+
+  def getStartUrl(): EssentialAction = adminsOnlyAsync("Get Start URL") { info =>
+    implicit val request = info.request
+    val roomName = getStartUrlForm.bindFromRequest().get
+
+    roomService.getManualRoom(roomName) match {
+      case Some(room) => {
+        zoomService.getStartUrl(room.zoomId.toLong).map { url =>
+          Ok(arisia.views.html.showMeetingUrl(roomName, url))
+        }
+      }
+      case _ => Future.successful(BadRequest(s"$roomName isn't the name of a known room!"))
+    }
+  }
+
   val restartForm = Form(
     single(
       "itemId" -> nonEmptyText
@@ -148,6 +174,7 @@ class ZoomController(
       case _ => Future.successful(BadRequest(""))
     }
   }
+
 
   /* ********************
    *

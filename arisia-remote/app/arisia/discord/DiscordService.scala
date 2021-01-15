@@ -1,6 +1,7 @@
 package arisia.discord
 
 import java.util.concurrent.atomic.AtomicReference
+import java.util.Base64
 
 import arisia.auth.LoginService
 import arisia.general.LifecycleItem
@@ -194,15 +195,32 @@ class DiscordServiceImpl(
   }
 
   def addArisian(who: LoginUser, creds: DiscordUserCredentials): Future[Either[String, DiscordMember]] = {
-    // TODO: check whether this discord user ID (not username#discriminator) is already claimed, and return a message if so
-    // TODO: If it is claimed by *this* user, then update it is success -- should we resync?
-    findMember(creds).flatMap {
-      _  match {
-        case Some(member) => {
-          addArisianCore(who, member)
+    loginService.userFromCredentials(creds).flatMap {
+      _ match {
+        case None => {
+          // The normal path: these credentials have not been claimed yet
+          findMember(creds).flatMap {
+            _  match {
+              case Some(member) => {
+                addArisianCore(who, member)
+              }
+              case _ =>
+                Future.successful(Left("Please join the Arisia Discord server first, then come back and try again!"))
+            }
+          }
         }
-        case _ =>
-          Future.successful(Left("Please join the Arisia Discord server first, then come back and try again!"))
+        case Some((userId, discordId)) => {
+          // Hmm. These credentials have already been claimed. Is it the same user?
+          if (userId == who.id) {
+            // It's the same person
+            // TODO: should we consider this a resync?
+            Future.successful(Left(s"You have already connected your Discord account."))
+          } else {
+            val msg = s"${who.id.v} attempting to claim already-claimed Discord account $discordId, which belongs to ${userId.v}!"
+            logger.warn(msg)
+            Future.successful(Left(s"Those Discord credentials are already claimed."))
+          }
+        }
       }
     }
   }
@@ -239,16 +257,24 @@ class DiscordServiceImpl(
 }
 
 object DiscordService {
+  lazy val encoder = Base64.getEncoder
+  lazy val decoder = Base64.getDecoder
+
   // Pulled out to make this testable:
   def generateAssistSecret(secretKey: String)(who: LoginUser): String = {
-    val hash = Hasher(who.badgeNumber.v).hmac(secretKey).sha512
-    s"${who.badgeNumber.v}:${hash.hex}"
+    val hash = Hasher(who.badgeNumber.v).hmac(secretKey).md5
+    val bytes = hash.bytes
+    // Drop the "==" at the end:
+    val base64 = new String(encoder.encode(bytes)).dropRight(2)
+    s"${who.badgeNumber.v}:$base64"
   }
 
   def validateAssistSecret(secretKey: String)(secret: String): Boolean = {
     secret.split(':').toList match {
-      case badgeNumber :: hex :: Nil => {
-        Hasher(badgeNumber).hmac(secretKey).sha512.hash = hex
+      case badgeNumber :: base64 :: Nil => {
+        val bytes = (base64 + "==").getBytes
+        val hashBytes = decoder.decode(bytes)
+        Hasher(badgeNumber).hmac(secretKey).md5.hash = hashBytes
       }
       case _ => false
     }

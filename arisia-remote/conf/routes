@@ -262,6 +262,9 @@ DELETE  /admin/meeting/:meetingId    arisia.controllers.AdminController.endMeeti
 GET     /admin/restart               arisia.controllers.ZoomController.showRestart()
 POST    /admin/restart               arisia.controllers.ZoomController.restartProgramItem()
 
+GET     /admin/showStartUrl          arisia.controllers.ZoomController.showGetStartUrl()
+POST    /admin/showStartUrl          arisia.controllers.ZoomController.getStartUrl()
+
 GET     /admin/manageMetadata        arisia.controllers.FileController.manageMetadata()
 POST    /admin/uploadArtshowMetadata arisia.controllers.FileController.uploadArtshowMetadata()
 POST    /admin/uploadDealersMetadata arisia.controllers.FileController.uploadDealersMetadata()
