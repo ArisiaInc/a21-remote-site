@@ -22,11 +22,15 @@
 }
 
 .link {
+    display: block;
     cursor: pointer;
     position: relative;
     height: 3.5rem;
     width: 24rem;
     background: #38A7CA;
+}
+a.link {
+    color: black;
 }
 
 .section-header {
