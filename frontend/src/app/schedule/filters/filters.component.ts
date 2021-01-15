@@ -18,9 +18,12 @@ export class FiltersComponent implements OnInit {
   trackFilters: string[] = [];
   typeFilters: string[] = [];
   dateFilters: number[] = [];
+  expanded = false;
   nowFilter = false;
   featuredFilter = false;
   captionedFilter = false;
+  anyActive = false;
+  collapsedFilters: {name: string, toggle: () => void, active?: boolean, always?: boolean}[] = [];
 
   @Output() filtersChanged = new EventEmitter<ProgramFilter>();
   LOC = Property.LOC;
@@ -46,9 +49,11 @@ export class FiltersComponent implements OnInit {
     if (tzoffset <= -4.5 * 60) {
       this.days.push(19);
     }
+    this.update();
   }
 
-  onTrack(value:string): void {
+  onTrack(value:string, event?: Event): void {
+    event && event.stopPropagation();
     const index = this.trackFilters.indexOf(value);
     if(index > -1) {
       this.trackFilters.splice(index, 1);
@@ -58,12 +63,14 @@ export class FiltersComponent implements OnInit {
     this.updateTagFilters();
   }
 
-  clearTrack(): void {
+  clearTrack(event?: Event): void {
+    event && event.stopPropagation();
     this.trackFilters.length = 0;
     this.updateTagFilters();
   }
 
-  onType(value:string): void {
+  onType(value:string, event?: Event): void {
+    event && event.stopPropagation();
     const index = this.typeFilters.indexOf(value);
     if(index > -1) {
       this.typeFilters.splice(index, 1);
@@ -73,12 +80,14 @@ export class FiltersComponent implements OnInit {
     this.updateTagFilters();
   }
 
-  clearType(): void {
+  clearType(event?: Event): void {
+    event && event.stopPropagation();
     this.typeFilters.length = 0;
     this.updateTagFilters();
   }
 
-  onDate(value: number): void {
+  onDate(value: number, event?: Event): void {
+    event && event.stopPropagation();
     this.dateFilters = this.dateFilters || [];
     const index = this.dateFilters.indexOf(value);
     if(index > -1) {
@@ -90,44 +99,86 @@ export class FiltersComponent implements OnInit {
     this.updateDateFilters();
   }
 
-  onNow(): void {
-    this.dateFilters.length = 0;
+  onNow(event?: Event): void {
+    event && event.stopPropagation();
+    this.dateFilters = [];
     this.nowFilter = !this.nowFilter;
     this.updateDateFilters();
   }
 
-  onFeatured(): void {
+  onFeatured(event?: Event): void {
+    event && event.stopPropagation();
     this.featuredFilter = !this.featuredFilter;
     this.filters.featuredOnly = this.featuredFilter;
-    this.filtersChanged.emit(this.filters);
+    this.update();
   }
 
-  onCaptioned() {
+  onCaptioned(event?: Event) {
+    event && event.stopPropagation();
     this.captionedFilter = !this.captionedFilter;
     this.filters.captionedOnly = this.captionedFilter;
-    this.filtersChanged.emit(this.filters);
+    this.update();
   }
 
-  clearDate(): void {
-    this.dateFilters.length = 0;
+  clearDate(event?: Event): void {
+    event && event.stopPropagation();
+    this.dateFilters = [];
     this.nowFilter = false;
     this.updateDateFilters();
   }
 
-  updateDateFilters(): void {
+  clearAll(event?: Event): void {
+    event && event.stopPropagation();
+    this.dateFilters = [];
+    this.trackFilters = [];
+    this.typeFilters = [];
+    this.nowFilter = false;
+    this.captionedFilter = false;
+    this.featuredFilter = false;
+    this.filters.featuredOnly = this.featuredFilter;
+    this.filters.captionedOnly = this.captionedFilter;
+    this.updateDateFilters(false);
+    this.updateTagFilters(false);
+    this.update();
+  }
+
+  updateDateFilters(emit: boolean = true): void {
     if (this.nowFilter) {
       const now = this.settingsService.currentTime;
       this.filters.date=[{start: now, end: new Date(now.getTime() + NOW_HOURS * 60 * 60 * 1000), inclusive: true}];
     } else {
       this.filters.date = this.dateFilters.map(date => ({start: new Date(2021, 0, date), end: new Date(2021, 0, date + 1)}));
     }
-    this.filtersChanged.emit(this.filters);
+    if (emit) {
+      this.update();
+    }
   }
 
-  updateTagFilters(): void {
+  updateTagFilters(emit: boolean = true): void {
     this.filters.tracks = this.trackFilters;
     this.filters.types = this.typeFilters;
-    this.filtersChanged.emit(this.filters);
+    if (emit) {
+      this.update();
+    }
   }
 
+  update(): void {
+    this.collapsedFilters = [];
+    this.collapsedFilters.push({name: "Captioned", toggle: () => this.onCaptioned(), active: this.captionedFilter, always: true});
+    this.collapsedFilters.push({name: "Featured", toggle: () => this.onFeatured(), active: this.featuredFilter, always: true});
+    if (this.nowFilter) {
+      this.collapsedFilters.push({name: "Now", toggle: () => this.onNow(), active: true});
+    }
+    for (const day of this.dateFilters) {
+      this.collapsedFilters.push({name: this.dayWeekday[day], toggle: () => this.onDate(day), active: true});
+    }
+    for (const track of this.trackFilters) {
+      this.collapsedFilters.push({name: track, toggle: () => this.onTrack(track), active: true});
+    }
+    for (const type of this.typeFilters) {
+      this.collapsedFilters.push({name: type, toggle: () => this.onType(type), active: true});
+    }
+    this.anyActive = this.collapsedFilters.some(({active}) => active);
+    this.filtersChanged.emit(this.filters);
+  }
 }
