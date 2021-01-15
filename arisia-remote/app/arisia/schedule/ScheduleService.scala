@@ -5,6 +5,8 @@ import java.util.concurrent.atomic.AtomicReference
 
 import arisia.admin.RoomService
 
+import cats.data.{OptionT}
+import cats.implicits._
 import scala.jdk.DurationConverters._
 import scala.concurrent.duration._
 import arisia.db.DBService
@@ -12,6 +14,7 @@ import arisia.general.{LifecycleService, LifecycleItem}
 import arisia.models.{ProgramItemTime, LoginUser, BadgeNumber, ProgramItem, ProgramItemTimestamp, Schedule, ProgramItemId, ProgramItemLoc, ProgramItemTitle}
 import arisia.timer.{TimerService, TimeService}
 import arisia.util.Done
+import arisia.zoom.ZoomService
 import doobie._
 import doobie.implicits._
 import play.api.{Configuration, Logging}
@@ -68,7 +71,8 @@ class ScheduleServiceImpl(
   config: Configuration,
   queueService: ScheduleQueueService,
   val lifecycleService: LifecycleService,
-  roomService: RoomService
+  roomService: RoomService,
+  zoomService: ZoomService
 )(
   implicit ec: ExecutionContext
 ) extends ScheduleService with LifecycleItem with Logging {
@@ -84,6 +88,9 @@ class ScheduleServiceImpl(
   lazy val zambiaLoginUrl = config.get[String]("arisia.zambia.loginUrl")
   lazy val zambiaBadgeId = config.get[String]("arisia.zambia.badgeId")
   lazy val zambiaPassword = config.get[String]("arisia.zambia.password")
+
+  lazy val fastTrackZambiaName = config.get[String]("arisia.fasttrack.zambia.name")
+  lazy val fastTrackZoomName = config.get[String]("arisia.fasttrack.zoom.name")
 
   val lifecycleName = "ScheduleService"
   lifecycleService.register(this)
@@ -291,10 +298,35 @@ class ScheduleServiceImpl(
     _scheduleWithPrep.get
   }
 
-  def getAttendeeUrlFor(who: LoginUser, which: ProgramItemId): Option[String] = {
+  def getAttendeeUrlFor(who: LoginUser, which: ProgramItemId): Future[Option[String]] = {
+    val result = for {
+      item <- OptionT.fromOption(_baseSchedule.get.byItemId.get(which))
+      loc <- OptionT.fromOption(item.loc.headOption)
+      result <-
+        if (loc.v == fastTrackZambiaName) {
+          // This is a Zambia session, so head off in that direction instead:
+          getFastTrackUrl()
+        } else {
+          OptionT.fromOption(getNormalAttendeeUrl(item, which, who))
+        }
+    }
+      yield result
+
+    result.value
+  }
+
+  def getFastTrackUrl(): OptionT[Future, String] = {
     for {
-      // Is this item real?
-      item <- _baseSchedule.get.byItemId.get(which)
+      meeting <- OptionT.fromOption(roomService.getManualRoom(fastTrackZoomName))
+      meetingRunning <- OptionT.liftF(zoomService.isMeetingRunning(meeting.id))
+      if (meetingRunning)
+      url <- OptionT.liftF(zoomService.getJoinUrl(meeting.id))
+    }
+      yield url
+  }
+
+  def getNormalAttendeeUrl(item: ProgramItem, which: ProgramItemId, who: LoginUser): Option[String] = {
+    for {
       // Is the meeting running?
       meeting <- queueService.getRunningMeeting(which)
       // Are they allowed to join yet?
