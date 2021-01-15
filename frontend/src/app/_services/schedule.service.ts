@@ -795,10 +795,10 @@ export class ScheduleService {
     return this.getNextEvents('Performance Hall');
   }
 
-  get_featured_events(): Observable<ScheduleEvent[]> {
+  get_featured_events(count = 3): Observable<ScheduleEvent[]> {
     // for testing:
     // return this.getSchedule({id: ['23', '45', '17']});
-    return this.getNextEventsList(this.getFilteredEvents({featuredOnly: true}), 3);
+    return this.getNextEventsList(this.getFilteredEvents({featuredOnly: true}), count);
   }
 
 
