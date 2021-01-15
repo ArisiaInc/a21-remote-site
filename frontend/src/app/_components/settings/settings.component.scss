@@ -1,6 +1,23 @@
-:host {
+.setting {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
+    align-items: first baseline;
+}
+
+.label-box {
+    padding-left: 0.5rem;
+}
+
+.note {
+    font-size: 0.75rem;
+    font-style: italic;
+}
+
+:host {
+    display: block;
+    margin-bottom: 1rem;
+}
+
+label {
+    width: 100%;
+    cursor: pointer;
 }

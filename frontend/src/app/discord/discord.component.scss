@@ -1,3 +1,45 @@
+.avatar {
+    width: 2rem;
+    height: 2rem;
+    margin-right: 0.5rem;
+    border-radius: 1rem;
+    background: white;
+}
+
+.discord-text {
+    line-height: 1rem;
+    font-family: Whitney, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.discriminator {
+    color: rgb(185, 187, 190)
+}
+
+.username {
+    color: rgb(220, 221, 222)
+}
+
+.look-for {
+    margin-top: 1rem;
+}
+
+.discord-example-box {
+    display:inline-block;
+    margin-bottom: 1rem;
+}
+
+.discord-example {
+    display:flex;
+    flex-wrap:nowrap;
+    align-items: center;
+    background: rgb(41, 43, 47);
+    padding: 0.75rem 0.5rem;
+    position: relative;
+}
+
+
 .secret-directions {
     font-size: 0.75rem;
     font-style: italic;
