@@ -1,16 +1,16 @@
 <div class="row">
   <div class="setting col-6">
-    <input type="checkbox" id="disableAnimations" [(ngModel)]="settingsService.disableAnimations" [ngModelOptions]="{standalone: true}">
+    <input class="check" type="checkbox" id="disableAnimations" [(ngModel)]="settingsService.disableAnimations" [ngModelOptions]="{standalone: true}">
     <div class="label-box">
       <label for="disableAnimations">No auto-play</label>
-      <div class="note">When this box is selected, all auto-play elements (e.g. auto-scroll photo carousels, Performance Hall) will be turned off.</div>
+      <label for="disableAnimations" class="note">When this box is selected, all auto-play elements (e.g. auto-scroll photo carousels, Performance Hall) will be turned off.</label>
     </div>
   </div>
   <div class="setting col-6">
-    <input type="checkbox" id="hour24" [(ngModel)]="hour24" [ngModelOptions]="{standalone: true}">
+    <input class="check" type="checkbox" id="hour24" [(ngModel)]="hour24" [ngModelOptions]="{standalone: true}">
     <div class="label-box">
       <label class="label" for="hour24">24 hour time</label>
-      <div class="note">When this box is selected, times in the schedule will be displayed in 24 hour time format.</div>
+      <label for="hour24" class="note">When this box is selected, times in the schedule will be displayed in 24 hour time format.</label>
     </div>
   </div>
   <div class="setting col-6" *ngIf="dev">
