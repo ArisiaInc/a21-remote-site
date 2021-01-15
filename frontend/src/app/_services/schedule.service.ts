@@ -32,7 +32,7 @@ let hour12: boolean = false;
 let hour12ConstSet$!: Observable<boolean>;
 
 export class ScheduleEvent {
-  constructor (item: ProgramItem, private starsService: StarsService, settingsService: SettingsService) {
+  constructor (item: ProgramItem, private starsService: StarsService) {
     this.id = item.id;
     this.title = item.title;
     this.description = item.desc;
@@ -46,11 +46,6 @@ export class ScheduleEvent {
     if (item.doorsOpen && item.doorsClose) {
       this.doors = {start: new Date(item.doorsOpen), end: new Date(item.doorsClose)};
     }
-//    if (item.doorsOpen && item.doorsClose) {
-//      this.doorsOpen$ = settingsService.isInDateRange(doors);
-//    } else {
-//      this.doorsOpen$ = of(false);
-//    }
   }
 
   link(peopleMap: {[_: string]: SchedulePerson}): void {
@@ -91,7 +86,6 @@ export class ScheduleEvent {
   location: string[];
   people: {person: SchedulePerson, isModerator: boolean}[];
 
-  //  doorsOpen$: Observable<boolean>;
   doors?: DateRange;
 
   performance?: Performance;
@@ -330,7 +324,7 @@ export class ScheduleService {
   private scheduleWithoutRelabeling$ = new ReplaySubject<StructuredEvents>(1);
   private schedule$: Observable<StructuredEvents>;
 
-  private update$ = new Subject();
+  private update$ = new Subject<1>();
 
   private status: ScheduleStatus = {state: ScheduleState.IDLE};
   status$ = new BehaviorSubject<ScheduleStatus>(this.status);
@@ -389,7 +383,6 @@ export class ScheduleService {
       repeat(),
       shareReplay(1)
     );
-    this.openDoors$.subscribe(val => console.log (`${val}${!!val}`));
   }
 
   private reload(): void {
@@ -424,7 +417,7 @@ export class ScheduleService {
     this.peopleMap = {};
     this.eventsMap = {};
 
-    this.events = program.program.map(item => new ScheduleEvent(item, this.starsService, this.settingsService));
+    this.events = program.program.map(item => new ScheduleEvent(item, this.starsService));
     this.events.forEach(event => this.eventsMap[event.id] = event);
     this.events.sort((a, b) => a.start.getTime() - b.start.getTime());
 
@@ -469,7 +462,7 @@ export class ScheduleService {
     this.peopleMap$.next(this.peopleMap);
     this.tracks$.next(this.tracks);
     this.types$.next(this.types);
-    this.update$.next(0);
+    this.update$.next(1);
     this.scheduleWithoutRelabeling$.next(this.schedule);
 
     this.status.state = ScheduleState.READY;

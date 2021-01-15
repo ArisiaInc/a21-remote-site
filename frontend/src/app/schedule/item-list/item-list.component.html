@@ -5,7 +5,7 @@
       <div *ngFor="let time of day.times" class="mb-4">
         <h5>{{time.timeString}}</h5>
         <ul class="list-group">
-          <app-item *ngFor="let event of time.events" [event]="event" [showStar]="showStars" [showDoors]="openDoors.has(event.id)"></app-item>
+          <app-item *ngFor="let event of time.events" [event]="event" [showStar]="showStars" [openDoors]="openDoors"></app-item>
         </ul>
       </div>
     </div>
