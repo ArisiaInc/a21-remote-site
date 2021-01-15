@@ -1,14 +1,7 @@
 app-link {
     height: 12.5rem;
     font-size: 1.5rem;
-
-    &.pull-left {
-        left: -6.25rem;
-    }
-}
-
-.dice-box {
-    height: 50rem;
+    margin: 1rem;
 }
 
 :host {

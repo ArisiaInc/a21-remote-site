@@ -4,3 +4,11 @@
     border: 1px solid #006382;
     border-top: none;
 }
+
+.placeholder {
+    background: #e9ecef;
+    padding: 1rem;
+    .small {
+        line-height: 0.5rem;
+    }
+}

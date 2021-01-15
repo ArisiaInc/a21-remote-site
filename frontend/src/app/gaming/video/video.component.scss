@@ -1,5 +1,6 @@
 .bg-image {
     background-image: url('/assets/images/gaming/video_background.png');
-    background-size: cover;
-    min-height: 37.5rem;
+    background-repeat: no-repeat;
+    background-size: contain;
+    width: 100%;
 }
