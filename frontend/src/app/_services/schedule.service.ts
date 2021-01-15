@@ -554,6 +554,71 @@ export class ScheduleService {
     this.inited = true;
   }
 
+  getFilteredEvents(filters?: ProgramFilter): Observable<ScheduleEvent[]> {
+    if (filters === undefined) {
+      return this.events$;
+    }
+
+    let dateRanges: DateRange[] | undefined;
+
+    const munged_filters: ((scheduleEvent: ScheduleEvent) => boolean)[] = [];
+    if (filters.types && filters.types.length > 0) {
+      const types = filters.types;
+      munged_filters.push(
+        scheduleEvent => types.some(
+          filterString => scheduleEvent.type === filterString));
+    }
+    if (filters.tracks && filters.tracks.length > 0) {
+      const tracks = filters.tracks;
+      munged_filters.push(
+        scheduleEvent => tracks.some(
+          filterString => scheduleEvent.track === filterString));
+    }
+    if (filters.captionedOnly) {
+      munged_filters.push(scheduleEvent => scheduleEvent.captioned);
+    }
+    if (filters.featuredOnly) {
+      munged_filters.push(scheduleEvent => scheduleEvent.featured);
+    }
+    if (filters.loc && filters.loc.length > 0) {
+      const loc = filters.loc;
+      munged_filters.push(
+        scheduleEvent => loc.some(
+          filterString => scheduleEvent.location.includes(filterString)))
+    }
+
+    if (filters.date && filters.date.length > 0) {
+      dateRanges = [...filters.date].
+        sort((a, b) => a.start.getTime()-b.start.getTime());
+    }
+
+    if (munged_filters.length === 0 && (!dateRanges || dateRanges.length === 0) && (!filters.id || filters.id.length === 0)) {
+      return this.events$;
+    }
+
+    let eventsObservable;
+
+    if (filters.id && filters.id.length > 0) {
+      const id = filters.id;
+      eventsObservable = this.eventsMap$.pipe(
+        // It's okay to sort in place since filters.id.map() has created a new array.
+        map(eventsMap => id.
+          map(id => eventsMap[id]).
+          filter(event => event).
+          sort((a, b) => a.start.getTime()-b.start.getTime())),
+      );
+    } else {
+      eventsObservable = this.events$;
+    }
+
+    return eventsObservable.pipe(
+      map(events => {
+        const dateFilteredEvents = dateRanges ? filterEventsByDate(events, dateRanges) : events;
+        return dateFilteredEvents.filter((event) => munged_filters.every(filter => filter(event)));
+      }),
+    );
+  }
+
   getSchedule(filters?: ProgramFilter): Observable<StructuredEvents> {
     if (filters === undefined) {
       return this.schedule$;
@@ -618,6 +683,12 @@ export class ScheduleService {
       }),
       relabelStructuredEventsAsNeeded(),
       restarStructuredEventsAsNeeded(),
+    );
+  }
+
+  getEvent(id: string): Observable<ScheduleEvent | undefined> {
+    return this.eventsMap$.pipe(
+      map(eventsMap => eventsMap[id]),
     );
   }
 
@@ -691,14 +762,41 @@ export class ScheduleService {
     );
   }
 
+  getNextEventsList(events: Observable<ScheduleEvent[]>, count: number): Observable<ScheduleEvent[]> {
+    let currentTime;
+    const DELAY = 20;
+    return events.pipe(
+      switchMap(events =>
+        defer(() => {
+          const filtered = filterEventsByDate(events, [{start: new Date((currentTime = (this.settingsService.currentTime.getTime() - DELAY * 60 * 1000)))}], count);
+          if (filtered.length > 0) {
+            let delayTime = Infinity;
+            for (let event of filtered) {
+              const startTime = event.start.getTime() + DELAY * 60 * 1000;
+              if (event.start.getTime() >= currentTime) {
+                delayTime = startTime - currentTime;
+                break;
+              }
+            }
+            return concat(
+              of(filtered), ignoreElements()(timer(delayTime))
+            );
+          } else {
+            return timer(Infinity).pipe(ignoreElements());
+          }
+        })),
+      repeat(),
+    );
+  }
+
   getPerformanceEvents(): Observable<RunningEvents> {
     return this.getNextEvents('Performance Hall');
   }
 
-  get_featured_events(): Observable<StructuredEvents> {
+  get_featured_events(): Observable<ScheduleEvent[]> {
     // for testing:
     // return this.getSchedule({id: ['23', '45', '17']});
-    return this.getSchedule({featuredOnly: true});
+    return this.getNextEventsList(this.getFilteredEvents({featuredOnly: true}), 3);
   }
 
 
