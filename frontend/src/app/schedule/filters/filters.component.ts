@@ -19,6 +19,8 @@ export class FiltersComponent implements OnInit {
   typeFilters: string[] = [];
   dateFilters: number[] = [];
   nowFilter = false;
+  featuredFilter = false;
+  captionedFilter = false;
 
   @Output() filtersChanged = new EventEmitter<ProgramFilter>();
   LOC = Property.LOC;
@@ -92,6 +94,18 @@ export class FiltersComponent implements OnInit {
     this.dateFilters.length = 0;
     this.nowFilter = !this.nowFilter;
     this.updateDateFilters();
+  }
+
+  onFeatured(): void {
+    this.featuredFilter = !this.featuredFilter;
+    this.filters.featuredOnly = this.featuredFilter;
+    this.filtersChanged.emit(this.filters);
+  }
+
+  onCaptioned() {
+    this.captionedFilter = !this.captionedFilter;
+    this.filters.captionedOnly = this.captionedFilter;
+    this.filtersChanged.emit(this.filters);
   }
 
   clearDate(): void {

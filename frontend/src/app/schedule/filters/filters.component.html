@@ -47,3 +47,21 @@
     <a *ngIf="typeFilters.length > 0" class="clear-filter" (click)="clearType()">x clear filter</a>
   </div>
 </div>
+<div class="filter-section">
+  <div class="pills">
+    <app-button (click)="onCaptioned()"
+                [active]="captionedFilter"
+                [toggle]="true"
+                [primary]="true"
+                [small]="true"
+                class="pill"
+                >Captioned</app-button>
+    <app-button (click)="onFeatured()"
+                [active]="featuredFilter"
+                [toggle]="true"
+                [primary]="true"
+                [small]="true"
+                class="pill"
+                >Featured</app-button>
+  </div>
+</div>
