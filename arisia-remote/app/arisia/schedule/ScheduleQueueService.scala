@@ -34,6 +34,7 @@ trait ScheduleQueueService {
 class ScheduleQueueServiceImpl(
   dbService: DBService,
   timerService: TimerService,
+  time: TimeService,
   config: Configuration,
   roomService: RoomService,
   zoomService: ZoomService,
@@ -57,7 +58,7 @@ class ScheduleQueueServiceImpl(
   override def init() = {
 
     // On a regular basis, check whether we need to start/stop Zoom sessions
-//    timerService.register("Schedule Queue Service", queueCheckInterval)(checkQueues)
+    timerService.register("Schedule Queue Service", queueCheckInterval)(checkQueues)
 
     dbService.run(
       sql"""
@@ -107,6 +108,7 @@ class ScheduleQueueServiceImpl(
   }
 
   def setScheduleCursor(now: Long): Future[Int] = {
+    _scheduleCursor.set(now)
     dbService.run(
       sql"""INSERT INTO text_files
                  (name, value)
@@ -142,6 +144,11 @@ class ScheduleQueueServiceImpl(
             // Only bother with items whose time is after our last processing time:
             item.zoomStart.get.toLong > _scheduleCursor.get()
           }
+          .filterNot { item =>
+            // Just to be on the safe side, filter out anything that has already ended
+            // (That is, the zoomEnd is less than now)
+            item.zoomEnd.get.toLong < time.now().toEpochMilli
+          }
           .sortBy(_.zoomStart.get.toLong)
 
       // TODO: in theory, we should check that there are no overlapping items in a given room
@@ -159,14 +166,23 @@ class ScheduleQueueServiceImpl(
     _scheduleQueue.get().headOption match {
       // The item at the front of the queue needs to be started:
       case Some(item) if (item.zoomStart.get.toLong < now.toEpochMilli) => {
-        // Start this item:
-        startProgramItem(item)
         // Note that we intentially do *not* block subsequent items on this one, so that one failure doesn't
         // bring down the whole works. This is sad, but probably correct.
         // Drop it from the head of the queue:
         _scheduleQueue.getAndUpdate(_.tail)
-        // On to the next
-        checkScheduleQueue(now)
+        // Belt and suspenders check: does the database say that this meeting has already started?
+        hasMeetingStarted(item.id).map { hasStarted =>
+          if (hasStarted) {
+            logger.warn(s"Not starting ${item.id.v} (${item.title}) because is seems to have already started.")
+            Future.successful(())
+          } else {
+            // Start this item:
+            startProgramItem(item)
+          }
+
+          // On to the next
+          checkScheduleQueue(now)
+        }
       }
       // We're done:
       case _ => setScheduleCursor(now.toEpochMilli)
@@ -176,8 +192,8 @@ class ScheduleQueueServiceImpl(
   private def checkMeetingsToEnd(now: Instant): Unit = {
     _runningItemsQueue.get().headOption match {
       case Some(item) if (item.endAt.toEpochMilli < now.toEpochMilli) => {
-        endRunningItem(item)
         _runningItemsQueue.getAndUpdate(_.tail)
+        endRunningItem(item)
         checkMeetingsToEnd(now)
       }
       case _ => // Nothing running
@@ -258,6 +274,19 @@ class ScheduleQueueServiceImpl(
       }
       // Someone seems to be confused:
       case _ => Future.successful(Done)
+    }
+  }
+
+  private def hasMeetingStarted(itemId: ProgramItemId): Future[Boolean] = {
+    dbService.run(
+      sql"""
+           SELECT program_item_id
+             FROM active_program_items
+            WHERE program_item_id = ${itemId.v}"""
+        .query[String]
+        .to[List]
+    ).map { existingItems =>
+      !(existingItems.isEmpty)
     }
   }
 
