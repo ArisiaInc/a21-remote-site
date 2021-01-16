@@ -49,6 +49,8 @@ export class FiltersComponent implements OnInit {
     if (tzoffset <= -4.5 * 60) {
       this.days.push(19);
     }
+    this.nowFilter = true;
+    this.updateDateFilters();
     this.update();
   }
 
@@ -166,9 +168,7 @@ export class FiltersComponent implements OnInit {
     this.collapsedFilters = [];
     this.collapsedFilters.push({name: "Captioned", toggle: () => this.onCaptioned(), active: this.captionedFilter, always: true});
     this.collapsedFilters.push({name: "Featured", toggle: () => this.onFeatured(), active: this.featuredFilter, always: true});
-    if (this.nowFilter) {
-      this.collapsedFilters.push({name: "Now", toggle: () => this.onNow(), active: true});
-    }
+    this.collapsedFilters.push({name: "Now", toggle: () => this.onNow(), active: this.nowFilter, always: true});
     for (const day of this.dateFilters) {
       this.collapsedFilters.push({name: this.dayWeekday[day], toggle: () => this.onDate(day), active: true});
     }
