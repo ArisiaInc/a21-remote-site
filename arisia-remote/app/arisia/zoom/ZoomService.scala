@@ -91,7 +91,7 @@ class ZoomServiceImpl(
           logger.info(s"Meeting $topic started")
           Right(Json.parse(response.body).as[ZoomMeeting])
         } else {
-          val error = s"Failure in trying to start a meeting: ${response.status}"
+          val error = s"Failure in trying to start a meeting: ${response}"
           logger.error(error)
           Left(error)
         }
