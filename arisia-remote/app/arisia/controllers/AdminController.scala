@@ -90,14 +90,14 @@ class AdminController (
     val currentlyRunning = scheduleQueueService.getAllRunningItems()
 
     val results: List[RunningMeetingInfo] =
-      currentlyRunning.toList.map { runningItem =>
-        schedule.byItemId.get(runningItem.itemId).map { item =>
+      currentlyRunning.toList.map { case (itemId, runningMeeting) =>
+        schedule.byItemId.get(itemId).map { item =>
           RunningMeetingInfo(
             item.id.v,
             item.title.map(_.v).getOrElse("Unnamed"),
             item.loc.headOption.map(_.v).getOrElse("Unknown room"),
-           runningItem.meeting.join_url,
-            runningItem.meeting.start_url
+            runningMeeting.meeting.join_url,
+            runningMeeting.meeting.start_url
           )
         }
       }.flatten

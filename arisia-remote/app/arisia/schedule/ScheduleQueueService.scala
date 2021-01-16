@@ -30,7 +30,7 @@ trait ScheduleQueueService {
 
   def restartMeeting(id: ProgramItemId): Future[Done]
 
-  def getAllRunningItems(): SortedSet[RunningItem]
+  def getAllRunningItems(): Map[ProgramItemId, RunningItem]
 }
 
 case class RunningItem(endAt: Instant, itemId: ProgramItemId, meeting: ZoomMeeting)
@@ -254,7 +254,7 @@ class ScheduleQueueServiceImpl(
   // The Running Items Queue. Note that this is automatically sorted by the end time:
   val _runningItemsQueue: AtomicReference[SortedSet[RunningItem]] = new AtomicReference(SortedSet.empty)
 
-  def getAllRunningItems(): SortedSet[RunningItem] = _runningItemsQueue.get()
+  def getAllRunningItems(): Map[ProgramItemId, RunningItem] = _currentlyRunningItems.get()
 
   // The Currently Running Items Map, which we fetch meetings from when people want to enter them:
   val _currentlyRunningItems: AtomicReference[Map[ProgramItemId, RunningItem]] = new AtomicReference(Map.empty)
