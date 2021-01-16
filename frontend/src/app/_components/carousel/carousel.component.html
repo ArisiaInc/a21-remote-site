@@ -4,7 +4,7 @@
               (slid)="handleSlidEvent($event)">
   <ng-template ngbSlide *ngFor="let image of imageBuffer">
     <div class="image-wrapper">
-      <img class="image" [src]="image.src" [alt]="'Picture of \'' + image.caption + '\''">
+      <img class="image" [src]="image.src" [alt]="image.alt">
     </div>
     <div class="carousel-caption caption">
       {{image.caption}}

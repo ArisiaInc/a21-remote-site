@@ -8,6 +8,7 @@ import { SettingsService } from '@app/_services';
 export interface Image {
   src: string;
   caption: string;
+  alt: string;
 };
 
 function moduloDecrement(value: number, divisor: number): number {
