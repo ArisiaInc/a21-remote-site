@@ -1,5 +1,5 @@
 <ng-container *ngIf="creator">
-  <app-breadcrumb [lastCrumbText]="creator.name"></app-breadcrumb>
+  <app-breadcrumb [crumbsOverride]="crumbsOverride" [lastCrumbText]="creator.name"></app-breadcrumb>
   <div class="row creator-page">
     <div class="col-sm-4 col-12">
       <h3>{{creator.name}}</h3>

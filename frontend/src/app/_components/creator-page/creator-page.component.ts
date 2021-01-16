@@ -1,6 +1,7 @@
 import { Component, OnChanges, Input } from '@angular/core';
 import { Creator, PreferredLink } from '@app/_models';
 import { Image as CarouselImage } from '@app/_components/carousel/carousel.component';
+import { Crumb } from '@app/_components/breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-creator-page',
@@ -9,6 +10,7 @@ import { Image as CarouselImage } from '@app/_components/carousel/carousel.compo
 })
 export class CreatorPageComponent implements OnChanges {
   @Input() creator?: Creator;
+  @Input() crumbsOverride?: Crumb[];
   carouselImages: CarouselImage[] = [];
   linksToDisplay: {[_: string]: string | undefined} = {};
 
