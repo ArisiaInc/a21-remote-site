@@ -14,6 +14,14 @@ img[ng-reflect-router-link] {
     cursor: pointer;
 }
 
+.link {
+    display: block;
+}
+
+.uncolored {
+    color: black;
+}
+
 img {
     height: 12.5rem;
     object-fit: cover;
