@@ -57,7 +57,7 @@ class ScheduleQueueServiceImpl(
   override def init() = {
 
     // On a regular basis, check whether we need to start/stop Zoom sessions
-    timerService.register("Schedule Queue Service", queueCheckInterval)(checkQueues)
+//    timerService.register("Schedule Queue Service", queueCheckInterval)(checkQueues)
 
     dbService.run(
       sql"""
