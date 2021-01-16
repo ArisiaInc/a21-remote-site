@@ -106,7 +106,7 @@ class LoginServiceImpl(
           EitherT.rightT[Future, LoginError](details)
         else
           EitherT.leftT[Future, LoginUser](LoginError.NoCoC)
-      initialUser = LoginUser(id, badgeName, details.badgeNumber, false, details.membershipType)
+      initialUser = LoginUser(id, badgeName.getOrElse(LoginName.empty), details.badgeNumber, false, details.membershipType)
       _ <- EitherT(recordUserInfo(initialUser))
       withPermissions <- EitherT(checkPermissions(initialUser))
     }

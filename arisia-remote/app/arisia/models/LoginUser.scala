@@ -9,8 +9,12 @@ case class LoginId(v: String) extends StdString {
 }
 object LoginId extends StdStringUtils(new LoginId(_))
 
-case class LoginName(v: String) extends StdString
-object LoginName extends StdStringUtils(new LoginName(_))
+case class LoginName(v: String) extends StdString {
+  def isEmpty: Boolean = v.isEmpty
+}
+object LoginName extends StdStringUtils(new LoginName(_)) {
+  val empty = LoginName("")
+}
 
 case class BadgeNumber(v: String) extends StdString
 object BadgeNumber extends StdStringUtils(new BadgeNumber(_))
