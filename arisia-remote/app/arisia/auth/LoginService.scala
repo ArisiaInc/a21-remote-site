@@ -138,9 +138,12 @@ class LoginServiceImpl(
              FROM user_info
             WHERE badge_number = ${badgeNumber.v}"""
         .query[(String, String, String, String)]
-        .option
+        // TODO: okay, this is just wrong. Badge Number *should* be unique, and this should be `.option`, but
+        // we're somehow getting into a state where people can have duplicate entries in the user_info table.
+        // So for now, we're coping with that. Someday, track down and fix the underlying bug.
+        .to[List]
     ).map {
-      _.map { case (username, badgeName, badgeNumber, membershipType) =>
+      _.headOption.map { case (username, badgeName, badgeNumber, membershipType) =>
           LoginUser(
             LoginId(username),
             LoginName(badgeName),
