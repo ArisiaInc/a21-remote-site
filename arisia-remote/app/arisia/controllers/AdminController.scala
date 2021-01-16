@@ -4,8 +4,9 @@ import arisia.admin.{RoomService, AdminService}
 import arisia.auth.LoginService
 import arisia.fun.{Duck, DuckService}
 import arisia.models.{LoginUser, LoginId, Permissions, ZoomRoom, LoginName}
+import arisia.schedule.{ScheduleService, ScheduleQueueService}
 import arisia.zoom.ZoomService
-import play.api.{Logging, Configuration}
+import play.api.{Configuration, Logging}
 import play.api.mvc._
 import play.api.data._
 import play.api.data.Forms._
@@ -15,6 +16,14 @@ import play.api.libs.json.Json
 
 import scala.concurrent.{Future, ExecutionContext}
 
+case class RunningMeetingInfo(
+  id: String,
+  title: String,
+  location: String,
+  attendeeUrl: String,
+  hostUrl: String
+)
+
 class AdminController (
   val controllerComponents: ControllerComponents,
   config: Configuration,
@@ -22,7 +31,9 @@ class AdminController (
   val loginService: LoginService,
   zoomService: ZoomService,
   roomService: RoomService,
-  duckService: DuckService
+  duckService: DuckService,
+  scheduleService: ScheduleService,
+  scheduleQueueService: ScheduleQueueService
 )(
   implicit val ec: ExecutionContext
 ) extends BaseController
@@ -71,6 +82,27 @@ class AdminController (
         Future.successful(BadRequest(s"$meetingIdStr is not a valid meeting ID"))
       }
     }
+  }
+
+  def showMeetingInfo(): EssentialAction = adminsOnly("View Meeting URLs") { info =>
+    val rooms = roomService.getRooms()
+    val schedule = scheduleService.fullSchedule()
+    val currentlyRunning = scheduleQueueService.getAllRunningItems()
+
+    val results: List[RunningMeetingInfo] =
+      currentlyRunning.toList.map { runningItem =>
+        schedule.byItemId.get(runningItem.itemId).map { item =>
+          RunningMeetingInfo(
+            item.id.v,
+            item.title.map(_.v).getOrElse("Unnamed"),
+            item.loc.headOption.map(_.v).getOrElse("Unknown room"),
+           runningItem.meeting.join_url,
+            runningItem.meeting.start_url
+          )
+        }
+      }.flatten
+
+    Ok(arisia.views.html.currentMeetings(results))
   }
 
   /* ********************

@@ -1,0 +1,19 @@
+@(meetings: List[arisia.controllers.RunningMeetingInfo])
+
+@main("Currently Running Meetings") {
+  <h1>Currently Running Meetings</h1>
+
+  <p>These are the scheduled Zoom meetings that Virtual Arisia believes are currently running.</p>
+
+  <ul>
+  @for(meeting <- meetings) {
+    <li><b>@{meeting.title} (@{meeting.id})</b>
+        <ul>
+            <li>In @{meeting.location}</li>
+            <li>Attendee URL: <a href="@{meeting.attendeeUrl}">@{meeting.attendeeUrl}</a></li>
+            <li>Host URL: <a href="@{meeting.hostUrl}">@{meeting.hostUrl}</a></li>
+        </ul>
+    </li>
+  }
+  </ul>
+}
