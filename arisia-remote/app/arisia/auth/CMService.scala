@@ -25,7 +25,7 @@ trait CMService {
   /**
    * Confirms that this id/password combination is a known user in CM; if so, returns the initial info about them.
    */
-  def checkLogin(username: String, password: String): Future[Either[LoginError, (LoginId, LoginName)]]
+  def checkLogin(username: String, password: String): Future[Either[LoginError, (LoginId, Option[LoginName])]]
 
   /**
    * Go out to CM directly, and fetch the details.
@@ -69,11 +69,11 @@ class CMServiceImpl(
    * to CM's login page, and see if we get a success or error back. Conveniently for us, the next page includes the
    * member's badge name, so we pull that out at the same time.
    */
-  def checkLogin(username: String, password: String): Future[Either[LoginError, (LoginId, LoginName)]] = {
+  def checkLogin(username: String, password: String): Future[Either[LoginError, (LoginId, Option[LoginName])]] = {
     if (!cmEnabled && testUsers.contains(username)) {
       // This is a test user, not actually in CM, so just pass it through here. Note that this code path is
       // ignored if CM integration is actually enabled
-      Future.successful(Right(LoginId(username), LoginName(username)))
+      Future.successful(Right(LoginId(username), Some(LoginName(username))))
     } else {
       // Normal case. Note that, even if CM integration is not enabled, we still do the screen-scrape, since
       // that doesn't require any special setup:
@@ -101,19 +101,19 @@ class CMServiceImpl(
           val badgeName = {
             val prefixPos = body.indexOf(badgeNamePrefix)
             if (prefixPos == -1) {
-              username
+              None
             } else {
               val namePos = prefixPos + badgeNamePrefix.length
               val endPos = body.indexOf('"', namePos)
               val name = body.substring(namePos, endPos)
               if (name.length == 0)
-                username
+                None
               else
-                name
+                Some(LoginName(name))
             }
           }
 
-          Right((LoginId(username.toLowerCase), LoginName(badgeName)))
+          Right((LoginId(username.toLowerCase), badgeName))
         } else {
           logger.error(s"Got unexpected response from Convention Master when checking $username!")
           Left{LoginError.NoLogin}

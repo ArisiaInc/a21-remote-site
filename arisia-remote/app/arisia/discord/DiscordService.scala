@@ -163,7 +163,7 @@ class DiscordServiceImpl(
   }
 
   def setBadgeName(who: LoginUser, memberId: String): Future[Done] = {
-    if (botEnabled) {
+    if (botEnabled && !who.name.isEmpty) {
       ws.url(s"$baseUrl/guilds/$arisiaGuildId/members/${memberId}")
         .addHttpHeaders(
           "Authorization" -> s"Bot $botToken",
