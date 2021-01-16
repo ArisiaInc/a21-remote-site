@@ -17,7 +17,7 @@ export class CreatorPageComponent implements OnChanges {
   ngOnChanges(): void {
     if (this.creator) {
       // TODO check for undefined creator & handle. 500 error?
-      this.carouselImages = this.creator.images.map(image => ({src: image.url, caption: image.title}));
+      this.carouselImages = this.creator.images.map(image => ({src: image.url, caption: image.title || (image.description ? image.description : image.alt), alt: image.alt}));
 
       // There's gotta be a better way to do this
       // this is a messy messy sad typecast nightmare
