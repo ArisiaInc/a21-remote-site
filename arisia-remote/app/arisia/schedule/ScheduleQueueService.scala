@@ -58,7 +58,7 @@ class ScheduleQueueServiceImpl(
   override def init() = {
 
     // On a regular basis, check whether we need to start/stop Zoom sessions
-//    timerService.register("Schedule Queue Service", queueCheckInterval)(checkQueues)
+    timerService.register("Schedule Queue Service", queueCheckInterval)(checkQueues)
 
     dbService.run(
       sql"""
@@ -153,8 +153,6 @@ class ScheduleQueueServiceImpl(
 
       // TODO: in theory, we should check that there are no overlapping items in a given room
 
-      println(s"Head of the queue is ${queue.headOption}")
-
       _scheduleQueue.set(queue)
       logger.info(s"Schedule Queue updated -- ${queue.length} items remaining")
       Done
@@ -174,10 +172,14 @@ class ScheduleQueueServiceImpl(
         _scheduleQueue.getAndUpdate(_.tail)
         // Belt and suspenders check: does the database say that this meeting has already started?
         hasMeetingStarted(item.id).map { hasStarted =>
-          if (!hasStarted) {
+          if (hasStarted) {
+            logger.warn(s"Not starting ${item.id.v} (${item.title}) because is seems to have already started.")
+            Future.successful(())
+          } else {
             // Start this item:
             startProgramItem(item)
           }
+
           // On to the next
           checkScheduleQueue(now)
         }
