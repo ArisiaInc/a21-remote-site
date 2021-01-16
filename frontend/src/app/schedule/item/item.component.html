@@ -34,7 +34,7 @@
       </div>
     </div>
     <div class="extra" *ngIf="expanded">
-      <span class="links" [ngSwitch]="event.location.length && event.location[0]">
+      <!--<span class="links" [ngSwitch]="event.location.length && event.location[0]">
         <ng-container *ngSwitchCase="'LARP'">
           <app-room-link-other [href]="event.location[1]">Sign Up for Larp</app-room-link-other>
           <app-room-link-other [href]="'https://discord.com/channels/743094117554454599/795432881094656020'">Join LARP</app-room-link-other>
@@ -50,7 +50,7 @@
             <app-room-link-host [id]="event.id"></app-room-link-host>
           </ng-container>
         </ng-container>
-      </span>
+      </span>-->
 
       <div class="item_tag text-muted" *ngIf="event.track">Track: <span>{{event.track}}</span></div>
       <div class="item_tag text-muted" *ngIf="event.type">Type: <span>{{event.type}}</span></div>
