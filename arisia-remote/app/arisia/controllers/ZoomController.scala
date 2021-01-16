@@ -3,12 +3,13 @@ package arisia.controllers
 import arisia.admin.RoomService
 import arisia.auth.LoginService
 import arisia.models.{ProgramItemId, LoginUser, ZoomRoom}
-import arisia.schedule.{ScheduleService, ScheduleQueueService}
+import arisia.schedule.{RunningItem, ScheduleService, ScheduleQueueService}
+import arisia.timer.{TimerService, TimeService}
 import arisia.zoom.ZoomService
 import play.api.Logging
 import play.api.data._
 import play.api.data.Forms._
-import play.api.mvc.{BaseController, ControllerComponents, EssentialAction, Result}
+import play.api.mvc.{Result, BaseController, ControllerComponents, EssentialAction}
 import play.api.i18n.I18nSupport
 
 import scala.concurrent.{Future, ExecutionContext}
@@ -22,7 +23,8 @@ class ZoomController(
   roomService: RoomService,
   scheduleService: ScheduleService,
   scheduleQueueService: ScheduleQueueService,
-  val loginService: LoginService
+  val loginService: LoginService,
+  time: TimeService
 )(
   implicit val ec: ExecutionContext
 ) extends BaseController
@@ -114,6 +116,38 @@ class ZoomController(
     implicit val request = info.request
 
     Ok(arisia.views.html.restartMeeting(restartForm.fill("")))
+  }
+
+  def stopProgramItem(): EssentialAction = adminsOnlyAsync("Force-stop item") { info =>
+    implicit val request = info.request
+    val rawItemStr = restartForm.bindFromRequest().get
+    val itemId = getItemId(rawItemStr)
+
+    scheduleQueueService.getRunningMeeting(itemId) match {
+      case Some(meeting) => {
+        val runningItem =
+          RunningItem(
+            time.now(),
+            itemId,
+            meeting
+          )
+
+        scheduleQueueService.endRunningItem(runningItem, true).map { _ =>
+          Redirect(arisia.controllers.routes.AdminController.showMeetingInfo())
+        }
+      }
+      case None => Future.successful(BadRequest("That item isn't currently running!"))
+    }
+  }
+
+  def startProgramItem(): EssentialAction = adminsOnlyAsync("Force-start item") { info =>
+    implicit val request = info.request
+    val rawItemStr = restartForm.bindFromRequest().get
+    val itemId = getItemId(rawItemStr)
+
+    scheduleQueueService.forceStartProgramItem(itemId).map { _ =>
+      Redirect(arisia.controllers.routes.AdminController.showMeetingInfo())
+    }
   }
 
   def restartProgramItem(): EssentialAction = adminsOnlyAsync("restart meeting") { info =>

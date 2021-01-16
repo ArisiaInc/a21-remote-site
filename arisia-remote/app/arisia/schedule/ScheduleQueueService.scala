@@ -31,6 +31,10 @@ trait ScheduleQueueService {
   def restartMeeting(id: ProgramItemId): Future[Done]
 
   def getAllRunningItems(): Map[ProgramItemId, RunningItem]
+
+  def forceStartProgramItem(itemId: ProgramItemId): Future[Done]
+
+  def endRunningItem(item: RunningItem, premature: Boolean = false): Future[Done]
 }
 
 case class RunningItem(endAt: Instant, itemId: ProgramItemId, meeting: ZoomMeeting)
@@ -207,6 +211,11 @@ class ScheduleQueueServiceImpl(
     checkMeetingsToEnd(now)
   }
 
+  def forceStartProgramItem(itemId: ProgramItemId): Future[Done] = {
+    val prep = _schedule.get().byItemId(ProgramItemId(s"${itemId.v}-prep"))
+    startProgramItem(prep)
+  }
+
   private def startProgramItem(item: ProgramItem): Future[Done] = {
     val actualItemOpt = for {
       prepFor <- item.prepFor
@@ -230,7 +239,7 @@ class ScheduleQueueServiceImpl(
       yield Done
   }
 
-  private def endRunningItem(item: RunningItem, premature: Boolean = false): Future[Done] = {
+  def endRunningItem(item: RunningItem, premature: Boolean = false): Future[Done] = {
     for {
       _ <- zoomService.endMeeting(item.meeting.id, item.meeting.isWebinar)
       _ = _currentlyRunningItems.getAndUpdate { items =>
