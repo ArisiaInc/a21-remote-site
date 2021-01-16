@@ -3,12 +3,6 @@
 @import "node_modules/bootstrap/scss/mixins/_breakpoints";
 
 :host {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #262626;
 }
 
 .contents {
@@ -90,6 +84,7 @@
 
 .links {
     margin-top: 1.75rem;
+    padding-bottom: 10rem;
     display: flex;
     justify-content: space-between;
     width: 100%;
@@ -108,6 +103,15 @@
 
 .background {
     z-index: 0;
+}
+
+.full {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #262626;
 }
 
 .light.right {

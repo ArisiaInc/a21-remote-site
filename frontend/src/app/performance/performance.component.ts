@@ -62,7 +62,7 @@ export class PerformanceComponent implements OnInit, OnDestroy {
               params.push('autoplay=false');
             }
             paramString = params.length > 0 ? '&' + params.join('&') : '';
-            url = `https://player.twitch.tv/?channel=${performance.streamId}&parent=localhost${paramString}`;
+            url = `https://player.twitch.tv/?channel=${performance.streamId}&parent=online.arisia.org${paramString}`;
             this.platform = "Twitch";
             break;
           case 'twitchVideo':
@@ -75,7 +75,7 @@ export class PerformanceComponent implements OnInit, OnDestroy {
               params.push(`time=${Math.floor(offset / 1000)}s`);
             }
             paramString = params.length > 0 ? '&' + params.join('&') : '';
-            url = `https://player.twitch.tv/?video=${performance.streamId}&parent=localhost${paramString}`;
+            url = `https://player.twitch.tv/?video=${performance.streamId}&parent=online.arisia.org${paramString}`;
             this.platform = "Twitch";
             break;
           case 'vimeoVideo':
