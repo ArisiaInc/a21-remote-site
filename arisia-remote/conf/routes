@@ -272,6 +272,8 @@ POST    /admin/uploadGamingMetadata  arisia.controllers.FileController.uploadGam
 POST    /admin/uploadEventsMetadata  arisia.controllers.FileController.uploadEventsMetadata()
 POST    /admin/uploadCoffeeMetadata  arisia.controllers.FileController.uploadCoffeeMetadata()
 
+GET     /admin/showMeetingInfo       arisia.controllers.AdminController.showMeetingInfo()
+
 # Note the non-standard path, which is configured in application.conf, so that frontend
 # can own /assets
 GET     /admin/assets/*file          controllers.Assets.versioned(path="/public", file: Asset)

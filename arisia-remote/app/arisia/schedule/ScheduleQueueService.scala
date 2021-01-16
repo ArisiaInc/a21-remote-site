@@ -29,6 +29,16 @@ trait ScheduleQueueService {
   def getRunningMeeting(id: ProgramItemId): Option[ZoomMeeting]
 
   def restartMeeting(id: ProgramItemId): Future[Done]
+
+  def getAllRunningItems(): SortedSet[RunningItem]
+}
+
+case class RunningItem(endAt: Instant, itemId: ProgramItemId, meeting: ZoomMeeting)
+object RunningItem {
+  implicit val runningItemOrdering: Ordering[RunningItem] = (x: RunningItem, y: RunningItem) => {
+    val instantOrdering = implicitly[Ordering[Instant]]
+    instantOrdering.compare(x.endAt, y.endAt)
+  }
 }
 
 class ScheduleQueueServiceImpl(
@@ -44,14 +54,6 @@ class ScheduleQueueServiceImpl(
 ) extends ScheduleQueueService with LifecycleItem with Logging
 {
   lazy val queueCheckInterval = config.get[FiniteDuration]("arisia.schedule.check.interval")
-
-  case class RunningItem(endAt: Instant, itemId: ProgramItemId, meeting: ZoomMeeting)
-  object RunningItem {
-    implicit val runningItemOrdering: Ordering[RunningItem] = (x: RunningItem, y: RunningItem) => {
-      val instantOrdering = implicitly[Ordering[Instant]]
-      instantOrdering.compare(x.endAt, y.endAt)
-    }
-  }
 
   val lifecycleName = "ScheduleQueueService"
   lifecycleService.register(this)
@@ -251,6 +253,8 @@ class ScheduleQueueServiceImpl(
 
   // The Running Items Queue. Note that this is automatically sorted by the end time:
   val _runningItemsQueue: AtomicReference[SortedSet[RunningItem]] = new AtomicReference(SortedSet.empty)
+
+  def getAllRunningItems(): SortedSet[RunningItem] = _runningItemsQueue.get()
 
   // The Currently Running Items Map, which we fetch meetings from when people want to enter them:
   val _currentlyRunningItems: AtomicReference[Map[ProgramItemId, RunningItem]] = new AtomicReference(Map.empty)
