@@ -24,13 +24,14 @@ class ScheduleController(
         scheduleService.fullSchedule()
       else
         scheduleService.currentSchedule()
+    val kicker = if (userOpt.isEmpty) "-loggedout" else ""
 
     // The HTTP standard says that the hash should be in double-quotes in both directions:
     //   https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
     // Note that the hash is always derived from the current schedule -- the others are based on it, so we
     // don't need to reload unless the base schedule has changed. This saves us from super-expensive
     // recalculations on the program participant schedules.
-    val hashStr = s""""${currentSchedule.hash}""""
+    val hashStr = s""""${currentSchedule.hash}$kicker""""
 
     request.headers.get("If-None-Match") match {
       case Some(prev) if (prev == hashStr) => NotModified
