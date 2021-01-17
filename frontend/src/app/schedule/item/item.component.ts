@@ -11,6 +11,7 @@ export class ItemComponent implements OnChanges {
   @Input() showStar = false;
   @Input() openDoors!: Set<string>;
   @Input() alwaysExpanded = false;
+  @Input() showDatetime = false;
   showDoors = false;
   expanded: boolean = false;
 

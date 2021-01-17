@@ -20,7 +20,8 @@
   </div>
   <div class="content">
     <div class="item_base">
-      <h6 class="title" [ngClass]="{'font-weight-bold': expanded}">{{event.title}}</h6>
+      <h6 class="title" [ngClass]="{'font-weight-bold': expanded, 'bigger': showDatetime}">{{event.title}}</h6>
+      <h6 class="title" [ngClass]="{'font-weight-bold': expanded}" *ngIf="showDatetime">{{event.getTimeString()}} {{event.getDateString()}}</h6>
       <div>
         <span class="loc text-muted">Location: <span>{{event.location}}</span> </span>&ngsp;
       </div>
