@@ -81,7 +81,6 @@ class ScheduleQueueServiceImpl(
           ZoomMeeting(zoomId, hostUrl, attendeeUrl, if (isWebinar) ZoomMeetingType.Webinar else ZoomMeetingType.Instant)
         )
       }
-      _runningItemsQueue.set(SortedSet(items:_*))
       val itemMap = items.map(item => (item.itemId -> item)).toMap
       _currentlyRunningItems.set(itemMap)
       Done
@@ -196,13 +195,19 @@ class ScheduleQueueServiceImpl(
   }
 
   private def checkMeetingsToEnd(now: Instant): Unit = {
-    _runningItemsQueue.get().headOption match {
-      case Some(item) if (item.endAt.toEpochMilli < now.toEpochMilli) => {
-        _runningItemsQueue.getAndUpdate(_.tail)
-        endRunningItem(item)
-        checkMeetingsToEnd(now)
+    val (toEnd, remaining) = _currentlyRunningItems.get().partition { case (itemId, runningItem) =>
+      val endingOpt = for {
+        item <- _schedule.get.byItemId.get(runningItem.itemId)
       }
-      case _ => // Nothing running
+        yield item.end.toEpochMilli < now.toEpochMilli
+
+      endingOpt.getOrElse(false)
+    }
+
+    _currentlyRunningItems.set(remaining)
+
+    toEnd.map { case (itemId, runningItem: RunningItem) =>
+      endRunningItem(runningItem)
     }
   }
 
@@ -260,9 +265,6 @@ class ScheduleQueueServiceImpl(
       yield Done
   }
 
-  // The Running Items Queue. Note that this is automatically sorted by the end time:
-  val _runningItemsQueue: AtomicReference[SortedSet[RunningItem]] = new AtomicReference(SortedSet.empty)
-
   def getAllRunningItems(): Map[ProgramItemId, RunningItem] = _currentlyRunningItems.get()
 
   // The Currently Running Items Map, which we fetch meetings from when people want to enter them:
@@ -277,9 +279,6 @@ class ScheduleQueueServiceImpl(
       case Some(runningItem) => {
         for {
           _ <- endRunningItem(runningItem, true)
-          _ = _runningItemsQueue.getAndUpdate {
-            _.filterNot(_.itemId == id)
-          }
           item = _schedule.get().program.find(_.id.v == s"$id-prep").get
           _ <- startProgramItem(item)
         }
@@ -309,7 +308,6 @@ class ScheduleQueueServiceImpl(
     // Note that what we record as running is the underlying item, not this prep item:
     val actualItemId = item.prepFor.get
     val runningItem = RunningItem(item.zoomEnd.get.t, actualItemId, meeting)
-    _runningItemsQueue.accumulateAndGet(SortedSet(runningItem), _ ++ _)
 
     // Add the meeting to the Currently Running Items Map, so people can enter it:
     _currentlyRunningItems.accumulateAndGet(
