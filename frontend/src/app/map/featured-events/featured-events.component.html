@@ -1,7 +1,7 @@
 <div *ngIf="events$ | async as events">
   <div class="card item" *ngFor="let event of events">
     <a routerLink="/schedule/program/event/{{event.id}}"  class="card-body">
-      <h5 class="card-title">{{event.title}}</h5>
+      <h5 class="card-title">{{event.getTimeString()}}: {{event.title}}</h5>
       <div class="card-text">{{event.description}}</div>
     </a>
   </div>
