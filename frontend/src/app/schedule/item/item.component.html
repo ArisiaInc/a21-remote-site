@@ -1,5 +1,5 @@
 <li class="program_item list-group-item list-group-item-action"  (click)="toggleExpand($event)" [ngClass]="{'expanded': expanded}" tabindex="0" role="button" (keydown.enter)="toggleExpand($event)">
-  <div class="icons"></div>
+  <div class="icons">
     <div class="icon" *ngIf="showStar" (click)="onStarClick($event)" (keydown.enter)="onStarClick($event)" tabindex="0" role="button" aria-label="star for {{event.title}}">
       <ng-container *ngIf="event.starred; else inactive">
         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-star-fill star" viewBox="0 0 16 16">
@@ -35,7 +35,8 @@
       </div>
     </div>
     <div class="extra" *ngIf="expanded">
-      <span class="links" [ngSwitch]="event.location.length && event.location[0]">
+      <app-room-link-other href="https://mit.zoom.us/j/98089460580?pwd=Y2pPbzd1VWdkLzdoR1JQeVpSdHJzZz09" *ngIf="event.id === '281' && showStar">Join Zoom Meeting</app-room-link-other>
+      <span class="links" [ngSwitch]="event.location.length && event.location[0]" *ngIf="showStar">
         <ng-container *ngSwitchCase="'LARP'">
           <app-room-link-other [href]="event.location[1]">Sign Up for Larp</app-room-link-other>
           <app-room-link-other [href]="'https://discord.com/channels/743094117554454599/795432881094656020'">Join LARP</app-room-link-other>

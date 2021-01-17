@@ -19,6 +19,10 @@ export class ItemComponent implements OnChanges {
 
   ngOnChanges(): void {
     this.showDoors = this.openDoors && this.openDoors.has(this.event.id);
+    // don't show for corp meeting
+    if (this.event.id === '281') {
+      this.showDoors = false;
+    }
     if (this.alwaysExpanded) {
       this.expanded = true;
     }
