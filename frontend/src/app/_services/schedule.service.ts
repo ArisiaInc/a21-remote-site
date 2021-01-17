@@ -87,6 +87,20 @@ export class ScheduleEvent {
     }
   }
 
+  compare(other: ScheduleEvent) {
+    const timeDiff = this.start.getTime() - other.start.getTime();
+    if (timeDiff) {
+      return timeDiff;
+    }
+    if (this.location.length > 0 && other.location.length > 0) {
+      const locationCompare = this.location[0].localeCompare(other.location[0]);
+      if (locationCompare) {
+        return locationCompare;
+      }
+    }
+    return this.title.localeCompare(other.title);
+  }
+
   featured = false;
   captioned = false;
   kids = KidsStatus.UNKNOWN;
@@ -254,7 +268,7 @@ export class SchedulePerson {
       this.events_ = this.tempProg.
         map(id => eventMap[id]).
         filter(event => event).
-        sort((a, b) => a.start.getTime() - b.start.getTime());
+        sort((a, b) => a.compare(b));
     }
   }
 
@@ -465,7 +479,7 @@ export class ScheduleService {
 
     this.events = program.program.map(item => new ScheduleEvent(item, this.starsService));
     this.events.forEach(event => this.eventsMap[event.id] = event);
-    this.events.sort((a, b) => a.start.getTime() - b.start.getTime());
+    this.events.sort((a, b) => a.compare(b));
 
     this.people = program.people.map((item) => new SchedulePerson(item));
     this.people.sort(SchedulePerson.compare);
@@ -606,7 +620,7 @@ export class ScheduleService {
         map(eventsMap => id.
           map(id => eventsMap[id]).
           filter(event => event).
-          sort((a, b) => a.start.getTime()-b.start.getTime())),
+          sort((a, b) => a.compare(b))),
       );
     } else {
       eventsObservable = this.events$;
