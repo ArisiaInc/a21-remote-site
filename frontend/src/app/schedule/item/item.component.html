@@ -35,8 +35,8 @@
       </div>
     </div>
     <div class="extra" *ngIf="expanded">
-      <app-room-link-other href="https://mit.zoom.us/j/98089460580?pwd=Y2pPbzd1VWdkLzdoR1JQeVpSdHJzZz09" *ngIf="event.id === '281'">Join Zoom Meeting</app-room-link-other>
-      <span class="links" [ngSwitch]="event.location.length && event.location[0]">
+      <app-room-link-other href="https://mit.zoom.us/j/98089460580?pwd=Y2pPbzd1VWdkLzdoR1JQeVpSdHJzZz09" *ngIf="event.id === '281' && showStar">Join Zoom Meeting</app-room-link-other>
+      <span class="links" [ngSwitch]="event.location.length && event.location[0]" *ngIf="showStar">
         <ng-container *ngSwitchCase="'LARP'">
           <app-room-link-other [href]="event.location[1]">Sign Up for Larp</app-room-link-other>
           <app-room-link-other [href]="'https://discord.com/channels/743094117554454599/795432881094656020'">Join LARP</app-room-link-other>
