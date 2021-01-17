@@ -1,28 +1,28 @@
 <div class="map-container row">
     <div class="col-12 col-sm-6 col-md-3 p-0 column-2">
         <div class="aspect-ratio map-entry desk medium-text">
-          <app-link backgroundImage="assets/images/map/info-desk.png" centerLine="80%" (click)="openInfodesk()">Help Desk</app-link>
+          <app-link backgroundImage="assets/images/map/info-desk.png" centerLine="80%" (click)="openInfodesk()" (keydown.enter)="openInfodesk()">Help Desk</app-link>
         </div>
         <div class="aspect-ratio map-entry ribbon xl-text">
           <div class="ribbon-padding">
-            <app-link backgroundImage="assets/images/map/black-ribbon.png" (click)="openSafety()">Safety</app-link>
+            <app-link backgroundImage="assets/images/map/black-ribbon.png" (click)="openSafety()" (keydown.enter)="openSafety()">Safety</app-link>
           </div>
         </div>
         <div class="aspect-ratio map-entry ribbon medium-text">
           <div class="ribbon-padding">
-            <app-link backgroundImage="assets/images/map/black-ribbon.png" (click)="openIrt()">Incident<br>Response<br>Team</app-link>
+            <app-link backgroundImage="assets/images/map/black-ribbon.png" (click)="openIrt()" (keydown.enter)="openIrt()">Incident<br>Response<br>Team</app-link>
           </div>
         </div>
     </div>
     <div class="col-12 col-sm-6 col-md-3 p-0 column-1">
         <div class="aspect-ratio map-entry large-text">
-            <app-link backgroundImage="assets/images/map/art-show.png" centerLine="56%" color="black" routerLink="/artshow">Art Show</app-link>
+            <app-link backgroundImage="assets/images/map/art-show.png" centerLine="56%" color="black" url="/artshow">Art Show</app-link>
         </div>
         <div class="aspect-ratio map-entry large-text">
             <app-link backgroundImage="assets/images/map/gaming.png" centerLine="53%" appLoginGuardedLink="/gaming" appDoorDragonStyle="programming">Gaming</app-link>
         </div>
         <div class="aspect-ratio map-entry small-text">
-            <app-link backgroundImage="assets/images/map/dealers-room.png" centerLine="80%" horizontalNudge="5%" routerLink="/dealers">Dealers Room<br>Creators' Corner</app-link>
+            <app-link backgroundImage="assets/images/map/dealers-room.png" centerLine="80%" horizontalNudge="5%" url="/dealers">Dealers Room<br>Creators' Corner</app-link>
         </div>
         <div class="aspect-ratio map-entry small-medium-text">
             <app-link backgroundImage="assets/images/map/social-spaces.png" centerLine="55%" horizontalNudge="-1%" appLoginGuardedLink="/social" appDoorDragonStyle="social">Social Spaces</app-link>

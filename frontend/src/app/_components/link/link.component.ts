@@ -1,4 +1,5 @@
 import { Component, OnInit, Input, HostBinding } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-link',
@@ -11,12 +12,13 @@ export class LinkComponent implements OnInit {
   @Input() backgroundImage?: string;
   @Input() centerLine = "50%";
   @Input() horizontalNudge = "";
+  @Input() url!: string;
   @HostBinding('class.circle') @Input() circle = false;
   @HostBinding('style') style = '';
 
   nudgeStyle = '';
 
-  constructor() { }
+  constructor(private router: Router) { }
 
   ngOnInit(): void {
     const background = this.backgroundImage ?
@@ -25,4 +27,12 @@ export class LinkComponent implements OnInit {
     this.style = `${background};color:${this.color}`;
     this.nudgeStyle = this.horizontalNudge ? `;left:${this.horizontalNudge}` : '';
   }
+
+  navigate() {
+    if (this.url) {
+      this.router.navigateByUrl(this.url);
+    }
+  }
+
+
 }

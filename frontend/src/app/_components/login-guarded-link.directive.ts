@@ -36,6 +36,7 @@ export class LoginGuardedLinkDirective {
   }
 
   /** @nodoc */
+  @HostListener('keydown.enter')
   @HostListener('click')
   onClick(): boolean {
     if (this.accountService.user) {
